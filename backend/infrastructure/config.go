@@ -18,12 +18,29 @@ type Config struct {
     Routing struct {
         Port string
     }
+    Session struct {
+        Name string
+        Secret string
+    }
+    Twitter struct {
+        Production struct {
+            ConsumerKey string
+            ConsumerSecret string
+            CallbackUrl string    
+        }
+        Test struct {
+            ConsumerKey string
+            ConsumerSecret string
+            CallbackUrl string
+        }
+    }
 }
 
 func NewConfig() *Config {
 
     c := new(Config)
 
+    // TODO: .envファイルまたはjsonファイルから読み込む
     c.DB.Production.Host = "localhost"
     c.DB.Production.Username = "username"
     c.DB.Production.Password = "password"
@@ -35,6 +52,17 @@ func NewConfig() *Config {
     c.DB.Test.DBName = "db_name_test"
     
     c.Routing.Port = ":8080"
+
+    c.Session.Name = "mysession"
+    c.Session.Secret = "secret"
+
+    c.Twitter.Production.CallbackUrl = ""
+    c.Twitter.Production.ConsumerKey = ""
+    c.Twitter.Production.ConsumerSecret = ""
+
+    c.Twitter.Test.CallbackUrl = ""
+    c.Twitter.Test.ConsumerKey = ""
+    c.Twitter.Test.ConsumerSecret = ""
 
     return c
 }

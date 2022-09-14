@@ -16,11 +16,6 @@ type User struct {
 	Conn *gorm.DB
 }
 
-type Context interface {
-    Param(key string) string
-    JSON(code int, obj interface{})
-}
-
 // GetUserByID は，httpを受け取り，portを組み立てて，inputPort.GetUserByIDを呼び出します．
 func (u *User) GetUserByID(c *gin.Context) {
 

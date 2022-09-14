@@ -5,6 +5,8 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/presenter"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,6 +24,7 @@ func NewRouting(db *DB) *Routing {
         Port: c.Routing.Port,
     }
     r.setRouting()
+    r.initSession(c.Session.Secret, c.Session.Name)
     return r
 }
 
@@ -33,6 +36,11 @@ func (r *Routing) setRouting() {
 		Conn:          r.DB.Connection,
 	}
     r.Gin.GET("/users/:id", func (c *gin.Context) {userController.GetUserByID(c) })
+}
+
+func (r *Routing) initSession(sessionSecret string, sessionName string) {
+    store := cookie.NewStore([]byte(sessionSecret))
+    r.Gin.Use(sessions.Sessions(sessionName, store))
 }
 
 func (r *Routing) Run() {
