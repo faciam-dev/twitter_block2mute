@@ -16,20 +16,29 @@ func NewAuthInputPort(outputPort port.AuthOutputPort, authRepository port.AuthRe
 	}
 }
 
-func (a *Auth) Auth(consumerKey string, consumerSecret string, callbackUrl string) {
-	auth, err := a.AuthRepo.Auth(consumerKey, consumerSecret, callbackUrl)
+func (a *Auth) Auth() {
+	auth, err := a.AuthRepo.Auth()
 	if err != nil {
 		a.OutputPort.RenderError(err)
 		return
 	}
-	a.OutputPort.Render(auth)
+	a.OutputPort.RenderAuth(auth)
 }
 
-func (a *Auth) IsAuthenticated(consumerKey string, consumerSecret string) {
-	auth, err := a.AuthRepo.IsAuthenticated(consumerKey, consumerSecret);
+func (a *Auth) IsAuthenticated() {
+	auth, err := a.AuthRepo.IsAuthenticated();
 	if err != nil {
 		a.OutputPort.RenderError(err)
 		return
 	}
-	a.OutputPort.Render(auth)
+	a.OutputPort.RenderIsAuth(auth)
+}
+
+func (a *Auth) Callback() {
+	auth, err := a.AuthRepo.Callback();
+	if err != nil {
+		a.OutputPort.RenderError(err)
+		return
+	}
+	a.OutputPort.RenderCallback(auth)
 }

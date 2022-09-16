@@ -4,6 +4,7 @@ import "github.com/faciam_dev/twitter_block2mute/backend/infrastructure"
 
 func main() {
     db := infrastructure.NewDB()
-    r := infrastructure.NewRouting(db)
+    twitter := infrastructure.NewTwitter()
+    r := infrastructure.NewRouting(db, twitter)
     r.Run()
 }

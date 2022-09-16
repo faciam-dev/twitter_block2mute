@@ -9,20 +9,20 @@ import (
 )
 
 type User struct {
-	c *gin.Context
+	ctx *gin.Context
 }
 
 // NewUserOutputPort はUserOutputPortを取得します．
-func NewUserOutputPort(c *gin.Context) port.UserOutputPort {
+func NewUserOutputPort(ctx *gin.Context) port.UserOutputPort {
 	return &User{
-		c: c,
+		ctx: ctx,
 	}
 }
 
 // usecase.UserOutputPortを実装している
 // Render はUserモデルを出力します．
 func (u *User) Render(user *entity.User) {
-	u.c.JSON(http.StatusOK, gin.H{
+	u.ctx.JSON(http.StatusOK, gin.H{
 		"id" : user.ID,
 		"name" : user.Name,
 	})
@@ -30,14 +30,14 @@ func (u *User) Render(user *entity.User) {
 
 // RenderNotFound は ユーザーがないことを出力します。
 func (u *User) RenderNotFound() {
-	u.c.JSON(http.StatusNotFound, gin.H{
+	u.ctx.JSON(http.StatusNotFound, gin.H{
 		
 	})
 }
 
 // RenderError はErrorを出力します．
 func (u *User) RenderError(err error) {
-	u.c.JSON(http.StatusInternalServerError, gin.H{
+	u.ctx.JSON(http.StatusInternalServerError, gin.H{
 		"error" : err,
 	})
 }

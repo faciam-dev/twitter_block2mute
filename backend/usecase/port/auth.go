@@ -5,17 +5,20 @@ import (
 )
 
 type AuthInputPort interface {
-	IsAuthenticated(consumerKey string, consumerSecret string)
-	Auth(consumerKey string, consumerSecret string, callbackUrl string)
+	IsAuthenticated()
+	Auth()
+	Callback()
 }
 
 type AuthOutputPort interface {
-	Render(*entity.Auth)
+	RenderAuth(*entity.Auth)
+	RenderIsAuth(*entity.Auth)
+	RenderCallback(*entity.Auth)
 	RenderError(error)
 }
 
 type AuthRepository interface {
-	IsAuthenticated(consumerKey string, consumerSecret string) (*entity.Auth, error)
-	Auth(consumerKey string, consumerSecret string, callbackUrl string) (*entity.Auth, error)
-	Callback(consumerKey string, consumerSecret string) (*entity.Auth, error)
+	IsAuthenticated() (*entity.Auth, error)
+	Auth() (*entity.Auth, error)
+	Callback() (*entity.Auth, error)
 }

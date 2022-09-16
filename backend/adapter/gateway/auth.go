@@ -11,17 +11,21 @@ import (
 
 type AuthRepository struct {
 	context *gin.Context
+	api *anaconda.TwitterApi
+	callbackUrl string
 }
 
 // NewUserRepository はUserRepositoryを返します．
-func NewAuthRepository(ctx *gin.Context) port.AuthRepository {
+func NewAuthRepository(ctx *gin.Context, api *anaconda.TwitterApi, callbackUrl string) port.AuthRepository {
 	return &AuthRepository{
 		context: ctx,
+		api: api,
+		callbackUrl: callbackUrl,
 	}
 }
 
 // セッションに入っている値から認証を実施し、認証状態を取得する。
-func (a *AuthRepository) IsAuthenticated(consumerKey string, consumerSecret string) (*entity.Auth, error) {
+func (a *AuthRepository) IsAuthenticated() (*entity.Auth, error) {
 	session := a.GetSession() 
 
 	token := session.Get("token")
@@ -36,9 +40,13 @@ func (a *AuthRepository) IsAuthenticated(consumerKey string, consumerSecret stri
 	}
 
 	//api = anaconda.NewTwitterApi(token, secret)
-	api := anaconda.NewTwitterApiWithCredentials(token.(string), secret.(string), consumerKey, consumerSecret)
+	a.api.Credentials.Token = token.(string)
+	a.api.Credentials.Secret = secret.(string)
+	//a.api.VerifyCredentials()
+
+	//api := anaconda.NewTwitterApiWithCredentials(token.(string), secret.(string), consumerKey, consumerSecret)
 	r := []string{}
-	_, err:= api.GetRateLimits(r)
+	_, err:= a.api.GetRateLimits(r)
 
 	if err == nil {
 		// 認証成功
@@ -49,14 +57,12 @@ func (a *AuthRepository) IsAuthenticated(consumerKey string, consumerSecret stri
 }
 
 // 認証を実施する（認証用URLを返す）
-func (a *AuthRepository) Auth(consumerKey string, consumerSecret string, callbackUrl string) (*entity.Auth, error) {
-	api := a.connectAPI(consumerKey, consumerSecret)
-
+func (a *AuthRepository) Auth() (*entity.Auth, error) {
 	auth := entity.Auth{
 		Authenticated: 0,
 	}
 
-	uri, _, err := api.AuthorizationURL(callbackUrl)
+	uri, _, err := a.api.AuthorizationURL(a.callbackUrl)
 
 	if err != nil {
 		return &auth, err;
@@ -68,16 +74,15 @@ func (a *AuthRepository) Auth(consumerKey string, consumerSecret string, callbac
 }
 
 // 認証コールバック
-func (a *AuthRepository) Callback(consumerKey string, consumerSecret string) (*entity.Auth, error) {
+func (a *AuthRepository) Callback() (*entity.Auth, error) {
     token := a.context.Query("oauth_token")
     secret := a.context.Query("oauth_verifier")
-    api := a.connectAPI(consumerKey, consumerSecret)
 
 	auth := entity.Auth{
 		Authenticated: 0,
 	}
  
-    credentials, _, err := api.GetCredentials(&oauth.Credentials{
+    credentials, _, err := a.api.GetCredentials(&oauth.Credentials{
         Token: token,
     }, secret)
     if err != nil {
@@ -86,7 +91,10 @@ func (a *AuthRepository) Callback(consumerKey string, consumerSecret string) (*e
     }
 
     // 認証成功後処理	
-	api = anaconda.NewTwitterApi(credentials.Token, credentials.Secret)
+	//api = anaconda.NewTwitterApi(credentials.Token, credentials.Secret)
+	a.api.Credentials.Token = credentials.Token
+	a.api.Credentials.Secret = credentials.Secret
+	//a.api.VerifyCredentials()
 	auth.Authenticated = 1;
 
     session := a.GetSession() 
@@ -100,12 +108,4 @@ func (a *AuthRepository) Callback(consumerKey string, consumerSecret string) (*e
 func (a *AuthRepository) GetSession() sessions.Session {
 	session := sessions.Default(a.context)
 	return session
-}
-
-func (a *AuthRepository) connectAPI(consumerKey string, consumerSecret string) *anaconda.TwitterApi {
-    anaconda.SetConsumerKey(consumerKey)
-    anaconda.SetConsumerSecret(consumerSecret)
- 
-    // 認証
-    return anaconda.NewTwitterApi("", "")
 }
