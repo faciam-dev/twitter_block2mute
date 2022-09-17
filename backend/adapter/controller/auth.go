@@ -4,7 +4,6 @@ import (
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type Auth struct {
@@ -14,7 +13,7 @@ type Auth struct {
 	InputFactory func(o port.AuthOutputPort, u port.AuthRepository) port.AuthInputPort
 	// -> gateway.NewAuthRepository
 	RepoFactory func(ctx *gin.Context, api *anaconda.TwitterApi, callbackUrl string) port.AuthRepository
-	Conn *gorm.DB
+	//Conn *gorm.DB
 	Api *anaconda.TwitterApi
 	CallbackUrl string
 }

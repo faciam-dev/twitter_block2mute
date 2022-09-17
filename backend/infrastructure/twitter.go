@@ -1,6 +1,9 @@
 package infrastructure
 
-import "github.com/ChimeraCoder/anaconda"
+import (
+	"github.com/ChimeraCoder/anaconda"
+	"github.com/faciam_dev/twitter_block2mute/backend/config"
+)
 
 type Twitter struct {
 	ConsumerKey string
@@ -10,11 +13,11 @@ type Twitter struct {
 }
 
 func NewTwitter() *Twitter {
-    c := NewConfig()
+    c := config.NewConfig()
     return newTwitter(&Twitter {
-		ConsumerKey: c.Twitter.Production.ConsumerKey,
-		ConsumerSecret: c.Twitter.Production.ConsumerSecret,
-		CallbackUrl: c.Twitter.Production.CallbackUrl,
+		ConsumerKey: c.Twitter.ConsumerKey,
+		ConsumerSecret: c.Twitter.ConsumerSecret,
+		CallbackUrl: c.Twitter.CallbackUrl,
 	})
 }
 

@@ -4,6 +4,8 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/controller"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/presenter"
+	"github.com/faciam_dev/twitter_block2mute/backend/config"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -11,22 +13,22 @@ import (
 )
 
 type Routing struct {
-    DB *DB
+    config *config.Config
     Gin *gin.Engine
     Port string
     Twitter *Twitter
 }
 
-func NewRouting(db *DB, twitter *Twitter) *Routing {
-    c := NewConfig()
+func NewRouting(twitter *Twitter) *Routing {
+    c := config.NewConfig()
     r := &Routing{
-        DB: db,
+        config: c,
         Gin: gin.Default(),
         Port: c.Routing.Port,
         Twitter: twitter,
     }
-    r.setRouting()
     r.initSession(c.Session.Secret, c.Session.Name)
+    r.setRouting()
     return r
 }
 
@@ -35,14 +37,14 @@ func (r *Routing) setRouting() {
 		OutputFactory: presenter.NewUserOutputPort,
 		InputFactory:  interactor.NewUserInputPort,
 		RepoFactory:   gateway.NewUserRepository,
-		Conn:          r.DB.Connection,
+        DbHandler:     database.NewUserDbHandler(r.config),
 	}
 
     authController := controller.Auth{
 		OutputFactory: presenter.NewAuthOutputPort,
 		InputFactory:  interactor.NewAuthInputPort,
 		RepoFactory:   gateway.NewAuthRepository,
-		Conn:          r.DB.Connection,
+		//Conn:          r.DB.Connection,
         Api:           r.Twitter.Api,
         CallbackUrl:   r.Twitter.CallbackUrl,
     }

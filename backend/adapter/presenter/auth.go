@@ -23,7 +23,6 @@ func NewAuthOutputPort(c *gin.Context) port.AuthOutputPort {
 // Render はUserモデルを出力します．
 func (a *Auth) RenderAuth(auth *entity.Auth) {
 	a.ctx.JSON(http.StatusOK, gin.H{
-		"result" : auth.Authenticated,
 		"to_url" : auth.AuthUrl, 
 	})
 }
