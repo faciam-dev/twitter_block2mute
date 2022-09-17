@@ -5,7 +5,6 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/presenter"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
-	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -16,37 +15,35 @@ type Routing struct {
     config *config.Config
     Gin *gin.Engine
     Port string
-    Twitter *Twitter
 }
 
-func NewRouting(twitter *Twitter) *Routing {
-    c := config.NewConfig()
+func NewRouting(config *config.Config, dbHandler gateway.DbHandler, twitterHandler gateway.TwitterHandler) *Routing {
     r := &Routing{
-        config: c,
+        config: config,
         Gin: gin.Default(),
-        Port: c.Routing.Port,
-        Twitter: twitter,
+        Port: config.Routing.Port,
     }
-    r.initSession(c.Session.Secret, c.Session.Name)
-    r.setRouting()
+    r.initSession(config.Session.Secret, config.Session.Name)
+    r.setRouting(dbHandler, twitterHandler)
     return r
 }
 
-func (r *Routing) setRouting() {
+func (r *Routing) setRouting(dbHandler gateway.DbHandler, twitterHandler gateway.TwitterHandler) {
 	userController := controller.User{
 		OutputFactory: presenter.NewUserOutputPort,
 		InputFactory:  interactor.NewUserInputPort,
 		RepoFactory:   gateway.NewUserRepository,
-        DbHandler:     database.NewUserDbHandler(r.config),
+        DbHandler:     dbHandler,
 	}
 
     authController := controller.Auth{
-		OutputFactory: presenter.NewAuthOutputPort,
-		InputFactory:  interactor.NewAuthInputPort,
-		RepoFactory:   gateway.NewAuthRepository,
+		OutputFactory:  presenter.NewAuthOutputPort,
+		InputFactory:   interactor.NewAuthInputPort,
+		RepoFactory:    gateway.NewAuthRepository,
+        TwitterHandler: twitterHandler,
 		//Conn:          r.DB.Connection,
-        Api:           r.Twitter.Api,
-        CallbackUrl:   r.Twitter.CallbackUrl,
+        //Api:           r.Twitter.Api,
+        //CallbackUrl:   r.Twitter.CallbackUrl,
     }
 
     // ルーティング割当

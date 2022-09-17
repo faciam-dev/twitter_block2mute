@@ -1,11 +1,18 @@
 package main
 
 import (
+	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/twitterapi"
 )
 
 func main() {
-    twitter := infrastructure.NewTwitter()
-    r := infrastructure.NewRouting(twitter)
+    config := config.NewConfig()
+
+    dbHandler := database.NewUserDbHandler(config)
+    anaconderHandler := twitterapi.NewAnaconderHandler(config)
+
+    r := infrastructure.NewRouting(config, dbHandler, anaconderHandler)
     r.Run()
 }
