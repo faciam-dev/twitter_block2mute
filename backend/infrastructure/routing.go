@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/controller"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/presenter"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/framework"
@@ -16,7 +17,7 @@ type Routing struct {
     Port string
 }
 
-func NewRouting(config *config.Config, dbHandler gateway.DbHandler, twitterHandler gateway.TwitterHandler) *Routing {
+func NewRouting(config *config.Config, dbHandler handler.DbHandler, twitterHandler handler.TwitterHandler) *Routing {
     r := &Routing{
         config: config,
         Gin: gin.Default(),
@@ -27,7 +28,7 @@ func NewRouting(config *config.Config, dbHandler gateway.DbHandler, twitterHandl
     return r
 }
 
-func (r *Routing) setRouting(dbHandler gateway.DbHandler, twitterHandler gateway.TwitterHandler, sessionHandler gateway.SessionHandler) {
+func (r *Routing) setRouting(dbHandler handler.DbHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler) {
 	userController := controller.User{
 		OutputFactory: presenter.NewUserOutputPort,
 		InputFactory:  interactor.NewUserInputPort,

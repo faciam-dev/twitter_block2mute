@@ -1,22 +1,22 @@
 package controller
 
 import (
-	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 )
 
 type User struct {
 	// -> presenter.NewUserOutputPort
-	OutputFactory func(contextHandler gateway.ContextHandler) port.UserOutputPort
+	OutputFactory func(contextHandler handler.ContextHandler) port.UserOutputPort
 	// -> interactor.NewUserInputPort
 	InputFactory func(o port.UserOutputPort, u port.UserRepository) port.UserInputPort
 	// -> gateway.NewUserRepository
-	RepoFactory func(dbHandler gateway.DbHandler) port.UserRepository
-	DbHandler gateway.DbHandler
+	RepoFactory func(dbHandler handler.DbHandler) port.UserRepository
+	DbHandler handler.DbHandler
 }
 
 // GetUserByID は，httpを受け取り，portを組み立てて，inputPort.GetUserByIDを呼び出します．
-func (u *User) GetUserByID(contextHandler gateway.ContextHandler) {
+func (u *User) GetUserByID(contextHandler handler.ContextHandler) {
 
 	//id, _ := strconv.Atoi(c.Param("id"))
 	id := contextHandler.Param("id")

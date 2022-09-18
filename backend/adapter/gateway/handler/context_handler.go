@@ -1,4 +1,4 @@
-package gateway
+package handler
 
 type ContextHandler interface {
     GetContext() interface{}

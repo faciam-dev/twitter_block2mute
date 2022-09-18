@@ -1,18 +1,19 @@
 package gateway
 
 import (
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 )
 
 type AuthRepository struct {
-	ContextHandler ContextHandler
-	twitterHandler TwitterHandler
-	sessionHandler SessionHandler
+	ContextHandler handler.ContextHandler
+	twitterHandler handler.TwitterHandler
+	sessionHandler handler.SessionHandler
 }
 
 // NewAuthRepository はAuthRepositoryを返します．
-func NewAuthRepository(contextHandler ContextHandler, twitterHandler TwitterHandler, sessionHandler SessionHandler) port.AuthRepository {
+func NewAuthRepository(contextHandler handler.ContextHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler) port.AuthRepository {
 	authRepository := &AuthRepository{
 		ContextHandler: contextHandler,
 		twitterHandler: twitterHandler,

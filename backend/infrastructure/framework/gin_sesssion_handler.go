@@ -1,7 +1,7 @@
 package framework
 
 import (
-	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -12,10 +12,10 @@ type GinSessionHandler struct {
 	Secret string
 	Name string
 	Gin *gin.Engine
-	contextHandler gateway.ContextHandler
+	contextHandler handler.ContextHandler
 }
 
-func NewGinSessionHandler(config *config.Config, gin *gin.Engine) gateway.SessionHandler {
+func NewGinSessionHandler(config *config.Config, gin *gin.Engine) handler.SessionHandler {
     return newSessionHandler(GinSessionHandler{
 		Secret: config.Session.Secret,
 		Name: config.Session.Name,
@@ -23,13 +23,13 @@ func NewGinSessionHandler(config *config.Config, gin *gin.Engine) gateway.Sessio
     })
 }
 
-func newSessionHandler(sessionHandler GinSessionHandler) gateway.SessionHandler {
+func newSessionHandler(sessionHandler GinSessionHandler) handler.SessionHandler {
     store := cookie.NewStore([]byte(sessionHandler.Secret))
     sessionHandler.Gin.Use(sessions.Sessions(sessionHandler.Name, store))
 	return &sessionHandler
 }
 
-func (g *GinSessionHandler) SetContextHandler(contextHandler gateway.ContextHandler) {
+func (g *GinSessionHandler) SetContextHandler(contextHandler handler.ContextHandler) {
 	g.contextHandler = contextHandler
 }
 

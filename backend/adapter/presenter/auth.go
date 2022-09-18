@@ -3,17 +3,17 @@ package presenter
 import (
 	"net/http"
 
-	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 )
 
 type Auth struct {
-	contextHandler gateway.ContextHandler
+	contextHandler handler.ContextHandler
 }
 
 // NewUserOutputPort はUserOutputPortを取得します．
-func NewAuthOutputPort(contextHandler gateway.ContextHandler) port.AuthOutputPort {
+func NewAuthOutputPort(contextHandler handler.ContextHandler) port.AuthOutputPort {
 	return &Auth{
 		contextHandler: contextHandler,
 	}

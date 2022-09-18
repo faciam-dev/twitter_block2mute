@@ -1,7 +1,7 @@
 package framework
 
 import (
-	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/gin-gonic/gin"
 )
 
@@ -9,7 +9,7 @@ type GinContextHandler struct {
     Context *gin.Context
 }
 
-func NewGinContextHandler(context *gin.Context) gateway.ContextHandler {
+func NewGinContextHandler(context *gin.Context) handler.ContextHandler {
     ginContextHandler := GinContextHandler{
         Context: context,
     }

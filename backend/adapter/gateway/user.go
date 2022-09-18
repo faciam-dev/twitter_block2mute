@@ -3,16 +3,17 @@ package gateway
 import (
 	"errors"
 
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 )
 
 type UserRepository struct {
-	dbHandler DbHandler
+	dbHandler handler.DbHandler
 }
 
 // NewUserRepository はUserRepositoryを返します．
-func NewUserRepository(dbHandler DbHandler) port.UserRepository {
+func NewUserRepository(dbHandler handler.DbHandler) port.UserRepository {
 	return &UserRepository{
 		dbHandler: dbHandler,
 	}

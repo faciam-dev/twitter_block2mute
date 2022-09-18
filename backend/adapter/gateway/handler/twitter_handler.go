@@ -1,4 +1,4 @@
-package gateway
+package handler
 
 type TwitterHandler interface {
 	SetCredentials(string, string)

@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"gorm.io/gorm"
 )
@@ -10,7 +10,7 @@ type UserDbHandler struct {
 	db *gorm.DB
 }
 
-func NewUserDbHandler(config *config.Config) gateway.DbHandler {
+func NewUserDbHandler(config *config.Config) handler.DbHandler {
 	gormHandler := NewGormHandler(config)
 
 	userDbHandler := new(UserDbHandler)
