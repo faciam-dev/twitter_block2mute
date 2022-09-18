@@ -3,45 +3,45 @@ package presenter
 import (
 	"net/http"
 
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
-	"github.com/gin-gonic/gin"
 )
 
 type Auth struct {
-	ctx *gin.Context
+	contextHandler gateway.ContextHandler
 }
 
 // NewUserOutputPort はUserOutputPortを取得します．
-func NewAuthOutputPort(c *gin.Context) port.AuthOutputPort {
+func NewAuthOutputPort(contextHandler gateway.ContextHandler) port.AuthOutputPort {
 	return &Auth{
-		ctx: c,
+		contextHandler: contextHandler,
 	}
 }
 
 // usecase.UserOutputPortを実装している
 // Render はUserモデルを出力します．
 func (a *Auth) RenderAuth(auth *entity.Auth) {
-	a.ctx.JSON(http.StatusOK, gin.H{
+	a.contextHandler.JSON(http.StatusOK, map[string]interface{}{
 		"to_url" : auth.AuthUrl, 
 	})
 }
 
 func (a *Auth) RenderIsAuth(auth *entity.Auth) {
-	a.ctx.JSON(http.StatusOK, gin.H{
+	a.contextHandler.JSON(http.StatusOK, map[string]interface{}{
 		"result" : auth.Authenticated,
 	})
 }
 
 // 空要素を返す
 func (a *Auth) RenderCallback(auth *entity.Auth) {
-	a.ctx.JSON(http.StatusOK, gin.H{
+	a.contextHandler.JSON(http.StatusOK, map[string]interface{}{
 	})
 }
 
 // RenderError はErrorを出力します．
 func (a *Auth) RenderError(err error) {
-	a.ctx.JSON(http.StatusInternalServerError, gin.H{
+	a.contextHandler.JSON(http.StatusInternalServerError, map[string]interface{}{
 		"error" : err,
 	})
 }

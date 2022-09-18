@@ -3,23 +3,22 @@ package gateway
 import (
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
-	"github.com/gin-gonic/gin"
 )
 
 type AuthRepository struct {
-	context *gin.Context
+	ContextHandler ContextHandler
 	twitterHandler TwitterHandler
 	sessionHandler SessionHandler
 }
 
 // NewAuthRepository はAuthRepositoryを返します．
-func NewAuthRepository(ctx *gin.Context, twitterHandler TwitterHandler, sessionHandler SessionHandler) port.AuthRepository {
+func NewAuthRepository(contextHandler ContextHandler, twitterHandler TwitterHandler, sessionHandler SessionHandler) port.AuthRepository {
 	authRepository := &AuthRepository{
-		context: ctx,
+		ContextHandler: contextHandler,
 		twitterHandler: twitterHandler,
 		sessionHandler: sessionHandler,
 	}
-	authRepository.sessionHandler.SetContext(ctx)
+	authRepository.sessionHandler.SetContextHandler(contextHandler)
 	return authRepository
 }
 
@@ -64,9 +63,7 @@ func (a *AuthRepository) Auth() (*entity.Auth, error) {
 }
 
 // 認証コールバック
-func (a *AuthRepository) Callback() (*entity.Auth, error) {
-    token := a.context.Query("oauth_token")
-    secret := a.context.Query("oauth_verifier")
+func (a *AuthRepository) Callback(token string, secret string) (*entity.Auth, error) {
 
 	auth := entity.Auth{
 		Authenticated: 0,

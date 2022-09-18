@@ -12,7 +12,7 @@ type GinSessionHandler struct {
 	Secret string
 	Name string
 	Gin *gin.Engine
-	context *gin.Context
+	contextHandler gateway.ContextHandler
 }
 
 func NewGinSessionHandler(config *config.Config, gin *gin.Engine) gateway.SessionHandler {
@@ -29,8 +29,8 @@ func newSessionHandler(sessionHandler GinSessionHandler) gateway.SessionHandler 
 	return &sessionHandler
 }
 
-func (g *GinSessionHandler) SetContext(context interface{}) {
-	g.context = context.(*gin.Context)
+func (g *GinSessionHandler) SetContextHandler(contextHandler gateway.ContextHandler) {
+	g.contextHandler = contextHandler
 }
 
 func (g *GinSessionHandler) Set(key string, value string) {
@@ -53,6 +53,6 @@ func (g *GinSessionHandler) Save() error{
 }
 
 func (g *GinSessionHandler) getSession() sessions.Session {
-	session := sessions.Default(g.context)
+	session := sessions.Default(g.contextHandler.GetContext().(*gin.Context))
 	return session
 }

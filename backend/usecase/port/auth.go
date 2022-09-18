@@ -7,7 +7,7 @@ import (
 type AuthInputPort interface {
 	IsAuthenticated()
 	Auth()
-	Callback()
+	Callback(token string, secret string)
 }
 
 type AuthOutputPort interface {
@@ -20,5 +20,5 @@ type AuthOutputPort interface {
 type AuthRepository interface {
 	IsAuthenticated() (*entity.Auth, error)
 	Auth() (*entity.Auth, error)
-	Callback() (*entity.Auth, error)
+	Callback(token string, secret string) (*entity.Auth, error)
 }

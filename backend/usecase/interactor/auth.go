@@ -34,8 +34,8 @@ func (a *Auth) IsAuthenticated() {
 	a.OutputPort.RenderIsAuth(auth)
 }
 
-func (a *Auth) Callback() {
-	auth, err := a.AuthRepo.Callback();
+func (a *Auth) Callback(token string, secret string) {
+	auth, err := a.AuthRepo.Callback(token, secret);
 	if err != nil {
 		a.OutputPort.RenderError(err)
 		return

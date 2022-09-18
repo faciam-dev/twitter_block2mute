@@ -3,26 +3,26 @@ package presenter
 import (
 	"net/http"
 
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
-	"github.com/gin-gonic/gin"
 )
 
 type User struct {
-	ctx *gin.Context
+	contextHandler gateway.ContextHandler
 }
 
 // NewUserOutputPort はUserOutputPortを取得します．
-func NewUserOutputPort(ctx *gin.Context) port.UserOutputPort {
+func NewUserOutputPort(contextHandler gateway.ContextHandler) port.UserOutputPort {
 	return &User{
-		ctx: ctx,
+		contextHandler: contextHandler,
 	}
 }
 
 // usecase.UserOutputPortを実装している
 // Render はUserモデルを出力します．
 func (u *User) Render(user *entity.User) {
-	u.ctx.JSON(http.StatusOK, gin.H{
+	u.contextHandler.JSON(http.StatusOK, map[string]interface{}{
 		"id" : user.ID,
 		"name" : user.Name,
 	})
@@ -30,14 +30,14 @@ func (u *User) Render(user *entity.User) {
 
 // RenderNotFound は ユーザーがないことを出力します。
 func (u *User) RenderNotFound() {
-	u.ctx.JSON(http.StatusNotFound, gin.H{
+	u.contextHandler.JSON(http.StatusNotFound, map[string]interface{}{
 		
 	})
 }
 
 // RenderError はErrorを出力します．
 func (u *User) RenderError(err error) {
-	u.ctx.JSON(http.StatusInternalServerError, gin.H{
+	u.contextHandler.JSON(http.StatusInternalServerError, map[string]interface{}{
 		"error" : err,
 	})
 }

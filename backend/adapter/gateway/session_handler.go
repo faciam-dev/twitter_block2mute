@@ -1,7 +1,7 @@
 package gateway
 
 type SessionHandler interface {
-	SetContext(interface{})
+	SetContextHandler(ContextHandler)
 	Set(string, string)
 	Get(string) interface{}
 	Save() error

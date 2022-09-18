@@ -22,7 +22,6 @@ func NewRouting(config *config.Config, dbHandler gateway.DbHandler, twitterHandl
         Gin: gin.Default(),
         Port: config.Routing.Port,
     }
-    //r.initSession(config.Session.Secret, config.Session.Name)
     sessionHandler := framework.NewGinSessionHandler(config, r.Gin)
     r.setRouting(dbHandler, twitterHandler, sessionHandler)
     return r
@@ -45,10 +44,21 @@ func (r *Routing) setRouting(dbHandler gateway.DbHandler, twitterHandler gateway
     }
 
     // ルーティング割当
-    r.Gin.GET("/user/user/:id", func (c *gin.Context) {userController.GetUserByID(c) })
-    r.Gin.GET("/auth/auth", func (c *gin.Context) {authController.Auth(c) })
-    r.Gin.GET("/auth/is_auth", func (c *gin.Context) {authController.IsAuth(c) })
-    r.Gin.GET("/auth/auth_callback", func (c *gin.Context) {authController.Callback(c) })
+    // user
+    r.Gin.GET("/user/user/:id", func (c *gin.Context) {
+        userController.GetUserByID(framework.NewGinContextHandler(c))
+    })
+    // auth
+    r.Gin.GET("/auth/auth", func (c *gin.Context) {
+        authController.Auth(framework.NewGinContextHandler(c))
+    })
+    r.Gin.GET("/auth/is_auth", func (c *gin.Context) {
+        authController.IsAuth(framework.NewGinContextHandler(c))
+    })
+    r.Gin.GET("/auth/auth_callback", func (c *gin.Context) {
+        authController.Callback(framework.NewGinContextHandler(c))
+    })
+    // block2mute
 
 }
 
