@@ -1,4 +1,4 @@
-package infrastructure
+package framework
 
 import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/controller"
@@ -6,7 +6,6 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/presenter"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
-	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/framework"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +22,7 @@ func NewRouting(config *config.Config, dbHandler handler.DbHandler, twitterHandl
         Gin: gin.Default(),
         Port: config.Routing.Port,
     }
-    sessionHandler := framework.NewGinSessionHandler(config, r.Gin)
+    sessionHandler := NewGinSessionHandler(config, r.Gin)
     r.setRouting(dbHandler, twitterHandler, sessionHandler)
     return r
 }
@@ -47,17 +46,17 @@ func (r *Routing) setRouting(dbHandler handler.DbHandler, twitterHandler handler
     // ルーティング割当
     // user
     r.Gin.GET("/user/user/:id", func (c *gin.Context) {
-        userController.GetUserByID(framework.NewGinContextHandler(c))
+        userController.GetUserByID(NewGinContextHandler(c))
     })
     // auth
     r.Gin.GET("/auth/auth", func (c *gin.Context) {
-        authController.Auth(framework.NewGinContextHandler(c))
+        authController.Auth(NewGinContextHandler(c))
     })
     r.Gin.GET("/auth/is_auth", func (c *gin.Context) {
-        authController.IsAuth(framework.NewGinContextHandler(c))
+        authController.IsAuth(NewGinContextHandler(c))
     })
     r.Gin.GET("/auth/auth_callback", func (c *gin.Context) {
-        authController.Callback(framework.NewGinContextHandler(c))
+        authController.Callback(NewGinContextHandler(c))
     })
     // block2mute
 
