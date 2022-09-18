@@ -12,8 +12,9 @@ type Auth struct {
 	// -> interactor.NewAuthInputPort
 	InputFactory func(o port.AuthOutputPort, u port.AuthRepository) port.AuthInputPort
 	// -> gateway.NewAuthRepository
-	RepoFactory func(ctx *gin.Context, twitterHandler gateway.TwitterHandler) port.AuthRepository
+	RepoFactory func(ctx *gin.Context, twitterHandler gateway.TwitterHandler, sessionHandler gateway.SessionHandler) port.AuthRepository
 	TwitterHandler gateway.TwitterHandler
+	SessionHandler gateway.SessionHandler
 	//Conn *gorm.DB
 	//Api *anaconda.TwitterApi
 	//CallbackUrl string
@@ -22,7 +23,7 @@ type Auth struct {
 // 認証済みかどうかをセッションと照らし合わせて判別する
 func (a *Auth) IsAuth(c *gin.Context) {
 	outputPort := a.OutputFactory(c)
-	repository := a.RepoFactory(c, a.TwitterHandler)
+	repository := a.RepoFactory(c, a.TwitterHandler, a.SessionHandler)
 	inputPort := a.InputFactory(outputPort, repository)
 	inputPort.IsAuthenticated()
 }
@@ -30,7 +31,7 @@ func (a *Auth) IsAuth(c *gin.Context) {
 // 認証を実施する
 func (a *Auth) Auth(c *gin.Context) {
 	outputPort := a.OutputFactory(c)
-	repository := a.RepoFactory(c, a.TwitterHandler)
+	repository := a.RepoFactory(c, a.TwitterHandler, a.SessionHandler)
 	inputPort := a.InputFactory(outputPort, repository)
 	inputPort.Auth()
 }
@@ -38,7 +39,7 @@ func (a *Auth) Auth(c *gin.Context) {
 // コールバック処理
 func (a *Auth) Callback(c *gin.Context) {
 	outputPort := a.OutputFactory(c)
-	repository := a.RepoFactory(c, a.TwitterHandler)
+	repository := a.RepoFactory(c, a.TwitterHandler, a.SessionHandler)
 	inputPort := a.InputFactory(outputPort, repository)
 	inputPort.Callback()
 }

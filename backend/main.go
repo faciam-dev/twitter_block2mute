@@ -12,6 +12,7 @@ func main() {
 
     dbHandler := database.NewUserDbHandler(config)
     anaconderHandler := twitterapi.NewAnaconderHandler(config)
+    //sessionHandler := framework.NewGinSessionHandler(NewGinSessionHandler(config)
 
     r := infrastructure.NewRouting(config, dbHandler, anaconderHandler)
     r.Run()

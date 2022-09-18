@@ -3,29 +3,30 @@ package gateway
 import (
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
 type AuthRepository struct {
 	context *gin.Context
 	twitterHandler TwitterHandler
+	sessionHandler SessionHandler
 }
 
 // NewAuthRepository はAuthRepositoryを返します．
-func NewAuthRepository(ctx *gin.Context, twitterHandler TwitterHandler) port.AuthRepository {
-	return &AuthRepository{
+func NewAuthRepository(ctx *gin.Context, twitterHandler TwitterHandler, sessionHandler SessionHandler) port.AuthRepository {
+	authRepository := &AuthRepository{
 		context: ctx,
 		twitterHandler: twitterHandler,
+		sessionHandler: sessionHandler,
 	}
+	authRepository.sessionHandler.SetContext(ctx)
+	return authRepository
 }
 
 // セッションに入っている値から認証を実施し、認証状態を取得する。
 func (a *AuthRepository) IsAuthenticated() (*entity.Auth, error) {
-	session := a.GetSession() 
-
-	token := session.Get("token")
-	secret := session.Get("secret") 
+	token := a.sessionHandler.Get("token")
+	secret := a.sessionHandler.Get("secret") 
 
 	auth := entity.Auth{
 		Authenticated: 0,
@@ -36,23 +37,7 @@ func (a *AuthRepository) IsAuthenticated() (*entity.Auth, error) {
 	}
 
 	a.twitterHandler.SetCredentials(token.(string), secret.(string))
-
-	//api = anaconda.NewTwitterApi(token, secret)
-	/*
-	a.api.Credentials.Token = token.(string)
-	a.api.Credentials.Secret = secret.(string)
-	*/
-	//a.api.VerifyCredentials()
-
-	//api := anaconda.NewTwitterApiWithCredentials(token.(string), secret.(string), consumerKey, consumerSecret)
-
 	err := a.twitterHandler.GetRateLimits()
-
-	/*
-	r := []string{}
-	_, err:= a.api.GetRateLimits(r)
-	*/
-
 	if err == nil {
 		// 認証成功
 		auth.Authenticated = 1;
@@ -68,10 +53,6 @@ func (a *AuthRepository) Auth() (*entity.Auth, error) {
 	}
 
 	uri, err := a.twitterHandler.AuthorizationURL()
-
-    /*
-	uri, _, err := a.api.AuthorizationURL(a.callbackUrl)
-	*/
 
 	if err != nil {
 		return &auth, err;
@@ -93,45 +74,19 @@ func (a *AuthRepository) Callback() (*entity.Auth, error) {
 
 	credentials, err := a.twitterHandler.GetCredentials(token, secret)
  
-	/*
-    credentials, _, err := a.api.GetCredentials(&oauth.Credentials{
-        Token: token,
-    }, secret)
-	*/
     if err != nil {
 		// TODO: ログ書き込み
         return &auth, err
     }
 
     // 認証成功後処理	
-	//api = anaconda.NewTwitterApi(credentials.Token, credentials.Secret)
-	/*
-	a.twitterHandler.SetCredentials(credentials.Token, credentials.Secret)
-	*/
 	a.twitterHandler.SetCredentials(credentials.GetToken(), credentials.GetSecret())
-	/*
-	a.api.Credentials.Token = credentials.Token
-	a.api.Credentials.Secret = credentials.Secret
-	*/
 	//a.api.VerifyCredentials()
 	auth.Authenticated = 1;
 
-    session := a.GetSession() 
-    session.Set("token", credentials.GetToken())
-    session.Set("secret", credentials.GetSecret())
-    session.Save()
+	a.sessionHandler.Set("token", credentials.GetToken())
+    a.sessionHandler.Set("secret", credentials.GetSecret())
+    a.sessionHandler.Save()
 
-	/*
-    session := a.GetSession() 
-    session.Set("token", credentials.Token)
-    session.Set("secret", credentials.Secret)
-    session.Save()
-	*/
- 
     return &auth, nil
-}
-
-func (a *AuthRepository) GetSession() sessions.Session {
-	session := sessions.Default(a.context)
-	return session
 }

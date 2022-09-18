@@ -77,38 +77,3 @@ func (t TwitterCredentials) GetToken() string {
 func (t TwitterCredentials) GetSecret() string {
 	return t.Credentials.Secret
 }
-
-/*
-func NewAnaconderHandler()  gateway.TwitterHandler {
-	anaconda.SetConsumerKey(a.ConsumerKey)
-	anaconda.SetConsumerSecret(a.ConsumerSecret)
-
-
-    conn, err := sql.Open("mysql", "root:@tcp(db:3306)/sample")
-    if err != nil {
-        panic(err.Error)
-    }
-    sqlHandler := new(SqlHandler)
-    sqlHandler.Conn = conn
-    return sqlHandler
-}
-
-
-
-func NewTwitter(config *config.Config) *AnaconderHandler {
-    return newTwitter(&AnaconderHandler {
-		ConsumerKey: config.Twitter.ConsumerKey,
-		ConsumerSecret: config.Twitter.ConsumerSecret,
-		CallbackUrl: config.Twitter.CallbackUrl,
-	})
-}
-
-func newTwitter(a *AnaconderHandler) *AnaconderHandler {
-	anaconda.SetConsumerKey(a.ConsumerKey)
-	anaconda.SetConsumerSecret(a.ConsumerSecret)
-	 
-	a.Api = anaconda.NewTwitterApi("", "")
-
-	return a
-}
-*/
