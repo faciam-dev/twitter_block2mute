@@ -5,9 +5,9 @@ import "gorm.io/gorm"
 // for users
 type User struct {
 	gorm.Model
-    Name string `gorm:"size:255;not null"`
+    Name string        `gorm:"size:255;not null"`
     AccountName string `gorm:"size:255;not null"`
-    TwitterID uint
+    TwitterID string   `gorm:"size:64;not null"`
     UserBlock[] UserBlock
     UserMute[] UserMute
 }
@@ -16,7 +16,7 @@ type User struct {
 type UserBlock struct {
     gorm.Model
     UserID uint 
-    TargetTwitterID uint
+    TargetTwitterID string `gorm:"size:64;not null"`
     Flag int
     User User
 }
@@ -25,7 +25,7 @@ type UserBlock struct {
 type UserMute struct {
     gorm.Model
     UserID uint 
-    TargetTwitterID uint
+    TargetTwitterID string `gorm:"size:64;not null"`
     Flag int
     User User
 }

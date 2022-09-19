@@ -34,8 +34,8 @@ func (a *Auth) IsAuthenticated() {
 	a.OutputPort.RenderIsAuth(auth)
 }
 
-func (a *Auth) Callback(token string, secret string) {
-	auth, err := a.AuthRepo.Callback(token, secret);
+func (a *Auth) Callback(token string, secret string, twitterID string, twitterName string) {
+	auth, err := a.AuthRepo.Callback(token, secret, twitterID, twitterName);
 	if err != nil {
 		a.OutputPort.RenderError(err)
 		return

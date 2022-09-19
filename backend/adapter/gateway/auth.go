@@ -1,23 +1,27 @@
 package gateway
 
 import (
+	"strconv"
+
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 )
 
 type AuthRepository struct {
-	ContextHandler handler.ContextHandler
+	contextHandler handler.ContextHandler
 	twitterHandler handler.TwitterHandler
 	sessionHandler handler.SessionHandler
+	userDbHandler handler.UserDbHandler
 }
 
 // NewAuthRepository はAuthRepositoryを返します．
-func NewAuthRepository(contextHandler handler.ContextHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler) port.AuthRepository {
+func NewAuthRepository(contextHandler handler.ContextHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler, userDbHandler handler.UserDbHandler) port.AuthRepository {
 	authRepository := &AuthRepository{
-		ContextHandler: contextHandler,
+		contextHandler: contextHandler,
 		twitterHandler: twitterHandler,
 		sessionHandler: sessionHandler,
+		userDbHandler: userDbHandler,
 	}
 	authRepository.sessionHandler.SetContextHandler(contextHandler)
 	return authRepository
@@ -64,7 +68,7 @@ func (a *AuthRepository) Auth() (*entity.Auth, error) {
 }
 
 // 認証コールバック
-func (a *AuthRepository) Callback(token string, secret string) (*entity.Auth, error) {
+func (a *AuthRepository) Callback(token string, secret string, twitterID string, twitterName string) (*entity.Auth, error) {
 
 	auth := entity.Auth{
 		Authenticated: 0,
@@ -77,7 +81,23 @@ func (a *AuthRepository) Callback(token string, secret string) (*entity.Auth, er
         return &auth, err
     }
 
-    // 認証成功後処理	
+    // 認証成功後処理
+	// DB
+	user := entity.User{} 
+	if err := a.userDbHandler.FindByTwitterID(user, twitterID);err != nil {
+		// TODO: ログ書き込み
+		return &auth, err
+	}
+	if user.ID == 0 {
+		user.Name = twitterName
+		user.TwitterID = twitterID
+	}
+	if err := a.userDbHandler.Upsert(user, "id", strconv.Itoa(user.ID));err != nil {
+		// TODO: ログ書き込み
+		return &auth, err
+	}
+
+	// Session
 	a.twitterHandler.SetCredentials(credentials.GetToken(), credentials.GetSecret())
 	//a.api.VerifyCredentials()
 	auth.Authenticated = 1;

@@ -6,6 +6,7 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/presenter"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +17,7 @@ type Routing struct {
     Port string
 }
 
-func NewRouting(config *config.Config, dbHandler handler.DbHandler, twitterHandler handler.TwitterHandler) *Routing {
+func NewRouting(config *config.Config, dbHandler database.GormDbHandler, twitterHandler handler.TwitterHandler) *Routing {
     r := &Routing{
         config: config,
         Gin: gin.Default(),
@@ -27,12 +28,12 @@ func NewRouting(config *config.Config, dbHandler handler.DbHandler, twitterHandl
     return r
 }
 
-func (r *Routing) setRouting(dbHandler handler.DbHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler) {
+func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler) {
 	userController := controller.User{
 		OutputFactory: presenter.NewUserOutputPort,
 		InputFactory:  interactor.NewUserInputPort,
 		RepoFactory:   gateway.NewUserRepository,
-        DbHandler:     dbHandler,
+        UserDbHandler: database.NewUserDbHandler(dbHandler),
 	}
 
     authController := controller.Auth{
@@ -41,6 +42,7 @@ func (r *Routing) setRouting(dbHandler handler.DbHandler, twitterHandler handler
 		RepoFactory:    gateway.NewAuthRepository,
         TwitterHandler: twitterHandler,
         SessionHandler: sessionHandler,
+        UserDbHandler: database.NewUserDbHandler(dbHandler),
     }
 
     // ルーティング割当

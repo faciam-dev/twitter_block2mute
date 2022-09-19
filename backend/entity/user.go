@@ -3,7 +3,7 @@ package entity
 type User struct {
     ID int
     Name string
-    TwitterID uint
+    TwitterID string
     CreatedAt int64
     UpdatedAt int64
 }

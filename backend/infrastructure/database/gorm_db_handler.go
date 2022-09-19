@@ -6,17 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type GormHandler struct {
-    Host string
-    Port string
-    Username string
-    Password string
-    DBName string
+type GormDbHandler struct {
+    DbHandler
     Conn *gorm.DB
 }
 
-func NewGormHandler(config *config.Config) GormHandler {
-    return newGormHandler(GormHandler{
+func NewGormDbHandler(config *config.Config) GormDbHandler {
+    return newGormDbHandler(DbHandler{
         Host: config.DB.Host,
         Port: config.DB.Port,
         Username: config.DB.Username,
@@ -25,13 +21,17 @@ func NewGormHandler(config *config.Config) GormHandler {
     })
 }
 
-func newGormHandler(gormHandler GormHandler) GormHandler {
-    dsn := gormHandler.Username + ":" + gormHandler.Password + "@tcp(" + gormHandler.Host + ":" + gormHandler.Port + ")/" + gormHandler.DBName + "?parseTime=True&loc=Local"
+func newGormDbHandler(dbHandler DbHandler) GormDbHandler {
+    dsn := dbHandler.Username + ":" + dbHandler.Password + "@tcp(" + dbHandler.Host + ":" + dbHandler.Port + ")/" + dbHandler.DBName + "?charset=utf8mb4&parseTime=True&loc=Local"
     db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
     // https://github.com/go-sql-driver/mysql#examples
     //db, err := gorm.Open("mysql", d.Username + ":" + d.Password + "@tcp(" + d.Host + ")/" + d.DBName + "?charset=utf8&parseTime=True&loc=Local")
     if err != nil {
         panic(err.Error())
+    }
+
+    gormHandler := GormDbHandler{
+        DbHandler: dbHandler,
     }
 
     gormHandler.Conn = db
@@ -40,10 +40,10 @@ func newGormHandler(gormHandler GormHandler) GormHandler {
 }
 
 // Begin begins a transaction
-func (g *GormHandler) Begin() *gorm.DB {
+func (g *GormDbHandler) Begin() *gorm.DB {
     return g.Conn.Begin()
 }
 
-func (g *GormHandler) Connect() *gorm.DB {
+func (g *GormDbHandler) Connect() *gorm.DB {
     return g.Conn
 }

@@ -9,17 +9,17 @@ import (
 )
 
 type UserRepository struct {
-	dbHandler handler.DbHandler
+	dbHandler handler.UserDbHandler
 }
 
 // NewUserRepository はUserRepositoryを返します．
-func NewUserRepository(dbHandler handler.DbHandler) port.UserRepository {
+func NewUserRepository(dbHandler handler.UserDbHandler) port.UserRepository {
 	return &UserRepository{
 		dbHandler: dbHandler,
 	}
 }
 
-// GetUserByID はDBからデータを取得します．
+// DBからid=userIDに該当するデータを取得します．
 func (u *UserRepository) GetUserByID(userID string) (*entity.User, error) {
 	user := entity.User{}
 
@@ -30,4 +30,12 @@ func (u *UserRepository) GetUserByID(userID string) (*entity.User, error) {
         return &entity.User{}, errors.New("user is not found")
     }
     return &user, nil
+}
+
+// DBにユーザーを追加する。既に存在する場合はデータを上書き更新するする。
+func (u *UserRepository) UpsertByTwitterID(newUser entity.User, twitterID string) (*entity.User, error) {
+	if err := u.dbHandler.Upsert(newUser, "twitter_id", twitterID);err != nil {
+		return &newUser, err
+	}
+	return &newUser, nil
 }
