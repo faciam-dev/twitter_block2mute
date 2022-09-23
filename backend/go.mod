@@ -6,6 +6,7 @@ require (
 	github.com/ChimeraCoder/anaconda v2.0.0+incompatible
 	github.com/garyburd/go-oauth v0.0.0-20180319155456-bca2e7f09a17
 	github.com/gin-contrib/sessions v0.0.5
+	github.com/golang/mock v1.6.0
 	gorm.io/gorm v1.23.8
 )
 
@@ -21,6 +22,7 @@ require (
 )
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.8.1

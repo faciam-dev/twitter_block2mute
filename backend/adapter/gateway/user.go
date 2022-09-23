@@ -23,19 +23,19 @@ func NewUserRepository(dbHandler handler.UserDbHandler) port.UserRepository {
 func (u *UserRepository) GetUserByID(userID string) (*entity.User, error) {
 	user := entity.User{}
 
-    if err := u.dbHandler.First(&user, userID);err != nil {
-		return &entity.User{},err
+	if err := u.dbHandler.First(&user, userID); err != nil {
+		return &entity.User{}, err
 	}
-    if user.ID <= 0 {
-        return &entity.User{}, errors.New("user is not found")
-    }
-    return &user, nil
+	if user.ID <= 0 {
+		return &entity.User{}, errors.New("user is not found")
+	}
+	return &user, nil
 }
 
 // DBにユーザーを追加する。既に存在する場合はデータを上書き更新するする。
-func (u *UserRepository) UpsertByTwitterID(newUser entity.User, twitterID string) (*entity.User, error) {
-	if err := u.dbHandler.Upsert(newUser, "twitter_id", twitterID);err != nil {
-		return &newUser, err
+func (u *UserRepository) UpsertByTwitterID(newUser *entity.User, twitterID string) (*entity.User, error) {
+	if err := u.dbHandler.Upsert(newUser, "twitter_id", twitterID); err != nil {
+		return newUser, err
 	}
-	return &newUser, nil
+	return newUser, nil
 }

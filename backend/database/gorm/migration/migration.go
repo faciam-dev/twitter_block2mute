@@ -6,9 +6,9 @@ import (
 )
 
 func Migration() {
-    config := config.NewConfig()
+	config := config.NewConfig(".env")
 
-    gormHandler := database.NewGormDbHandler(config)
+	gormHandler := database.NewGormDbHandler(config)
 
 	gormHandler.Connect().AutoMigrate(
 		&User{},

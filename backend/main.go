@@ -11,22 +11,22 @@ import (
 )
 
 func main() {
-    mode := flag.String("mode", "", "mode")
-    flag.Parse()
+	mode := flag.String("mode", "", "mode")
+	flag.Parse()
 
-    if *mode == "migration" {
-        migration.Migration()
-    } else {
-        server()
-    }
+	if *mode == "migration" {
+		migration.Migration()
+	} else {
+		server()
+	}
 }
 
 func server() {
-    config := config.NewConfig()
+	config := config.NewConfig(".env")
 
-    dbHandler := database.NewGormDbHandler(config)
-    anaconderHandler := twitterapi.NewAnaconderHandler(config)
+	dbHandler := database.NewGormDbHandler(config)
+	anaconderHandler := twitterapi.NewAnaconderHandler(config)
 
-    r := framework.NewRouting(config, dbHandler, anaconderHandler)
-    r.Run()
+	r := framework.NewRouting(config, dbHandler, anaconderHandler)
+	r.Run()
 }
