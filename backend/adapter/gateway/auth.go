@@ -92,7 +92,7 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 		user.Name = twitterName
 		user.TwitterID = twitterID
 	}
-	if err := a.userDbHandler.Upsert(&user, "id", strconv.Itoa(user.ID)); err != nil {
+	if err := a.userDbHandler.Upsert(&user, "id", strconv.FormatUint(uint64(user.ID), 10)); err != nil {
 		// TODO: ログ書き込み
 		return &auth, err
 	}

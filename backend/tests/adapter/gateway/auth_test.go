@@ -31,7 +31,7 @@ func newMockGormDbUserHandler() (handler.UserDbHandler, sqlmock.Sqlmock, error) 
 			Conn:                      mockDB,
 			SkipInitializeWithVersion: true,
 		}),
-		&gorm.Config{ /*PrepareStmt: true*/ },
+		&gorm.Config{},
 	)
 
 	gormDbUserHandler := database.NewUserDbHandler(
@@ -88,6 +88,7 @@ func TestIsAuthenticated(t *testing.T) {
 			args := tt.args
 
 			// モックの生成
+			// sqlmock処理
 			dbUserHandler /*dbMock*/, _, err := newMockGormDbUserHandler()
 
 			if err != nil {
@@ -244,6 +245,7 @@ func TestCallback(t *testing.T) {
 			}
 
 			// モックの生成
+			// sqlmock処理
 			// dbHandler
 			dbMock.ExpectQuery(
 				regexp.QuoteMeta("SELECT * FROM `users` WHERE twitter_id = ?")).

@@ -8,7 +8,7 @@ import (
 
 func TestCreateUserDomain(t *testing.T) {
 	type args struct {
-		ID        int
+		ID        uint
 		Name      string
 		TwitterID string
 		CreatedAt int64

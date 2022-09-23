@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
@@ -26,13 +27,13 @@ func (u *UserRepository) GetUserByID(userID string) (*entity.User, error) {
 	if err := u.dbHandler.First(&user, userID); err != nil {
 		return &entity.User{}, err
 	}
-	if user.ID <= 0 {
+	if strconv.FormatUint(uint64(user.ID), 10) != userID {
 		return &entity.User{}, errors.New("user is not found")
 	}
 	return &user, nil
 }
 
-// DBにユーザーを追加する。既に存在する場合はデータを上書き更新するする。
+// DBにユーザーを追加する。既に存在する場合はデータを上書き更新する。
 func (u *UserRepository) UpsertByTwitterID(newUser *entity.User, twitterID string) (*entity.User, error) {
 	if err := u.dbHandler.Upsert(newUser, "twitter_id", twitterID); err != nil {
 		return newUser, err
