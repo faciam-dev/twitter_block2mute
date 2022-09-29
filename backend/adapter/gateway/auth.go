@@ -90,6 +90,7 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 	}
 	if user.ID == 0 {
 		user.Name = twitterName
+		user.AccountName = twitterName
 		user.TwitterID = twitterID
 	}
 	if err := a.userDbHandler.Upsert(&user, "id", strconv.FormatUint(uint64(user.ID), 10)); err != nil {

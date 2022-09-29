@@ -2,6 +2,10 @@ package handler
 
 // このハンドラは各gatewayで共通の基本的な操作のみを扱う
 type DbHandler interface {
+	Transaction(fn func() error) error
+	Begin()
+	Commit()
+	Rollback()
 	First(interface{}, string) error
 	Create(interface{}) error
 	Update(interface{}, string) error

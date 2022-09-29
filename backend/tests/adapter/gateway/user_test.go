@@ -67,18 +67,9 @@ func TestGetUserByID(t *testing.T) {
 			// sqlmock処理
 			// dbHandler
 			dbMock.ExpectQuery(
-				regexp.QuoteMeta("SELECT * FROM `users` WHERE `users`.`id` = ? ORDER BY `users`.`id` LIMIT 1")).
+				regexp.QuoteMeta("SELECT * FROM `users` WHERE `users`.`id` = ? AND `users`.`deleted_at` IS NULL ORDER BY `users`.`id` LIMIT 1")).
 				WithArgs(strconv.FormatInt(args.SearchID, 10)).
 				WillReturnRows(sqlmock.NewRows([]string{"id", "name", "twitter_id"}).AddRow(args.UserID, args.UserName, args.UserTwitterID))
-
-				/*
-					dbMock.ExpectBegin()
-					dbMock.ExpectExec(
-						regexp.QuoteMeta("INSERT INTO `users` (`name`,`twitter_id`,`created_at`,`updated_at`,`id`) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE `updated_at`=?,`name`=VALUES(`name`),`twitter_id`=VALUES(`twitter_id`)")).
-						WithArgs(args.TwitterName, args.TwitterID, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-						WillReturnResult(sqlmock.NewResult(1, 1))
-					dbMock.ExpectCommit()
-				*/
 
 			// repository
 			userRepository := gateway.NewUserRepository(

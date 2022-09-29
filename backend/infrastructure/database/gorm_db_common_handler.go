@@ -18,6 +18,28 @@ func NewGormCommonDbHandler(databaseDbHandler GormDbHandler) handler.DbHandler {
 	return gormCommonDbHandler
 }
 
+// 接続取得
+func (g *GormCommonDbHandler) Transaction(fn func() error) error {
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		return fn()
+	})
+}
+
+// トランザクション開始
+func (g *GormCommonDbHandler) Begin() {
+	g.db = g.db.Begin()
+}
+
+// トランザクションコミット
+func (g *GormCommonDbHandler) Commit() {
+	g.db = g.db.Commit()
+}
+
+// トランザクションロールバック
+func (g *GormCommonDbHandler) Rollback() {
+	g.db = g.db.Rollback()
+}
+
 // レコード1件をIDで取得
 func (g *GormCommonDbHandler) First(model interface{}, ID string) error {
 	if err := g.db.First(&model, ID).Error; err != nil {

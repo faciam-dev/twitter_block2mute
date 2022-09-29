@@ -207,6 +207,7 @@ func TestCallback(t *testing.T) {
 		SessionToken       interface{}
 		SessionTokenSecret interface{}
 		TwitterName        string
+		TwitterAccountName string
 		TwitterID          string
 		OAuthToken         string
 		OAuthTokenSecret   string
@@ -223,6 +224,7 @@ func TestCallback(t *testing.T) {
 				SessionToken:       "token",
 				SessionTokenSecret: "secret",
 				TwitterName:        "test",
+				TwitterAccountName: "Test",
 				TwitterID:          "1234567890",
 				OAuthToken:         "token",
 				OAuthTokenSecret:   "secret",
@@ -250,12 +252,12 @@ func TestCallback(t *testing.T) {
 			dbMock.ExpectQuery(
 				regexp.QuoteMeta("SELECT * FROM `users` WHERE twitter_id = ?")).
 				WithArgs(args.TwitterID).
-				WillReturnRows(sqlmock.NewRows([]string{"id", "name", "twitter_id"}).AddRow(1, args.TwitterName, args.TwitterID))
+				WillReturnRows(sqlmock.NewRows([]string{"id", "name", "account_name", "twitter_id"}).AddRow(1, args.TwitterName, args.TwitterAccountName, args.TwitterID))
 
 			dbMock.ExpectBegin()
 			dbMock.ExpectExec(
-				regexp.QuoteMeta("INSERT INTO `users` (`name`,`twitter_id`,`created_at`,`updated_at`,`id`) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE `updated_at`=?,`name`=VALUES(`name`),`twitter_id`=VALUES(`twitter_id`)")).
-				WithArgs(args.TwitterName, args.TwitterID, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+				regexp.QuoteMeta("INSERT INTO `users` (`created_at`,`updated_at`,`deleted_at`,`name`,`account_name`,`twitter_id`,`id`) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE `updated_at`=?,`deleted_at`=VALUES(`deleted_at`),`name`=VALUES(`name`),`account_name`=VALUES(`account_name`),`twitter_id`=VALUES(`twitter_id`)")).
+				WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), args.TwitterName, args.TwitterAccountName, args.TwitterID, sqlmock.AnyArg(), sqlmock.AnyArg()).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 			dbMock.ExpectCommit()
 

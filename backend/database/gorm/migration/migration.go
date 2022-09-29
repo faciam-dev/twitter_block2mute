@@ -2,6 +2,7 @@ package migration
 
 import (
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
+	"github.com/faciam_dev/twitter_block2mute/backend/database/gorm/model"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 )
 
@@ -11,8 +12,8 @@ func Migration() {
 	gormHandler := database.NewGormDbHandler(config)
 
 	gormHandler.Connect().AutoMigrate(
-		&User{},
-		&UserBlock{},
-		&UserMute{},
+		&model.User{},
+		&model.UserBlock{},
+		&model.UserMute{},
 	)
 }
