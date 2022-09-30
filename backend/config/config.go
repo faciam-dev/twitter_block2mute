@@ -23,7 +23,8 @@ type Config struct {
 		DBName   string `env:"DB_DBNAME"`
 	}
 	Routing struct {
-		Port string `env:"ROUTING_PORT"`
+		AllowOrigins []string `env:"ALLOW_ORIGINS" envSeparator:","`
+		Port         string   `env:"ROUTING_PORT"`
 	}
 	Session struct {
 		Name   string `env:"SESSION_NAME"`
