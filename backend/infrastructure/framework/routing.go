@@ -24,6 +24,7 @@ func NewRouting(config *config.Config, dbHandler database.GormDbHandler, twitter
 		Gin:    gin.Default(),
 		Port:   config.Routing.Port,
 	}
+	r.AllowOrigins() // before set routing
 	sessionHandler := NewGinSessionHandler(config, r.Gin)
 	r.setRouting(dbHandler, twitterHandler, sessionHandler)
 	return r

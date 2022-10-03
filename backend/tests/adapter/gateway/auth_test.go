@@ -273,10 +273,14 @@ func TestCallback(t *testing.T) {
 			mockTwitterCredentials.EXPECT().GetToken().Return(args.SessionToken).AnyTimes()
 			mockTwitterCredentials.EXPECT().GetSecret().Return(args.SessionTokenSecret).AnyTimes()
 
+			mockTwitterValue := mock_handler.NewMockTwitterValues(mockCtrl)
+			mockTwitterValue.EXPECT().GetTwitterID().Return(args.TwitterID).AnyTimes()
+			mockTwitterValue.EXPECT().GetTwitterScreenName().Return(args.TwitterName).AnyTimes()
+
 			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
 			mockTwitterHandler.EXPECT().GetRateLimits().Return(nil).AnyTimes()
 			mockTwitterHandler.EXPECT().SetCredentials(args.OAuthToken, args.OAuthTokenSecret).Return().AnyTimes()
-			mockTwitterHandler.EXPECT().GetCredentials(gomock.Any(), gomock.Any()).Return(mockTwitterCredentials, nil)
+			mockTwitterHandler.EXPECT().GetCredentials(gomock.Any(), gomock.Any()).Return(mockTwitterCredentials, mockTwitterValue, nil)
 
 			// sessionHandler
 			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)

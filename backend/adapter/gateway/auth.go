@@ -1,7 +1,7 @@
 package gateway
 
 import (
-	"strconv"
+	"log"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
@@ -74,26 +74,30 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 		Authenticated: 0,
 	}
 
-	credentials, err := a.twitterHandler.GetCredentials(token, secret)
+	credentials, values, err := a.twitterHandler.GetCredentials(token, secret)
 
 	if err != nil {
 		// TODO: ログ書き込み
+		log.Printf("token=%v,secret=%v", token, secret)
+		log.Println(err)
 		return &auth, err
 	}
 
 	// 認証成功後処理
 	// DB
 	user := entity.User{}
-	if err := a.userDbHandler.FindByTwitterID(&user, twitterID); err != nil {
+	if err := a.userDbHandler.FindByTwitterID(&user, values.GetTwitterID()); err != nil {
 		// TODO: ログ書き込み
+		log.Println(err)
 		return &auth, err
 	}
+	log.Printf("user-> id:%v tid:%v", user.ID, user.TwitterID)
 	if user.ID == 0 {
-		user.Name = twitterName
-		user.AccountName = twitterName
-		user.TwitterID = twitterID
+		user.Name = values.GetTwitterScreenName()
+		user.AccountName = values.GetTwitterScreenName()
+		user.TwitterID = values.GetTwitterID()
 	}
-	if err := a.userDbHandler.Upsert(&user, "id", strconv.FormatUint(uint64(user.ID), 10)); err != nil {
+	if err := a.userDbHandler.Upsert(&user, "twitter_id", user.TwitterID); err != nil {
 		// TODO: ログ書き込み
 		return &auth, err
 	}

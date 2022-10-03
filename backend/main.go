@@ -28,6 +28,5 @@ func server() {
 	anaconderHandler := twitterapi.NewAnaconderHandler(config)
 
 	r := framework.NewRouting(config, dbHandler, anaconderHandler)
-	r.AllowOrigins()
 	r.Run()
 }

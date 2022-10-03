@@ -1,6 +1,8 @@
 package twitterapi
 
 import (
+	"net/url"
+
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
@@ -8,24 +10,24 @@ import (
 )
 
 type AnaconderHandler struct {
-	ConsumerKey string
+	ConsumerKey    string
 	ConsumerSecret string
-	CallbackUrl string
-	Api *anaconda.TwitterApi
+	CallbackUrl    string
+	Api            *anaconda.TwitterApi
 }
 
 func NewAnaconderHandler(config *config.Config) handler.TwitterHandler {
-    return newAnaconderHandler(AnaconderHandler{
-		ConsumerKey: config.Twitter.ConsumerKey,
+	return newAnaconderHandler(AnaconderHandler{
+		ConsumerKey:    config.Twitter.ConsumerKey,
 		ConsumerSecret: config.Twitter.ConsumerSecret,
-		CallbackUrl: config.Twitter.CallbackUrl,
-    })
+		CallbackUrl:    config.Twitter.CallbackUrl,
+	})
 }
 
 func newAnaconderHandler(a AnaconderHandler) handler.TwitterHandler {
 	anaconda.SetConsumerKey(a.ConsumerKey)
 	anaconda.SetConsumerSecret(a.ConsumerSecret)
-	
+
 	anaconderHandler := new(AnaconderHandler)
 
 	anaconderHandler.Api = anaconda.NewTwitterApi("", "")
@@ -51,21 +53,24 @@ func (a *AnaconderHandler) GetRateLimits() error {
 	return err
 }
 
-func (a *AnaconderHandler) GetCredentials(token string, secret string) (handler.TwitterCredentials, error) {
+func (a *AnaconderHandler) GetCredentials(token string, secret string) (handler.TwitterCredentials, handler.TwitterValues, error) {
 	twitterCredentials := TwitterCredentials{}
-	credentials, _, err := a.Api.GetCredentials(&oauth.Credentials{
-        Token: token,
-    }, secret)
+	twitterValues := TwitterValues{}
+	credentials, values, err := a.Api.GetCredentials(&oauth.Credentials{
+		Token: token,
+	}, secret)
 
 	twitterCredentials.Credentials = credentials
+	twitterValues.Vaules = values
 
 	if err != nil {
-        return twitterCredentials, err
-    }
+		return twitterCredentials, twitterValues, err
+	}
 
-	return twitterCredentials, nil
+	return twitterCredentials, twitterValues, nil
 }
 
+// TwitterCredentials
 type TwitterCredentials struct {
 	Credentials *oauth.Credentials
 }
@@ -76,4 +81,26 @@ func (t TwitterCredentials) GetToken() string {
 
 func (t TwitterCredentials) GetSecret() string {
 	return t.Credentials.Secret
+}
+
+// TwitterValues
+type TwitterValues struct {
+	Vaules url.Values
+}
+
+func (t TwitterValues) GetTwitterID() string {
+	return t.getTwitterValue("user_id")
+}
+
+func (t TwitterValues) GetTwitterScreenName() string {
+	return t.getTwitterValue("screen_name")
+}
+
+func (t TwitterValues) getTwitterValue(key string) string {
+	for k, v := range t.Vaules {
+		if k == key {
+			return v[0]
+		}
+	}
+	return ""
 }
