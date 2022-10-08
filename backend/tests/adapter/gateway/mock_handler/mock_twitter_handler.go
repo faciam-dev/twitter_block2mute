@@ -50,12 +50,13 @@ func (mr *MockTwitterHandlerMockRecorder) AuthorizationURL() *gomock.Call {
 }
 
 // GetCredentials mocks base method.
-func (m *MockTwitterHandler) GetCredentials(arg0, arg1 string) (handler.TwitterCredentials, error) {
+func (m *MockTwitterHandler) GetCredentials(arg0, arg1 string) (handler.TwitterCredentials, handler.TwitterValues, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCredentials", arg0, arg1)
 	ret0, _ := ret[0].(handler.TwitterCredentials)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(handler.TwitterValues)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetCredentials indicates an expected call of GetCredentials.
@@ -64,30 +65,31 @@ func (mr *MockTwitterHandlerMockRecorder) GetCredentials(arg0, arg1 interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCredentials", reflect.TypeOf((*MockTwitterHandler)(nil).GetCredentials), arg0, arg1)
 }
 
-// GetRateLimits mocks base method.
-func (m *MockTwitterHandler) GetRateLimits() error {
+// GetUser mocks base method.
+func (m *MockTwitterHandler) GetUser(arg0 string) (handler.TwitterUser, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRateLimits")
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "GetUser", arg0)
+	ret0, _ := ret[0].(handler.TwitterUser)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// GetRateLimits indicates an expected call of GetRateLimits.
-func (mr *MockTwitterHandlerMockRecorder) GetRateLimits() *gomock.Call {
+// GetUser indicates an expected call of GetUser.
+func (mr *MockTwitterHandlerMockRecorder) GetUser(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRateLimits", reflect.TypeOf((*MockTwitterHandler)(nil).GetRateLimits))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockTwitterHandler)(nil).GetUser), arg0)
 }
 
-// SetCredentials mocks base method.
-func (m *MockTwitterHandler) SetCredentials(arg0, arg1 string) {
+// UpdateTwitterApi mocks base method.
+func (m *MockTwitterHandler) UpdateTwitterApi(arg0, arg1 string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetCredentials", arg0, arg1)
+	m.ctrl.Call(m, "UpdateTwitterApi", arg0, arg1)
 }
 
-// SetCredentials indicates an expected call of SetCredentials.
-func (mr *MockTwitterHandlerMockRecorder) SetCredentials(arg0, arg1 interface{}) *gomock.Call {
+// UpdateTwitterApi indicates an expected call of UpdateTwitterApi.
+func (mr *MockTwitterHandlerMockRecorder) UpdateTwitterApi(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCredentials", reflect.TypeOf((*MockTwitterHandler)(nil).SetCredentials), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTwitterApi", reflect.TypeOf((*MockTwitterHandler)(nil).UpdateTwitterApi), arg0, arg1)
 }
 
 // MockTwitterCredentials is a mock of TwitterCredentials interface.
@@ -139,4 +141,120 @@ func (m *MockTwitterCredentials) GetToken() string {
 func (mr *MockTwitterCredentialsMockRecorder) GetToken() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetToken", reflect.TypeOf((*MockTwitterCredentials)(nil).GetToken))
+}
+
+// MockTwitterValues is a mock of TwitterValues interface.
+type MockTwitterValues struct {
+	ctrl     *gomock.Controller
+	recorder *MockTwitterValuesMockRecorder
+}
+
+// MockTwitterValuesMockRecorder is the mock recorder for MockTwitterValues.
+type MockTwitterValuesMockRecorder struct {
+	mock *MockTwitterValues
+}
+
+// NewMockTwitterValues creates a new mock instance.
+func NewMockTwitterValues(ctrl *gomock.Controller) *MockTwitterValues {
+	mock := &MockTwitterValues{ctrl: ctrl}
+	mock.recorder = &MockTwitterValuesMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTwitterValues) EXPECT() *MockTwitterValuesMockRecorder {
+	return m.recorder
+}
+
+// GetTwitterID mocks base method.
+func (m *MockTwitterValues) GetTwitterID() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTwitterID")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetTwitterID indicates an expected call of GetTwitterID.
+func (mr *MockTwitterValuesMockRecorder) GetTwitterID() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTwitterID", reflect.TypeOf((*MockTwitterValues)(nil).GetTwitterID))
+}
+
+// GetTwitterScreenName mocks base method.
+func (m *MockTwitterValues) GetTwitterScreenName() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTwitterScreenName")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetTwitterScreenName indicates an expected call of GetTwitterScreenName.
+func (mr *MockTwitterValuesMockRecorder) GetTwitterScreenName() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTwitterScreenName", reflect.TypeOf((*MockTwitterValues)(nil).GetTwitterScreenName))
+}
+
+// MockTwitterUser is a mock of TwitterUser interface.
+type MockTwitterUser struct {
+	ctrl     *gomock.Controller
+	recorder *MockTwitterUserMockRecorder
+}
+
+// MockTwitterUserMockRecorder is the mock recorder for MockTwitterUser.
+type MockTwitterUserMockRecorder struct {
+	mock *MockTwitterUser
+}
+
+// NewMockTwitterUser creates a new mock instance.
+func NewMockTwitterUser(ctrl *gomock.Controller) *MockTwitterUser {
+	mock := &MockTwitterUser{ctrl: ctrl}
+	mock.recorder = &MockTwitterUserMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTwitterUser) EXPECT() *MockTwitterUserMockRecorder {
+	return m.recorder
+}
+
+// GetTwitterID mocks base method.
+func (m *MockTwitterUser) GetTwitterID() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTwitterID")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetTwitterID indicates an expected call of GetTwitterID.
+func (mr *MockTwitterUserMockRecorder) GetTwitterID() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTwitterID", reflect.TypeOf((*MockTwitterUser)(nil).GetTwitterID))
+}
+
+// GetTwitterName mocks base method.
+func (m *MockTwitterUser) GetTwitterName() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTwitterName")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetTwitterName indicates an expected call of GetTwitterName.
+func (mr *MockTwitterUserMockRecorder) GetTwitterName() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTwitterName", reflect.TypeOf((*MockTwitterUser)(nil).GetTwitterName))
+}
+
+// GetTwitterScreenName mocks base method.
+func (m *MockTwitterUser) GetTwitterScreenName() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTwitterScreenName")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetTwitterScreenName indicates an expected call of GetTwitterScreenName.
+func (mr *MockTwitterUserMockRecorder) GetTwitterScreenName() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTwitterScreenName", reflect.TypeOf((*MockTwitterUser)(nil).GetTwitterScreenName))
 }
