@@ -1,22 +1,37 @@
-import useSWR from "swr";
-import React from "react";
 import { useRouter } from "next/router";
+import { NextPage } from "next";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const axios = require("axios").default;
 
-export default function AuthCallbackPage() {
+import { useEffect, useRef } from "react";
+
+const AuthCallbackPage: NextPage = () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL_BASE;
   const router = useRouter();
+  const didEffect = useRef(false);
   const { oauth_token, oauth_verifier } = router.query;
 
-  const { data, error } = useSWR(
-    "http://localhost:8080/auth/auth_callback?oauth_token=" +
-      oauth_token +
-      "&oauth_verifier=" +
-      oauth_verifier,
-    fetcher
-  );
+  const getCallback = async () => {
+    if (oauth_token === undefined) return;
+    let client = axios.create({
+      withCredentials: true,
+    });
 
-  if (data) {
-    window.close();
-  }
-}
+    const { data, headers } = await client.get(
+      `${apiUrl}/auth/auth_callback?oauth_token=${oauth_token}&oauth_verifier=${oauth_verifier}`
+    );
+
+    router.push({
+      pathname: "/",
+    });
+  };
+
+  useEffect(() => {
+    if (!didEffect.current) {
+      getCallback();
+    }
+  });
+  return <div>Login...</div>;
+};
+
+export default AuthCallbackPage;

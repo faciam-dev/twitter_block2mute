@@ -6,29 +6,29 @@ import (
 )
 
 type GinContextHandler struct {
-    Context *gin.Context
+	Context *gin.Context
 }
 
 func NewGinContextHandler(context *gin.Context) handler.ContextHandler {
-    ginContextHandler := GinContextHandler{
-        Context: context,
-    }
+	ginContextHandler := GinContextHandler{
+		Context: context,
+	}
 
-    return &ginContextHandler
+	return &ginContextHandler
 }
 
 func (g *GinContextHandler) GetContext() interface{} {
-    return g.Context
+	return g.Context
 }
 
 func (g *GinContextHandler) Query(key string) (value string) {
-    return g.Context.Query(key)
+	return g.Context.Query(key)
 }
 
 func (g *GinContextHandler) Param(key string) string {
-    return g.Context.Param(key)
+	return g.Context.Param(key)
 }
 
 func (g *GinContextHandler) JSON(code int, obj interface{}) {
-    g.Context.JSON(code, obj)
+	g.Context.JSON(code, obj)
 }

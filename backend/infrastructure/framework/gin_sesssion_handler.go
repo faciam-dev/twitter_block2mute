@@ -9,23 +9,23 @@ import (
 )
 
 type GinSessionHandler struct {
-	Secret string
-	Name string
-	Gin *gin.Engine
+	Secret         string
+	Name           string
+	Gin            *gin.Engine
 	contextHandler handler.ContextHandler
 }
 
 func NewGinSessionHandler(config *config.Config, gin *gin.Engine) handler.SessionHandler {
-    return newSessionHandler(GinSessionHandler{
+	return newSessionHandler(GinSessionHandler{
 		Secret: config.Session.Secret,
-		Name: config.Session.Name,
-		Gin: gin,
-    })
+		Name:   config.Session.Name,
+		Gin:    gin,
+	})
 }
 
 func newSessionHandler(sessionHandler GinSessionHandler) handler.SessionHandler {
-    store := cookie.NewStore([]byte(sessionHandler.Secret))
-    sessionHandler.Gin.Use(sessions.Sessions(sessionHandler.Name, store))
+	store := cookie.NewStore([]byte(sessionHandler.Secret))
+	sessionHandler.Gin.Use(sessions.Sessions(sessionHandler.Name, store))
 	return &sessionHandler
 }
 
@@ -47,7 +47,7 @@ func (g *GinSessionHandler) Get(key string) interface{} {
 	return value
 }
 
-func (g *GinSessionHandler) Save() error{
+func (g *GinSessionHandler) Save() error {
 	session := g.getSession()
 	return session.Save()
 }

@@ -1,10 +1,10 @@
 package handler
 
 type TwitterHandler interface {
-	SetCredentials(string, string)
+	UpdateTwitterApi(string, string)
 	AuthorizationURL() (string, error)
 	GetCredentials(string, string) (TwitterCredentials, TwitterValues, error)
-	GetRateLimits() error
+	GetUser(string) (TwitterUser, error)
 }
 
 type TwitterCredentials interface {
@@ -15,4 +15,10 @@ type TwitterCredentials interface {
 type TwitterValues interface {
 	GetTwitterID() string
 	GetTwitterScreenName() string
+}
+
+type TwitterUser interface {
+	GetTwitterID() string
+	GetTwitterScreenName() string
+	GetTwitterName() string
 }

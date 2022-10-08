@@ -25,7 +25,7 @@ func server() {
 	config := config.NewConfig(".env")
 
 	dbHandler := database.NewGormDbHandler(config)
-	anaconderHandler := twitterapi.NewAnaconderHandler(config)
+	anaconderHandler := twitterapi.NewGotwiHandler(config)
 
 	r := framework.NewRouting(config, dbHandler, anaconderHandler)
 	r.Run()

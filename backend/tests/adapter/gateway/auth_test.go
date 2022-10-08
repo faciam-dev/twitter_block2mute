@@ -46,6 +46,9 @@ func TestIsAuthenticated(t *testing.T) {
 	type args struct {
 		SessionToken       interface{}
 		SessionTokenSecret interface{}
+		TwitterName        string
+		TwitterAccountName string
+		TwitterID          string
 		OAuthToken         string
 		OAuthTokenSecret   string
 	}
@@ -60,6 +63,9 @@ func TestIsAuthenticated(t *testing.T) {
 			args: args{
 				SessionToken:       "token",
 				SessionTokenSecret: "secret",
+				TwitterName:        "test",
+				TwitterAccountName: "Test",
+				TwitterID:          "1234567890",
 				OAuthToken:         "token",
 				OAuthTokenSecret:   "secret",
 			},
@@ -73,6 +79,9 @@ func TestIsAuthenticated(t *testing.T) {
 			args: args{
 				SessionToken:       nil,
 				SessionTokenSecret: nil,
+				TwitterName:        "test",
+				TwitterAccountName: "Test",
+				TwitterID:          "1234567890",
 				OAuthToken:         "token",
 				OAuthTokenSecret:   "secret",
 			},
@@ -103,15 +112,21 @@ func TestIsAuthenticated(t *testing.T) {
 			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
 
 			// twtterHandler
+			mockTwitterUser := mock_handler.NewMockTwitterUser(mockCtrl)
+			mockTwitterUser.EXPECT().GetTwitterID().Return(args.TwitterID).AnyTimes()
+			mockTwitterUser.EXPECT().GetTwitterScreenName().Return(args.TwitterName).AnyTimes()
+			mockTwitterUser.EXPECT().GetTwitterName().Return(args.TwitterAccountName).AnyTimes()
+
 			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
-			mockTwitterHandler.EXPECT().GetRateLimits().Return(nil).AnyTimes()
-			mockTwitterHandler.EXPECT().SetCredentials(args.OAuthToken, args.OAuthTokenSecret).Return().AnyTimes()
+			mockTwitterHandler.EXPECT().GetUser(args.TwitterID).Return(mockTwitterUser, nil).AnyTimes()
+			mockTwitterHandler.EXPECT().UpdateTwitterApi(args.OAuthToken, args.OAuthTokenSecret).Return().AnyTimes()
 
 			// sessionHandler
 			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)
 			sessionHandler.EXPECT().SetContextHandler(contextHandler).Return()
 			sessionHandler.EXPECT().Get("token").Return(args.SessionToken).AnyTimes()
 			sessionHandler.EXPECT().Get("secret").Return(args.SessionTokenSecret).AnyTimes()
+			sessionHandler.EXPECT().Get("twitter_id").Return(args.TwitterID).AnyTimes()
 
 			// repository
 			authRepository := gateway.NewAuthRepository(
@@ -277,9 +292,14 @@ func TestCallback(t *testing.T) {
 			mockTwitterValue.EXPECT().GetTwitterID().Return(args.TwitterID).AnyTimes()
 			mockTwitterValue.EXPECT().GetTwitterScreenName().Return(args.TwitterName).AnyTimes()
 
+			mockTwitterUser := mock_handler.NewMockTwitterUser(mockCtrl)
+			mockTwitterUser.EXPECT().GetTwitterID().Return(args.TwitterID).AnyTimes()
+			mockTwitterUser.EXPECT().GetTwitterScreenName().Return(args.TwitterName).AnyTimes()
+			mockTwitterUser.EXPECT().GetTwitterName().Return(args.TwitterAccountName).AnyTimes()
+
 			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
-			mockTwitterHandler.EXPECT().GetRateLimits().Return(nil).AnyTimes()
-			mockTwitterHandler.EXPECT().SetCredentials(args.OAuthToken, args.OAuthTokenSecret).Return().AnyTimes()
+			mockTwitterHandler.EXPECT().GetUser(args.TwitterID).Return(mockTwitterUser, nil).AnyTimes()
+			mockTwitterHandler.EXPECT().UpdateTwitterApi(args.OAuthToken, args.OAuthTokenSecret).Return().AnyTimes()
 			mockTwitterHandler.EXPECT().GetCredentials(gomock.Any(), gomock.Any()).Return(mockTwitterCredentials, mockTwitterValue, nil)
 
 			// sessionHandler

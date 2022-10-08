@@ -2,6 +2,7 @@ package twitterapi
 
 import (
 	"net/url"
+	"strconv"
 
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
@@ -35,9 +36,8 @@ func newAnaconderHandler(a AnaconderHandler) handler.TwitterHandler {
 	return anaconderHandler
 }
 
-func (a *AnaconderHandler) SetCredentials(token string, secret string) {
-	a.Api.Credentials.Token = token
-	a.Api.Credentials.Secret = secret
+func (a *AnaconderHandler) UpdateTwitterApi(token string, secret string) {
+	a.Api = anaconda.NewTwitterApi(token, secret)
 }
 
 func (a *AnaconderHandler) AuthorizationURL() (string, error) {
@@ -46,11 +46,17 @@ func (a *AnaconderHandler) AuthorizationURL() (string, error) {
 	return uri, err
 }
 
-func (a *AnaconderHandler) GetRateLimits() error {
-	r := []string{}
-	_, err := a.Api.GetRateLimits(r)
+func (a *AnaconderHandler) GetUser(twitterID string) (handler.TwitterUser, error) {
+	values := url.Values{}
+	convertedTwitterID, _ := strconv.ParseInt(twitterID, 10, 64)
 
-	return err
+	user, err := a.Api.GetUsersShowById(convertedTwitterID, values)
+
+	return TwitterUser{
+		ID:          user.IdStr,
+		ScreenName:  user.ScreenName,
+		TwitterName: user.Name,
+	}, err
 }
 
 func (a *AnaconderHandler) GetCredentials(token string, secret string) (handler.TwitterCredentials, handler.TwitterValues, error) {

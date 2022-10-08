@@ -31,6 +31,7 @@ func NewAuthRepository(contextHandler handler.ContextHandler, twitterHandler han
 func (a *AuthRepository) IsAuthenticated() (*entity.Auth, error) {
 	token := a.sessionHandler.Get("token")
 	secret := a.sessionHandler.Get("secret")
+	twitterID := a.sessionHandler.Get("twitter_id")
 
 	auth := entity.Auth{
 		Authenticated: 0,
@@ -40,11 +41,13 @@ func (a *AuthRepository) IsAuthenticated() (*entity.Auth, error) {
 		return &auth, nil
 	}
 
-	a.twitterHandler.SetCredentials(token.(string), secret.(string))
-	err := a.twitterHandler.GetRateLimits()
+	a.twitterHandler.UpdateTwitterApi(token.(string), secret.(string))
+	_, err := a.twitterHandler.GetUser(twitterID.(string))
 	if err == nil {
 		// 認証成功
 		auth.Authenticated = 1
+	} else {
+		log.Printf("GetUser() error: %v", err.Error())
 	}
 
 	return &auth, nil
@@ -77,7 +80,6 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 	credentials, values, err := a.twitterHandler.GetCredentials(token, secret)
 
 	if err != nil {
-		// TODO: ログ書き込み
 		log.Printf("token=%v,secret=%v", token, secret)
 		log.Println(err)
 		return &auth, err
@@ -87,31 +89,31 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 	// DB
 	user := entity.User{}
 	if err := a.userDbHandler.FindByTwitterID(&user, values.GetTwitterID()); err != nil {
-		// TODO: ログ書き込み
 		log.Println(err)
 		return &auth, err
 	}
-	log.Printf("user-> id:%v tid:%v", user.ID, user.TwitterID)
+
+	//log.Printf("user-> id:%v tid:%v", user.ID, user.TwitterID)
 	if user.ID == 0 {
 		user.Name = values.GetTwitterScreenName()
 		user.AccountName = values.GetTwitterScreenName()
 		user.TwitterID = values.GetTwitterID()
 	}
 	if err := a.userDbHandler.Upsert(&user, "twitter_id", user.TwitterID); err != nil {
-		// TODO: ログ書き込み
+		log.Println(err)
 		return &auth, err
 	}
 
-	// Session
-	a.twitterHandler.SetCredentials(credentials.GetToken(), credentials.GetSecret())
-	//a.api.VerifyCredentials()
+	a.twitterHandler.UpdateTwitterApi(credentials.GetToken(), credentials.GetSecret())
 	auth.Authenticated = 1
 
+	// Session
 	a.sessionHandler.Set("token", credentials.GetToken())
 	a.sessionHandler.Set("secret", credentials.GetSecret())
+	a.sessionHandler.Set("twitter_id", values.GetTwitterID())
 
 	if err := a.sessionHandler.Save(); err != nil {
-		// TODO: ログ書き込み
+		log.Println(err)
 		return &auth, err
 	}
 

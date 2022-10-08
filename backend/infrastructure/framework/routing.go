@@ -1,6 +1,8 @@
 package framework
 
 import (
+	"time"
+
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/controller"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
@@ -47,6 +49,9 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 		UserDbHandler:  database.NewUserDbHandler(dbHandler),
 	}
 
+	// PROXY
+	r.Gin.SetTrustedProxies(r.config.Routing.TrustedProxies)
+
 	// ルーティング割当
 	// user
 	r.Gin.GET("/user/user/:id", func(c *gin.Context) {
@@ -69,6 +74,11 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 func (r *Routing) AllowOrigins() {
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = r.config.Routing.AllowOrigins
+	corsConfig.AllowHeaders = r.config.Routing.AllowHeaders
+	corsConfig.ExposeHeaders = r.config.Routing.ExposeHeaders
+	corsConfig.AllowMethods = r.config.Routing.AllowMethods
+	corsConfig.AllowCredentials = true
+	corsConfig.MaxAge = time.Duration(r.config.Routing.MaxAge)
 	r.Gin.Use(cors.New(corsConfig))
 }
 
