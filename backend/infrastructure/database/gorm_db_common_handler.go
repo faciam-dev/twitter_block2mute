@@ -69,6 +69,17 @@ func (g *GormCommonDbHandler) Update(recordSrc interface{}, ID string) error {
 
 // レコード1件を検索。※columnNameにユーザーからの入力値を絶対に使わないこと。
 func (g *GormCommonDbHandler) Find(model interface{}, columnName string, searchValue string) error {
+	if err := g.db.Where(columnName+" = ?", searchValue).Find(&model).Take(1).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
+// レコード全件を検索。※columnNameにユーザーからの入力値を絶対に使わないこと。
+func (g *GormCommonDbHandler) FindAll(model interface{}, columnName string, searchValue string) error {
 	if err := g.db.Where(columnName+" = ?", searchValue).Find(&model).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil

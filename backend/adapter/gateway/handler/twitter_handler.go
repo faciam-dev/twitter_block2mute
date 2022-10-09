@@ -5,6 +5,7 @@ type TwitterHandler interface {
 	AuthorizationURL() (string, error)
 	GetCredentials(string, string) (TwitterCredentials, TwitterValues, error)
 	GetUser(string) (TwitterUser, error)
+	GetBlockedUser(string) (TwitterUserIds, error)
 }
 
 type TwitterCredentials interface {
@@ -21,4 +22,9 @@ type TwitterUser interface {
 	GetTwitterID() string
 	GetTwitterScreenName() string
 	GetTwitterName() string
+}
+
+type TwitterUserIds interface {
+	GetTotal() int
+	GetTwitterIDs() []string
 }

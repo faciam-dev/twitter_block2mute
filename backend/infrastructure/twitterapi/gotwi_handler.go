@@ -9,6 +9,8 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"github.com/garyburd/go-oauth/oauth"
 	"github.com/michimani/gotwi"
+	"github.com/michimani/gotwi/user/block"
+	blocktypes "github.com/michimani/gotwi/user/block/types"
 	"github.com/michimani/gotwi/user/userlookup"
 	"github.com/michimani/gotwi/user/userlookup/types"
 )
@@ -100,4 +102,30 @@ func (g *GotwiHandler) GetCredentials(token string, secret string) (handler.Twit
 	}
 
 	return twitterCredentials, twitterValues, nil
+}
+
+func (g *GotwiHandler) GetBlockedUser(twitterID string) (handler.TwitterUserIds, error) {
+	p := &blocktypes.ListInput{ID: twitterID}
+
+	twitterIDs := []string{}
+
+	listOutput, err := block.List(context.Background(), g.Api, p)
+
+	if err != nil {
+		return TwitterUserIds{
+			IDs:   twitterIDs,
+			Total: 0,
+		}, err
+	}
+
+	total := listOutput.Meta.ResultCount
+
+	for _, user := range listOutput.Data {
+		twitterIDs = append(twitterIDs, *user.ID)
+	}
+
+	return TwitterUserIds{
+		IDs:   twitterIDs,
+		Total: *total,
+	}, err
 }

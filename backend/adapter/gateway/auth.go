@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
@@ -110,6 +111,7 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 	// Session
 	a.sessionHandler.Set("token", credentials.GetToken())
 	a.sessionHandler.Set("secret", credentials.GetSecret())
+	a.sessionHandler.Set("user_id", fmt.Sprintf("%d", user.ID))
 	a.sessionHandler.Set("twitter_id", values.GetTwitterID())
 
 	if err := a.sessionHandler.Save(); err != nil {
