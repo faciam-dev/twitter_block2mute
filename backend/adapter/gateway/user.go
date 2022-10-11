@@ -23,7 +23,6 @@ func NewUserRepository(dbHandler handler.UserDbHandler) port.UserRepository {
 // DBからid=userIDに該当するデータを取得する。
 func (u *UserRepository) GetUserByID(userID string) (*entity.User, error) {
 	user := entity.User{}
-
 	if err := u.dbHandler.First(&user, userID); err != nil {
 		return &entity.User{}, err
 	}

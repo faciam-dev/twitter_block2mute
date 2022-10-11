@@ -1,8 +1,6 @@
 package database
 
 import (
-	"errors"
-
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/database/gorm/model"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
@@ -10,16 +8,20 @@ import (
 )
 
 type GormDbBlockHandler struct {
-	GormCommonDbHandler
+	//GormCommonDbHandler
+	GormDbEntityHandler[entity.Block, model.UserBlock]
 }
 
 func NewBlockDbHandler(gormDbHandler GormDbHandler) handler.BlockDbHandler {
 	blockDbHandler := new(GormDbBlockHandler)
 	blockDbHandler.db = gormDbHandler.Conn
+	//blockDbHandler.GormDbEntityHandler.db = blockDbHandler.db
+	blockDbHandler.ModelForDomain = &model.UserBlockModelForDomain{}
 
 	return blockDbHandler
 }
 
+/*
 // レコード1件をIDで取得
 func (g *GormDbBlockHandler) First(blockEntity interface{}, ID string) error {
 	blockModel, err := g.entityToModel(blockEntity)
@@ -101,16 +103,6 @@ func (g *GormDbBlockHandler) Find(blockEntity interface{}, columnName string, se
 
 // レコード全件を検索。※columnNameにユーザーからの入力値を絶対に使わないこと。
 func (g *GormDbBlockHandler) FindAll(entities interface{}, columnName string, searchValue string) error {
-	/*
-		for _, entity := range entities {
-			model, err := g.entityToModel(entity)
-			if err != nil {
-				return err
-			}
-			models = append(models, model)
-		}
-	*/
-
 	models, err := g.entitiesToModels(entities)
 	if err != nil {
 		return err
@@ -127,6 +119,7 @@ func (g *GormDbBlockHandler) FindAll(entities interface{}, columnName string, se
 
 	return nil
 }
+*/
 
 // ブロックをUserIDで全て取得
 func (u *GormDbBlockHandler) FindAllByUserID(blockEntities interface{}, userID string) error {
@@ -135,10 +128,11 @@ func (u *GormDbBlockHandler) FindAllByUserID(blockEntities interface{}, userID s
 
 // 記録済みブロックを変更せずに新規レコードを追加する
 func (u *GormDbBlockHandler) CreateNewBlocks(recordSrc interface{}, columnName1 string, columnName2 string) error {
-	models, err := u.entitiesToModels(recordSrc)
+	blockEntities, err := u.GormDbEntityHandler.InterfaceToEntities(recordSrc)
 	if err != nil {
 		return err
 	}
+	models := u.EntitiesToModels(*blockEntities)
 
 	err = u.db.Debug().Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "user_id"}, {Name: "target_twitter_id"}},
@@ -153,6 +147,7 @@ func (u *GormDbBlockHandler) CreateNewBlocks(recordSrc interface{}, columnName1 
 	return nil
 }
 
+/*
 // interface(entity)をmodelにする。
 func (u *GormDbBlockHandler) entityToModel(blockEntity interface{}) (model.UserBlock, error) {
 	blockModel := model.UserBlock{}
@@ -183,3 +178,4 @@ func (u *GormDbBlockHandler) entitiesToModels(blockEntity interface{}) ([]model.
 	return blockModels, nil
 
 }
+*/

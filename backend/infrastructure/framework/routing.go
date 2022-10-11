@@ -37,6 +37,8 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 		OutputFactory: presenter.NewUserOutputPort,
 		InputFactory:  interactor.NewUserInputPort,
 		RepoFactory:   gateway.NewUserRepository,
+		//UserDbHandler: database.NewDbEntityHandler[handler.UserDbHandler, entity.User, *model.UserModelForDomain[entity.User]],
+		//UserDbHandler: database.NewDbEntityHandler[handler.UserDbHandler, entity.User, model.ModelForDomain[entity.User]](dbHandler),
 		UserDbHandler: database.NewUserDbHandler(dbHandler),
 	}
 

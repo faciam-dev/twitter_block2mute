@@ -79,6 +79,8 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 			return err
 		}
 
+		log.Print(registedBlockEntities)
+
 		// blocksに登録されていないものを一括削除する
 		deleteTargetBlocks := []entity.Block{}
 		for _, registedBlockEntity := range registedBlockEntities {
