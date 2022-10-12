@@ -3,6 +3,7 @@ package gateway
 import (
 	"errors"
 	"log"
+	"sort"
 	"strconv"
 	"time"
 
@@ -69,36 +70,55 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 		blocks = append(blocks, block)
 	}
 
-	// update blocks table
-	registedBlockEntities := []entity.Block{}
+	sort.Slice(blocks, func(i, j int) bool {
+		return blocks[i].TargetTwitterID <= blocks[j].TargetTwitterID
+	})
 
+	// update blocks table
 	err = u.blockDbHandler.Transaction(func() error {
 		// 登録済みのエンティティを取得する
+		registedBlockEntities := []entity.Block{}
 		if err := u.blockDbHandler.FindAllByUserID(&registedBlockEntities, userID); err != nil {
 			log.Print(err)
 			return err
 		}
 
-		log.Print(registedBlockEntities)
+		sort.Slice(registedBlockEntities, func(i, j int) bool {
+			return registedBlockEntities[i].TargetTwitterID <= registedBlockEntities[j].TargetTwitterID
+		})
 
-		// blocksに登録されていないものを一括削除する
-		deleteTargetBlocks := []entity.Block{}
+		//log.Print(registedBlockEntities)
+
+		// api問い合わせ結果のblocksに登録されていないものを一括削除する
+		IDs := []uint{}
 		for _, registedBlockEntity := range registedBlockEntities {
-			isFound := false
-			for _, block := range blocks {
-				if registedBlockEntity.TargetTwitterID == block.TargetTwitterID {
-					isFound = true
-					break
-				}
-			}
-			if !isFound {
-				deleteTargetBlocks = append(deleteTargetBlocks, registedBlockEntity)
+			needle := registedBlockEntity.TargetTwitterID
+			idx := sort.Search(len(blocks), func(i int) bool {
+				return string(blocks[i].TargetTwitterID) >= needle
+			})
+
+			if blocks[idx].TargetTwitterID != needle {
+				IDs = append(IDs, registedBlockEntity.ID)
 			}
 		}
-		//err := u.dbHandler.Delete(deleteTargetBlocks)
-		log.Print(deleteTargetBlocks)
+
+		if err := u.blockDbHandler.DeleteByIds(&[]entity.Block{}, IDs); err != nil {
+			log.Print(err)
+			return err
+		}
 
 		// 既存レコードは一切更新せずに登録する
+		// 登録済みエンティティでフラグが1であるものは除外する（Upsertでうまくいかないので）
+		for n, block := range blocks {
+			needle := block.TargetTwitterID
+			idx := sort.Search(len(registedBlockEntities), func(i int) bool {
+				return string(registedBlockEntities[i].TargetTwitterID) >= needle
+			})
+
+			if registedBlockEntities[idx].TargetTwitterID == needle {
+				blocks[n].Flag = registedBlockEntities[idx].Flag
+			}
+		}
 		if err := u.blockDbHandler.CreateNewBlocks(&blocks, "user_id", "twitter_id"); err != nil {
 			log.Print(err)
 			return err

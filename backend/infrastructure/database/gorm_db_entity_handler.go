@@ -132,7 +132,7 @@ func (g *GormDbEntityHandler[E, M]) Find(domainEntityInterface interface{}, colu
 		}
 	*/
 
-	log.Print(model)
+	//log.Print(model)
 
 	if err := g.db.Where(columnName+" = ?", searchValue).Find(&model).Limit(1).Error; err != nil {
 		log.Print(err)
@@ -249,6 +249,64 @@ func (g *GormDbEntityHandler[T, E, MD, M]) entityToModel(modelForDomain MD, doma
 }
 */
 
+// プライマリキーに対応するモデルのレコードの削除処理
+func (g *GormDbEntityHandler[E, M]) Delete(domainEntityInterface interface{}, searchValue string) error {
+
+	domainEntity, err := g.InterfaceToEntity(domainEntityInterface)
+	if err != nil {
+		return err
+	}
+
+	model := g.ModelForDomain.FromDomain(domainEntity)
+
+	if err := g.db.Delete(&model, searchValue).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// 複数プライマリキーに対応するモデルのレコードの削除処理
+func (g *GormDbEntityHandler[E, M]) DeleteByIds(domainEntitiesInterface interface{}, IDs []uint) error {
+
+	entities, err := g.InterfaceToEntities(domainEntitiesInterface)
+	if err != nil {
+		return err
+	}
+
+	models := []M{}
+	for _, entity := range *entities {
+		model := g.ModelForDomain.FromDomain(&entity)
+		models = append(models, model)
+	}
+
+	if err := g.db.Delete(&models, IDs).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// エンティティに対応するモデルの全レコード削除処理
+func (g *GormDbEntityHandler[E, M]) DeleteAll(domainEntityInterface interface{}, columnName string, searchValue string) error {
+
+	domainEntity, err := g.InterfaceToEntity(domainEntityInterface)
+	if err != nil {
+		return err
+	}
+
+	model := g.ModelForDomain.FromDomain(domainEntity)
+
+	if err := g.db.Where(columnName+" = ?", searchValue).Delete(&model).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return err
+	}
+
+	return nil
+}
+
 // エンティティ変換：interfaceをentityにする
 func (g *GormDbEntityHandler[E, M]) InterfaceToEntity(interf interface{}) (*E, error) {
 	switch casted := interf.(type) {
@@ -269,7 +327,7 @@ func (g *GormDbEntityHandler[E, M]) InterfaceToEntities(interfaceSlice interface
 	}
 }
 
-// モデルスライス変換：interface([]]entity)を[]modelにする。
+// モデルスライス変換：interface([]entity)を[]modelにする。
 func (g *GormDbEntityHandler[E, M]) EntitiesToModels(entities []E) []M {
 	models := []M{}
 

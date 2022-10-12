@@ -8,10 +8,13 @@ type DbHandler interface {
 	Rollback()
 	First(interface{}, string) error
 	Create(interface{}) error
-	Update(interface{}, string) error
-	Upsert(interface{}, string, string) error
 	Find(interface{}, string, string) error
 	FindAll(interface{}, string, string) error
+	Update(interface{}, string) error
+	Upsert(interface{}, string, string) error
+	Delete(interface{}, string) error
+	DeleteByIds(interface{}, []uint) error
+	DeleteAll(interface{}, string, string) error
 }
 
 // user独自の処理を追加したハンドラ
