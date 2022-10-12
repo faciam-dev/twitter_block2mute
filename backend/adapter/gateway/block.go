@@ -102,9 +102,11 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 			}
 		}
 
-		if err := u.blockDbHandler.DeleteByIds(&[]entity.Block{}, IDs); err != nil {
-			log.Print(err)
-			return err
+		if len(IDs) > 0 {
+			if err := u.blockDbHandler.DeleteByIds(&[]entity.Block{}, IDs); err != nil {
+				log.Print(err)
+				return err
+			}
 		}
 
 		// 既存レコードは一切更新せずに登録する
