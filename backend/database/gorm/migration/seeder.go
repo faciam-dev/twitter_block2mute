@@ -18,14 +18,17 @@ var users = []model.User{
 
 var userBlocks = []model.UserBlock{
 	{
+		UserID:          1,
 		TargetTwitterID: "12345678901",
 		Flag:            1,
 	},
 	{
+		UserID:          1,
 		TargetTwitterID: "12345678902",
 		Flag:            1,
 	},
 	{
+		UserID:          1,
 		TargetTwitterID: "12345678903",
 		Flag:            0,
 	},
@@ -33,10 +36,12 @@ var userBlocks = []model.UserBlock{
 
 var userMutes = []model.UserMute{
 	{
+		UserID:          1,
 		TargetTwitterID: "12345678904",
 		Flag:            1,
 	},
 	{
+		UserID:          1,
 		TargetTwitterID: "12345678905",
 		Flag:            0,
 	},
@@ -70,18 +75,15 @@ func Seeder() {
 		if err != nil {
 			log.Fatalf("cannot seed users table: %v", err)
 		}
-		userBlocks[i].UserID = users[i].ID
+	}
 
-		err = gormHandler.Conn.Model(&model.UserBlock{}).Create(&userBlocks[i]).Error
-		if err != nil {
-			log.Fatalf("cannot seed user_blocks table: %v", err)
-		}
-		userMutes[i].UserID = users[i].ID
+	err = gormHandler.Conn.Model(&model.UserBlock{}).Create(&userBlocks).Error
+	if err != nil {
+		log.Fatalf("cannot seed user_blocks table: %v", err)
+	}
 
-		err = gormHandler.Conn.Model(&model.UserMute{}).Create(&userMutes[i]).Error
-		if err != nil {
-			log.Fatalf("cannot seed user_mutes table: %v", err)
-		}
-
+	err = gormHandler.Conn.Model(&model.UserMute{}).Create(&userMutes).Error
+	if err != nil {
+		log.Fatalf("cannot seed user_mutes table: %v", err)
 	}
 }

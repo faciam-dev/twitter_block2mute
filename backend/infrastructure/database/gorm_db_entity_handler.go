@@ -22,7 +22,7 @@ func NewDbEntityHandler[E any, M any](gormDbHandler GormDbHandler) GormDbEntityH
 	return *gormDbEntityHandler
 }
 
-// 接続取得
+// トランザクションfunc
 func (g *GormDbEntityHandler[E, M]) Transaction(fn func() error) error {
 	return g.db.Transaction(func(tx *gorm.DB) error {
 		return fn()
@@ -45,8 +45,6 @@ func (g *GormDbEntityHandler[E, M]) Rollback() {
 }
 
 // レコード1件をIDで取得
-// func (g *GormDbEntityHandler[T, E, MD, M]) First(modelForDomain MD, domainEntity interface{}, ID string) error {
-// func (g *GormDbEntityHandler[T, E, MD, M]) First(modelForDomain MD, domainEntity *E, ID string) error {
 func (g *GormDbEntityHandler[E, M]) First(domainEntityInterface interface{}, ID string) error {
 
 	domainEntity, err := g.InterfaceToEntity(domainEntityInterface)

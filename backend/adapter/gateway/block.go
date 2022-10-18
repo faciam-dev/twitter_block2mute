@@ -97,7 +97,7 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 				return string(blocks[i].TargetTwitterID) >= needle
 			})
 
-			if blocks[idx].TargetTwitterID != needle {
+			if len(blocks) > 0 && blocks[idx].TargetTwitterID != needle {
 				IDs = append(IDs, registedBlockEntity.ID)
 			}
 		}
@@ -111,19 +111,23 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 
 		// 既存レコードは一切更新せずに登録する
 		// 登録済みエンティティでフラグが1であるものは除外する（Upsertでうまくいかないので）
-		for n, block := range blocks {
-			needle := block.TargetTwitterID
-			idx := sort.Search(len(registedBlockEntities), func(i int) bool {
-				return string(registedBlockEntities[i].TargetTwitterID) >= needle
-			})
+		if len(registedBlockEntities) > 0 {
+			for n, block := range blocks {
+				needle := block.TargetTwitterID
+				idx := sort.Search(len(registedBlockEntities), func(i int) bool {
+					return string(registedBlockEntities[i].TargetTwitterID) >= needle
+				})
 
-			if registedBlockEntities[idx].TargetTwitterID == needle {
-				blocks[n].Flag = registedBlockEntities[idx].Flag
+				if len(registedBlockEntities) < idx && registedBlockEntities[idx].TargetTwitterID == needle {
+					blocks[n].Flag = registedBlockEntities[idx].Flag
+				}
 			}
 		}
-		if err := u.blockDbHandler.CreateNewBlocks(&blocks, "user_id", "twitter_id"); err != nil {
-			log.Print(err)
-			return err
+		if len(blocks) > 0 {
+			if err := u.blockDbHandler.CreateNewBlocks(&blocks, "user_id", "twitter_id"); err != nil {
+				log.Print(err)
+				return err
+			}
 		}
 
 		return nil

@@ -224,3 +224,52 @@ func TestCallback(t *testing.T) {
 		})
 	}
 }
+
+func TestGetBlockByID(t *testing.T) {
+
+	table := []struct {
+		name       string
+		method     string
+		id         int
+		wantStatus int
+		wantBody   string
+	}{
+		{
+			"success_200",
+			"GET",
+			1,
+			200,
+			"{\"ids\":[\"1\",\"2\",\"3\"],\"total\":3}",
+		},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.name, func(t *testing.T) {
+
+			config := config.NewConfig(".env.test")
+
+			router := NewTestRouting(config)
+
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			/*
+				requestBody := bytes.NewBufferString("{\"name\":\"foo\"}")
+				c.Request, _ = http.NewRequest("POST", "/user/user", requestBody)
+			*/
+
+			c.Request, _ = http.NewRequest(tt.method, "/blocks/ids", nil)
+
+			router.Gin.ServeHTTP(w, c.Request)
+
+			// statusの比較
+			if w.Code != tt.wantStatus {
+				t.Errorf("GetBlockByID() status = %v, want %v", w.Code, tt.wantStatus)
+			}
+
+			// 中身の比較
+			if w.Code == 200 && w.Body.String() != tt.wantBody {
+				t.Errorf("GetBlockByID() body = %v, want %v", w.Body, tt.wantBody)
+			}
+		})
+	}
+}
