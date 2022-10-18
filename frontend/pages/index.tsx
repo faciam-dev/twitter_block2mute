@@ -24,6 +24,7 @@ const IndexPage: NextPage = () => {
           router.push("/login");
         } else {
           setMessage("logged in");
+          router.push("/block2mute/");
         }
       };
       getIsAuth();

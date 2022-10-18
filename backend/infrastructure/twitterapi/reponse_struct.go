@@ -59,3 +59,17 @@ func (t TwitterUser) GetTwitterScreenName() string {
 func (t TwitterUser) GetTwitterName() string {
 	return t.TwitterName
 }
+
+// TwitterUsers
+type TwitterUserIds struct {
+	Total int
+	IDs   []string
+}
+
+func (t TwitterUserIds) GetTotal() int {
+	return t.Total
+}
+
+func (t TwitterUserIds) GetTwitterIDs() []string {
+	return t.IDs
+}

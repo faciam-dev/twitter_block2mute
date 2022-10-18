@@ -88,6 +88,30 @@ func (a *Auth) Callback(contextHandler handler.ContextHandler) {
 	contextHandler.JSON(http.StatusOK, map[string]interface{}{})
 }
 
+// block
+type Block struct {
+}
+
+func (b *Block) GetBlockByID(contextHandler handler.ContextHandler) {
+	table := []struct {
+		IDs   []string
+		Total int
+	}{
+		{
+			[]string{"1", "2", "3"},
+			3,
+		},
+	}
+
+	for _, tt := range table {
+		contextHandler.JSON(http.StatusOK, map[string]interface{}{
+			"ids":   tt.IDs,
+			"total": tt.Total,
+		})
+	}
+
+}
+
 // ルーティングの作成
 type TestRouting struct {
 	Gin  *gin.Engine
@@ -108,6 +132,8 @@ func (t *TestRouting) setTestRouting() {
 
 	authController := Auth{}
 
+	blockController := Block{}
+
 	// ルーティング割当
 	// user
 	t.Gin.GET("/user/user/:id", func(c *gin.Context) {
@@ -123,6 +149,11 @@ func (t *TestRouting) setTestRouting() {
 	})
 	t.Gin.GET("/auth/auth_callback", func(c *gin.Context) {
 		authController.Callback(framework.NewGinContextHandler(c))
+	})
+
+	// block
+	t.Gin.GET("/blocks/ids", func(c *gin.Context) {
+		blockController.GetBlockByID(framework.NewGinContextHandler(c))
 	})
 
 	// block2mute

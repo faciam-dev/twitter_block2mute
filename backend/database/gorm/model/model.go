@@ -1,21 +1,10 @@
 package model
 
-import "gorm.io/gorm"
-
-// for user_blocks
-type UserBlock struct {
-	gorm.Model
-	UserID          uint
-	TargetTwitterID string `gorm:"size:64;not null"`
-	Flag            int
-	User            User
-}
-
-// for user_mutes
-type UserMute struct {
-	gorm.Model
-	UserID          uint
-	TargetTwitterID string `gorm:"size:64;not null"`
-	Flag            int
-	User            User
+// for all models
+type ModelForDomain[E any, M any] interface {
+	FromDomain(*E) M
+	//ToDomain(M, interface{})
+	ToDomain(M, *E)
+	ToDomains([]M, *[]E)
+	//Blank() M
 }
