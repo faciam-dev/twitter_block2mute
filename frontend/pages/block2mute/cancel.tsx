@@ -18,10 +18,6 @@ const CancelPage: NextPage = () => {
     }
   };
 
-  const onClickClose = async (event: FormEvent) => {
-    window.close();
-  };
-
   const logoutButton = (isLoggedout: boolean) => {
     if (isLoggedout) {
       return "";

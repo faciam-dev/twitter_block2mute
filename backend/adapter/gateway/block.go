@@ -97,7 +97,7 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 				return string(blocks[i].TargetTwitterID) >= needle
 			})
 
-			if len(blocks) > 0 && blocks[idx].TargetTwitterID != needle {
+			if len(blocks) > idx && blocks[idx].TargetTwitterID != needle {
 				IDs = append(IDs, registedBlockEntity.ID)
 			}
 		}
@@ -115,7 +115,7 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 			for n, block := range blocks {
 				needle := block.TargetTwitterID
 				idx := sort.Search(len(registedBlockEntities), func(i int) bool {
-					return string(registedBlockEntities[i].TargetTwitterID) >= needle
+					return string(registedBlockEntities[i].TargetTwitterID) == needle
 				})
 
 				if len(registedBlockEntities) < idx && registedBlockEntities[idx].TargetTwitterID == needle {

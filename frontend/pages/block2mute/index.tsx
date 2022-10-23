@@ -30,7 +30,7 @@ const IndexPage: NextPage = () => {
 
   const onClickOk = async (event: FormEvent) => {
     event.preventDefault();
-    const { data } = await axios.get(`${apiUrl}/block2mute/all`);
+    router.push("/block2mute/all");
   };
 
   const onClickCancel = async (event: FormEvent) => {
@@ -43,7 +43,7 @@ const IndexPage: NextPage = () => {
       <h1>ブロックミュート変換</h1>
       <p>
         現在あなたは{totalBlock}
-        件ブロックしています。ブロックを全てミュートに変換しますか。
+        件ブロックしています。ブロックを全てミュートに変換しますか。 <br />
       </p>
 
       <form>

@@ -61,6 +61,9 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 			log.Print(err)
 			return err
 		}
+		sort.Slice(registedBlockEntities, func(i, j int) bool {
+			return registedBlockEntities[i].TargetTwitterID <= registedBlockEntities[j].TargetTwitterID
+		})
 
 		registedMuteEntities := []entity.Mute{}
 		if err := b.muteDbHandler.FindAllByUserID(&registedMuteEntities, userID); err != nil {
@@ -74,14 +77,16 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 		// MuteでFlag=1のものはスキップし、Blockは変換できたものだけFlag=1をたてる。それ以外は処理しない。
 		convertedBlockEntities := []entity.Block{}
 		muteEntities := []entity.Mute{}
+		//count := 0
 		for _, registedBlockEntity := range registedBlockEntities {
+
 			// mute除外
 			needleTwitterID := registedBlockEntity.TargetTwitterID
 			idx := sort.Search(len(registedMuteEntities), func(i int) bool {
-				return string(registedMuteEntities[i].TargetTwitterID) >= needleTwitterID
+				return string(registedMuteEntities[i].TargetTwitterID) == needleTwitterID
 			})
 
-			if len(registedMuteEntities) > 0 && registedMuteEntities[idx].Flag == 1 {
+			if len(registedMuteEntities) > idx && registedMuteEntities[idx].Flag == 1 {
 				continue
 			}
 
@@ -93,11 +98,14 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 			// 移行処理
 			// NOTE: 既にブロックを解除している場合はエラーを返さないようにする。
 			if err := b.twitterHandler.DestroyBlock(user.TwitterID, registedBlockEntity.TargetTwitterID); err != nil {
+				log.Printf("destroy block :%v %v", user.TwitterID, registedBlockEntity.TargetTwitterID)
 				log.Print(err)
 				continue
 			}
+
 			// NOTE: 既にミュートにしている場合はエラーを返さないようにする。
 			if err := b.twitterHandler.CreateMute(user.TwitterID, registedBlockEntity.TargetTwitterID); err != nil {
+				log.Printf("create mute :%v %v", user.TwitterID, registedBlockEntity.TargetTwitterID)
 				log.Print(err)
 				continue
 			}
@@ -109,6 +117,15 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 				Flag:            1,
 			}
 			muteEntities = append(muteEntities, mute)
+
+			// 以下テスト終わるまでいろいろ。
+			/*
+				if count >= 0 {
+					log.Print("break:" + registedBlockEntity.TargetTwitterID)
+					break
+				}
+				count++
+			*/
 		}
 
 		// 移行完了処理 blocks更新とmute更新
