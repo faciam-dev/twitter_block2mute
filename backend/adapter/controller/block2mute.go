@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"errors"
+
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 )
@@ -33,5 +35,10 @@ func (b *Block2Mute) All(contextHandler handler.ContextHandler) {
 	outputPort := b.OutputFactory(contextHandler)
 	repository := b.RepoFactory(b.BlockDbHandler, b.UserDbHandler, b.MuteDbHandler, b.TwitterHandler, b.SessionHandler)
 	inputPort := b.InputFactory(outputPort, repository)
+
+	if id == nil {
+		outputPort.RenderError(errors.New("session user_id is not found"))
+		return
+	}
 	inputPort.All(id.(string))
 }
