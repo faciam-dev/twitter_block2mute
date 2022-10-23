@@ -6,6 +6,8 @@ type TwitterHandler interface {
 	GetCredentials(string, string) (TwitterCredentials, TwitterValues, error)
 	GetUser(string) (TwitterUser, error)
 	GetBlockedUser(string) (TwitterUserIds, error)
+	DestroyBlock(string, string) error
+	CreateMute(string, string) error
 }
 
 type TwitterCredentials interface {
