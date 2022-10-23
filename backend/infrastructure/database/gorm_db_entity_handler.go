@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"log"
+	"reflect"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/database/gorm/model"
 	"gorm.io/gorm"
@@ -321,7 +322,7 @@ func (g *GormDbEntityHandler[E, M]) InterfaceToEntities(interfaceSlice interface
 	case *[]E:
 		return casted, nil
 	default:
-		return &[]E{}, errors.New("interface is not []entity.*")
+		return &[]E{}, errors.New("interface (" + reflect.TypeOf(interfaceSlice).String() + ") is not []entity.*" + reflect.TypeOf([]E{}).String())
 	}
 }
 

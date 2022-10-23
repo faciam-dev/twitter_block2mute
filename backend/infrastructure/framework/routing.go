@@ -61,6 +61,17 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 		UserDbHandler:  database.NewUserDbHandler(dbHandler),
 	}
 
+	block2MuteController := controller.Block2Mute{
+		OutputFactory:  presenter.NewBlock2MuteOutputPort,
+		InputFactory:   interactor.NewBlock2MuteInputPort,
+		RepoFactory:    gateway.NewBlock2MuteRepository,
+		TwitterHandler: twitterHandler,
+		SessionHandler: sessionHandler,
+		BlockDbHandler: database.NewBlockDbHandler(dbHandler),
+		UserDbHandler:  database.NewUserDbHandler(dbHandler),
+		MuteDbHandler:  database.NewMuteHandler(dbHandler),
+	}
+
 	// PROXY
 	r.Gin.SetTrustedProxies(r.config.Routing.TrustedProxies)
 
@@ -84,7 +95,9 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 		blockController.GetBlockByID(NewGinContextHandler(c))
 	})
 	// block2mute
-
+	r.Gin.GET("/block2mute/all", func(c *gin.Context) {
+		block2MuteController.All(NewGinContextHandler(c))
+	})
 }
 
 func (r *Routing) AllowOrigins() {

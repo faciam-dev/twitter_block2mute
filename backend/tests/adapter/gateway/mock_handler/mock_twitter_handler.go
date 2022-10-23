@@ -49,6 +49,34 @@ func (mr *MockTwitterHandlerMockRecorder) AuthorizationURL() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizationURL", reflect.TypeOf((*MockTwitterHandler)(nil).AuthorizationURL))
 }
 
+// CreateMute mocks base method.
+func (m *MockTwitterHandler) CreateMute(arg0, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMute", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateMute indicates an expected call of CreateMute.
+func (mr *MockTwitterHandlerMockRecorder) CreateMute(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMute", reflect.TypeOf((*MockTwitterHandler)(nil).CreateMute), arg0, arg1)
+}
+
+// DestroyBlock mocks base method.
+func (m *MockTwitterHandler) DestroyBlock(arg0, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DestroyBlock", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DestroyBlock indicates an expected call of DestroyBlock.
+func (mr *MockTwitterHandlerMockRecorder) DestroyBlock(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DestroyBlock", reflect.TypeOf((*MockTwitterHandler)(nil).DestroyBlock), arg0, arg1)
+}
+
 // GetBlockedUser mocks base method.
 func (m *MockTwitterHandler) GetBlockedUser(arg0 string) (handler.TwitterUserIds, error) {
 	m.ctrl.T.Helper()
