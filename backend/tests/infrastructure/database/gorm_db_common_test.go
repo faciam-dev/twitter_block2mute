@@ -13,7 +13,6 @@ import (
 
 var UserDbHandler handler.UserDbHandler
 var BlockDbHandler handler.BlockDbHandler
-var MuteDbHandler handler.MuteDbHandler
 
 func TestMain(m *testing.M) {
 	// 前処理
@@ -23,7 +22,6 @@ func TestMain(m *testing.M) {
 
 	UserDbHandler = database.NewUserDbHandler(dbHandler)
 	BlockDbHandler = database.NewBlockDbHandler(dbHandler)
-	MuteDbHandler = database.NewMuteHandler(dbHandler)
 
 	// userテーブルから何も得られない場合はseederを実行
 	user := &entity.User{}
@@ -34,7 +32,6 @@ func TestMain(m *testing.M) {
 	// トランザクション
 	UserDbHandler.Begin()
 	BlockDbHandler.Begin()
-	MuteDbHandler.Begin()
 
 	status := m.Run()
 
@@ -43,7 +40,6 @@ func TestMain(m *testing.M) {
 	// MySQLではauto_incrementは戻らない
 	UserDbHandler.Rollback()
 	BlockDbHandler.Rollback()
-	MuteDbHandler.Rollback()
 
 	os.Exit(status)
 }
