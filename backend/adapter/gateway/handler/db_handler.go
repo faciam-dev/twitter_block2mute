@@ -29,10 +29,3 @@ type BlockDbHandler interface {
 	FindAllByUserID(interface{}, string) error
 	CreateNewBlocks(interface{}, string, string) error
 }
-
-// mute独自の処理を追加したハンドラ
-type MuteDbHandler interface {
-	DbHandler
-	FindAllByUserID(interface{}, string) error
-	CreateNew(interface{}, string, string) error
-}

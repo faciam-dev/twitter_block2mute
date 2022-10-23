@@ -11,8 +11,6 @@ import (
 	"github.com/michimani/gotwi"
 	"github.com/michimani/gotwi/user/block"
 	blocktypes "github.com/michimani/gotwi/user/block/types"
-	"github.com/michimani/gotwi/user/mute"
-	mutetypes "github.com/michimani/gotwi/user/mute/types"
 	"github.com/michimani/gotwi/user/userlookup"
 	"github.com/michimani/gotwi/user/userlookup/types"
 )
@@ -130,27 +128,4 @@ func (g *GotwiHandler) GetBlockedUser(twitterID string) (handler.TwitterUserIds,
 		IDs:   twitterIDs,
 		Total: *total,
 	}, err
-}
-
-func (g *GotwiHandler) CreateMute(twitterID string, targetTwitterID string) error {
-
-	p := &mutetypes.CreateInput{
-		ID:       twitterID,
-		TargetID: targetTwitterID,
-	}
-
-	_, err := mute.Create(context.Background(), g.Api, p)
-
-	return err
-}
-
-func (g *GotwiHandler) DestroyBlock(twitterID string, targetTwitterID string) error {
-	p := &blocktypes.DeleteInput{
-		SourceUserID: twitterID,
-		TargetID:     targetTwitterID,
-	}
-
-	_, err := block.Delete(context.Background(), g.Api, p)
-
-	return err
 }

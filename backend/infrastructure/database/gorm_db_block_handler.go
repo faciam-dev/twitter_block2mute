@@ -24,7 +24,7 @@ func (u *GormDbBlockHandler) FindAllByUserID(blockEntities interface{}, userID s
 	return u.FindAll(blockEntities, "user_id", userID)
 }
 
-// 新規ブロックを追加する（ただし追加済みのものも更新される）名称と実装が不一致
+// 記録済みブロックを変更せずに新規レコードを追加する
 func (u *GormDbBlockHandler) CreateNewBlocks(recordSrc interface{}, columnName1 string, columnName2 string) error {
 	blockEntities, err := u.GormDbEntityHandler.InterfaceToEntities(recordSrc)
 	if err != nil {
