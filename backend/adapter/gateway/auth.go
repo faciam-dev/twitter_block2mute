@@ -121,3 +121,20 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 
 	return &auth, nil
 }
+
+func (a *AuthRepository) Logout() (*entity.Auth, error) {
+	auth := entity.Auth{
+		Logout: 0,
+	}
+
+	a.sessionHandler.Clear()
+
+	auth.Logout = 1
+
+	if err := a.sessionHandler.Save(); err != nil {
+		log.Println(err)
+		return &auth, err
+	}
+
+	return &auth, nil
+}

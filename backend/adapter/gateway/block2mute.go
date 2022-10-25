@@ -77,7 +77,6 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 		// MuteでFlag=1のものはスキップし、Blockは変換できたものだけFlag=1をたてる。それ以外は処理しない。
 		convertedBlockEntities := []entity.Block{}
 		muteEntities := []entity.Mute{}
-		//count := 0
 		for _, registedBlockEntity := range registedBlockEntities {
 
 			// mute除外
@@ -117,15 +116,6 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 				Flag:            1,
 			}
 			muteEntities = append(muteEntities, mute)
-
-			// 以下テスト終わるまでいろいろ。
-			/*
-				if count >= 0 {
-					log.Print("break:" + registedBlockEntity.TargetTwitterID)
-					break
-				}
-				count++
-			*/
 		}
 
 		// 移行完了処理 blocks更新とmute更新

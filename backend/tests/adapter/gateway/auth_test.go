@@ -334,6 +334,65 @@ func TestCallback(t *testing.T) {
 	}
 }
 
+// Logoutに対するテスト
+func TestLogout(t *testing.T) {
+	table := []struct {
+		name string
+		want entity.Auth
+		err  error
+	}{
+		{
+			name: "success",
+			want: entity.Auth{
+				Logout: 1,
+			},
+			err: nil,
+		},
+	}
+
+	dbUserHandler, _, err := newMockGormDbUserHandler()
+
+	if err != nil {
+		t.Error("sqlmock not work")
+	}
+
+	for _, tt := range table {
+		t.Run(tt.name, func(t *testing.T) {
+			// モック処理
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// contextHandler
+			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
+
+			// twtterHandler
+			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
+
+			// sessionHandler
+			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)
+			sessionHandler.EXPECT().SetContextHandler(contextHandler).Return()
+			sessionHandler.EXPECT().Clear().Return()
+
+			authRepository := gateway.NewAuthRepository(
+				contextHandler,
+				mockTwitterHandler,
+				sessionHandler,
+				dbUserHandler,
+			)
+
+			got, err := authRepository.Logout()
+
+			if tt.err != err {
+				t.Errorf("Auth() err = %v, want %v", err, tt.err)
+			}
+
+			if got.Logout != tt.want.Logout {
+				t.Errorf("Auth() auth = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func RandomString(n int) string {
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 

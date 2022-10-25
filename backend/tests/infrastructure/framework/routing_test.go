@@ -225,6 +225,48 @@ func TestCallback(t *testing.T) {
 	}
 }
 
+func TestLogout(t *testing.T) {
+
+	table := []struct {
+		name       string
+		method     string
+		wantStatus int
+		wantBody   string
+	}{
+		{
+			"success_200",
+			"GET",
+			200,
+			"{\"result\":1}",
+		},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.name, func(t *testing.T) {
+
+			config := config.NewConfig(".env.test")
+
+			router := NewTestRouting(config)
+
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Request, _ = http.NewRequest(tt.method, "/auth/logout", nil)
+
+			router.Gin.ServeHTTP(w, c.Request)
+
+			// statusの比較
+			if w.Code != tt.wantStatus {
+				t.Errorf("Auth() status = %v, want %v", w.Code, tt.wantStatus)
+			}
+
+			// 中身の比較
+			if w.Code == 200 && w.Body.String() != tt.wantBody {
+				t.Errorf("Auth() body = %v, want %v", w.Body, tt.wantBody)
+			}
+		})
+	}
+}
+
 func TestGetBlockByID(t *testing.T) {
 
 	table := []struct {

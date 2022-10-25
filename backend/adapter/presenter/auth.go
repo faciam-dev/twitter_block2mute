@@ -23,25 +23,31 @@ func NewAuthOutputPort(contextHandler handler.ContextHandler) port.AuthOutputPor
 // Render はUserモデルを出力します．
 func (a *Auth) RenderAuth(auth *entity.Auth) {
 	a.contextHandler.JSON(http.StatusOK, map[string]interface{}{
-		"to_url" : auth.AuthUrl, 
+		"to_url": auth.AuthUrl,
 	})
 }
 
 func (a *Auth) RenderIsAuth(auth *entity.Auth) {
 	a.contextHandler.JSON(http.StatusOK, map[string]interface{}{
-		"result" : auth.Authenticated,
+		"result": auth.Authenticated,
 	})
 }
 
 // 空要素を返す
 func (a *Auth) RenderCallback(auth *entity.Auth) {
+	a.contextHandler.JSON(http.StatusOK, map[string]interface{}{})
+}
+
+// ログアウト
+func (a *Auth) RenderLogout(auth *entity.Auth) {
 	a.contextHandler.JSON(http.StatusOK, map[string]interface{}{
+		"result": auth.Logout,
 	})
 }
 
 // RenderError はErrorを出力します．
 func (a *Auth) RenderError(err error) {
 	a.contextHandler.JSON(http.StatusInternalServerError, map[string]interface{}{
-		"error" : err,
+		"error": err,
 	})
 }
