@@ -47,6 +47,16 @@ func (g *GinSessionHandler) Get(key string) interface{} {
 	return value
 }
 
+func (g *GinSessionHandler) Delete(key string) {
+	session := g.getSession()
+	session.Delete(key)
+}
+
+func (g *GinSessionHandler) Clear() {
+	session := g.getSession()
+	session.Clear()
+}
+
 func (g *GinSessionHandler) Save() error {
 	session := g.getSession()
 	return session.Save()

@@ -87,17 +87,17 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 			return registedBlockEntities[i].TargetTwitterID <= registedBlockEntities[j].TargetTwitterID
 		})
 
-		//log.Print(registedBlockEntities)
-
 		// api問い合わせ結果のblocksに登録されていないものを一括削除する
 		IDs := []uint{}
 		for _, registedBlockEntity := range registedBlockEntities {
 			needle := registedBlockEntity.TargetTwitterID
 			idx := sort.Search(len(blocks), func(i int) bool {
-				return string(blocks[i].TargetTwitterID) >= needle
+				return string(blocks[i].TargetTwitterID) == needle
 			})
 
-			if len(blocks) > idx && blocks[idx].TargetTwitterID != needle {
+			// blocksの長さが0なら登録されていない。
+			// または、idxがblocks総数以上の場合は登録されていない
+			if len(blocks) == 0 || len(blocks) <= idx {
 				IDs = append(IDs, registedBlockEntity.ID)
 			}
 		}

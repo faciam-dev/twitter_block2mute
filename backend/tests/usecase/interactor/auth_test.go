@@ -86,6 +86,35 @@ var (
 	}
 )
 
+// for Logout
+type argsLogout struct {
+	Logout          int
+	RepositoryError error
+}
+
+var (
+	tableLogout = []struct {
+		name string
+		args argsLogout
+		err  error
+	}{
+		{
+			name: "success",
+			args: argsLogout{
+				Logout:          1,
+				RepositoryError: nil,
+			},
+		},
+		{
+			name: "error",
+			args: argsLogout{
+				Logout:          0,
+				RepositoryError: errors.New(" is not found"),
+			},
+		},
+	}
+)
+
 // Auth()のテスト
 func TestAuth(t *testing.T) {
 	for _, tt := range tableAuth {
@@ -179,6 +208,34 @@ func TestCallback(t *testing.T) {
 				tt.args.TwitterID,
 				tt.args.TwitterName,
 			)
+		})
+	}
+}
+
+func TestLogout(t *testing.T) {
+	for _, tt := range tableLogout {
+		t.Run(tt.name, func(t *testing.T) {
+			// モック処理
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// エンティティ類
+			fromRepositoryAuth := &entity.Auth{Logout: tt.args.Logout}
+
+			// outputPort の設定
+			outputPort := mock_port.NewMockAuthOutputPort(mockCtrl)
+			outputPort.EXPECT().RenderLogout(fromRepositoryAuth).Return().AnyTimes()
+			outputPort.EXPECT().RenderError(tt.args.RepositoryError).Return().AnyTimes()
+
+			// authRepositoryモックの設定
+			authRepository := mock_port.NewMockAuthRepository(mockCtrl)
+			authRepository.EXPECT().Logout().Return(fromRepositoryAuth, tt.args.RepositoryError)
+
+			// テスト対象の構築
+			interactor := interactor.NewAuthInputPort(outputPort, authRepository)
+
+			// 得られるものはないため、実行できればテスト通過とする。
+			interactor.Logout()
 		})
 	}
 }

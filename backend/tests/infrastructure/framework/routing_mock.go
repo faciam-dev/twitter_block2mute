@@ -88,6 +88,16 @@ func (a *Auth) Callback(contextHandler handler.ContextHandler) {
 	contextHandler.JSON(http.StatusOK, map[string]interface{}{})
 }
 
+func (a *Auth) Logout(contextHandler handler.ContextHandler) {
+	auth := entity.Auth{
+		Logout: 1,
+	}
+
+	contextHandler.JSON(http.StatusOK, map[string]interface{}{
+		"result": auth.Logout,
+	})
+}
+
 // block
 type Block struct {
 }
@@ -175,6 +185,9 @@ func (t *TestRouting) setTestRouting() {
 	})
 	t.Gin.GET("/auth/auth_callback", func(c *gin.Context) {
 		authController.Callback(framework.NewGinContextHandler(c))
+	})
+	t.Gin.GET("/auth/logout", func(c *gin.Context) {
+		authController.Logout(framework.NewGinContextHandler(c))
 	})
 
 	// block

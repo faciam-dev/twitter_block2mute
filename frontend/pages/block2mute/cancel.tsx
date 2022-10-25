@@ -1,5 +1,7 @@
 import { FormEvent, useRef, useState } from "react";
 
+import LogoutButton from "../../components/LogoutButton";
+
 import { NextPage } from "next";
 
 import axios from "axios";
@@ -11,33 +13,27 @@ const CancelPage: NextPage = () => {
 
   const onClickLogout = async (event: FormEvent) => {
     event.preventDefault();
-    const { data } = await axios.get(`${apiUrl}/auth/logout`);
-    if (data.result == 1) {
-      setMessage("ログアウトしました。ウィンドウを閉じてください。");
-      isLoggedout.current = true;
-    }
-  };
+    const config = {
+      withCredentials: true,
+    };
 
-  const logoutButton = (isLoggedout: boolean) => {
-    if (isLoggedout) {
-      return "";
-    } else {
-      return (
-        <p>
-          <button type="button" onClick={onClickLogout}>
-            {" "}
-            Logout
-          </button>
-        </p>
-      );
-    }
+    try {
+      const { data } = await axios.get(`${apiUrl}/auth/logout`, config);
+      if (data.result == 1) {
+        setMessage("ログアウトしました。ウィンドウを閉じてください。");
+        isLoggedout.current = true;
+      }
+    } catch (error) {}
   };
 
   return (
     <div>
       <h1>ブロックミュート変換</h1>
       {message}
-      {logoutButton(isLoggedout.current)}
+      <LogoutButton
+        clickLogout={onClickLogout}
+        isLoggedout={isLoggedout.current}
+      ></LogoutButton>
     </div>
   );
 };

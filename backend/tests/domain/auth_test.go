@@ -12,6 +12,7 @@ func TestCreateAuthDomain(t *testing.T) {
 		AuthUrl          string
 		OAuthToken       string
 		OAuthTokenSecret string
+		Logout           int
 	}
 	tests := []struct {
 		name string
@@ -25,12 +26,14 @@ func TestCreateAuthDomain(t *testing.T) {
 				AuthUrl:          "http://localhost/auth/auth",
 				OAuthToken:       "token",
 				OAuthTokenSecret: "secret",
+				Logout:           0,
 			},
 			want: entity.Auth{
 				Authenticated:    1,
 				AuthUrl:          "http://localhost/auth/auth",
 				OAuthToken:       "token",
 				OAuthTokenSecret: "secret",
+				Logout:           0,
 			},
 		},
 	}
@@ -41,6 +44,7 @@ func TestCreateAuthDomain(t *testing.T) {
 				AuthUrl:          tt.args.AuthUrl,
 				OAuthToken:       tt.args.OAuthToken,
 				OAuthTokenSecret: tt.args.OAuthTokenSecret,
+				Logout:           tt.args.Logout,
 			}
 			if got != tt.want {
 				t.Errorf("createAuthDomain() = %v, want %v", got, tt.want)

@@ -26,7 +26,7 @@ func (a *Auth) Auth() {
 }
 
 func (a *Auth) IsAuthenticated() {
-	auth, err := a.AuthRepo.IsAuthenticated();
+	auth, err := a.AuthRepo.IsAuthenticated()
 	if err != nil {
 		a.OutputPort.RenderError(err)
 		return
@@ -35,10 +35,19 @@ func (a *Auth) IsAuthenticated() {
 }
 
 func (a *Auth) Callback(token string, secret string, twitterID string, twitterName string) {
-	auth, err := a.AuthRepo.Callback(token, secret, twitterID, twitterName);
+	auth, err := a.AuthRepo.Callback(token, secret, twitterID, twitterName)
 	if err != nil {
 		a.OutputPort.RenderError(err)
 		return
 	}
 	a.OutputPort.RenderCallback(auth)
+}
+
+func (a *Auth) Logout() {
+	auth, err := a.AuthRepo.Logout()
+	if err != nil {
+		a.OutputPort.RenderError(err)
+		return
+	}
+	a.OutputPort.RenderLogout(auth)
 }

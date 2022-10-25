@@ -34,6 +34,30 @@ func (m *MockSessionHandler) EXPECT() *MockSessionHandlerMockRecorder {
 	return m.recorder
 }
 
+// Clear mocks base method.
+func (m *MockSessionHandler) Clear() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Clear")
+}
+
+// Clear indicates an expected call of Clear.
+func (mr *MockSessionHandlerMockRecorder) Clear() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clear", reflect.TypeOf((*MockSessionHandler)(nil).Clear))
+}
+
+// Delete mocks base method.
+func (m *MockSessionHandler) Delete(arg0 string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Delete", arg0)
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockSessionHandlerMockRecorder) Delete(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockSessionHandler)(nil).Delete), arg0)
+}
+
 // Get mocks base method.
 func (m *MockSessionHandler) Get(arg0 string) interface{} {
 	m.ctrl.T.Helper()

@@ -15,7 +15,7 @@ const LoginPage: NextPage = () => {
 
   return (
     <div>
-      <h1>ログイン画面</h1>
+      <h1>ブロックミュート変換</h1>
 
       <form>
         <button type="submit" onClick={onClick}>

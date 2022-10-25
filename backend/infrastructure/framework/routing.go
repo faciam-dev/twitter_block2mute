@@ -90,6 +90,9 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 	r.Gin.GET("/auth/auth_callback", func(c *gin.Context) {
 		authController.Callback(NewGinContextHandler(c))
 	})
+	r.Gin.GET("/auth/logout", func(c *gin.Context) {
+		authController.Logout(NewGinContextHandler(c))
+	})
 	// block
 	r.Gin.GET("/blocks/ids", func(c *gin.Context) {
 		blockController.GetBlockByID(NewGinContextHandler(c))

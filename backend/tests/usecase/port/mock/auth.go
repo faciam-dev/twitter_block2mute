@@ -70,6 +70,18 @@ func (mr *MockAuthInputPortMockRecorder) IsAuthenticated() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuthenticated", reflect.TypeOf((*MockAuthInputPort)(nil).IsAuthenticated))
 }
 
+// Logout mocks base method.
+func (m *MockAuthInputPort) Logout() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Logout")
+}
+
+// Logout indicates an expected call of Logout.
+func (mr *MockAuthInputPortMockRecorder) Logout() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockAuthInputPort)(nil).Logout))
+}
+
 // MockAuthOutputPort is a mock of AuthOutputPort interface.
 type MockAuthOutputPort struct {
 	ctrl     *gomock.Controller
@@ -141,6 +153,18 @@ func (mr *MockAuthOutputPortMockRecorder) RenderIsAuth(arg0 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenderIsAuth", reflect.TypeOf((*MockAuthOutputPort)(nil).RenderIsAuth), arg0)
 }
 
+// RenderLogout mocks base method.
+func (m *MockAuthOutputPort) RenderLogout(arg0 *entity.Auth) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "RenderLogout", arg0)
+}
+
+// RenderLogout indicates an expected call of RenderLogout.
+func (mr *MockAuthOutputPortMockRecorder) RenderLogout(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenderLogout", reflect.TypeOf((*MockAuthOutputPort)(nil).RenderLogout), arg0)
+}
+
 // MockAuthRepository is a mock of AuthRepository interface.
 type MockAuthRepository struct {
 	ctrl     *gomock.Controller
@@ -207,4 +231,19 @@ func (m *MockAuthRepository) IsAuthenticated() (*entity.Auth, error) {
 func (mr *MockAuthRepositoryMockRecorder) IsAuthenticated() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuthenticated", reflect.TypeOf((*MockAuthRepository)(nil).IsAuthenticated))
+}
+
+// Logout mocks base method.
+func (m *MockAuthRepository) Logout() (*entity.Auth, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Logout")
+	ret0, _ := ret[0].(*entity.Auth)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Logout indicates an expected call of Logout.
+func (mr *MockAuthRepositoryMockRecorder) Logout() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockAuthRepository)(nil).Logout))
 }

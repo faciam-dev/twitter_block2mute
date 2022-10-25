@@ -4,13 +4,13 @@ import { NextPage } from "next";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import LogoutButton from "../../components/LogoutButton";
 
 const AllPage: NextPage = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL_BASE;
   const router = useRouter();
   const didEffect = useRef(false);
-  const [message, setMessage] = useState("");
-  const [totalSuccess, setTotalSuccess] = useState(0);
+  const [message, setMessage] = useState("現在、変換中です。");
   const isLoggedout = useRef(false);
 
   useEffect(() => {
@@ -20,10 +20,17 @@ const AllPage: NextPage = () => {
         const config = {
           withCredentials: true,
         };
-        const { data } = await axios.get(`${apiUrl}/block2mute/all`, config);
 
-        if (data.num_success != undefined) {
-          setTotalSuccess(data.num_success);
+        try {
+          const { data } = await axios.get(`${apiUrl}/block2mute/all`, config);
+
+          if (data.num_success != undefined) {
+            setMessage(
+              data.num_success + "件ブロックからミュートに変換しました。"
+            );
+          }
+        } catch (error) {
+          router.push("/login");
         }
       };
       getIsAuth();
@@ -32,7 +39,10 @@ const AllPage: NextPage = () => {
 
   const onClickLogout = async (event: FormEvent) => {
     event.preventDefault();
-    const { data } = await axios.get(`${apiUrl}/auth/logout`);
+    const config = {
+      withCredentials: true,
+    };
+    const { data } = await axios.get(`${apiUrl}/auth/logout`, config);
     if (data.result == 1) {
       setMessage("ログアウトしました。ウィンドウを閉じてください。");
       isLoggedout.current = true;
@@ -43,20 +53,14 @@ const AllPage: NextPage = () => {
     <div>
       <h1>ブロックミュート変換</h1>
       <p>
-        {totalSuccess}
-        件ブロックからミュートに変換しました。<br></br>
-        ※0件変換の場合はAPI制限がかかっている可能性があります。
         {message}
+        <br></br>
+        ※0件変換の場合はAPI制限がかかっている可能性があります。<br></br>
       </p>
-
-      <form>
-        <p>
-          <button type="button" onClick={onClickLogout}>
-            {" "}
-            Logout
-          </button>
-        </p>
-      </form>
+      <LogoutButton
+        clickLogout={onClickLogout}
+        isLoggedout={isLoggedout.current}
+      ></LogoutButton>
     </div>
   );
 };

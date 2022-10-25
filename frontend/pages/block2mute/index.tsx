@@ -18,10 +18,15 @@ const IndexPage: NextPage = () => {
         const config = {
           withCredentials: true,
         };
-        const { data } = await axios.get(`${apiUrl}/blocks/ids`, config);
 
-        if (data.total != undefined) {
-          setTotalBlock(data.total);
+        try {
+          const { data } = await axios.get(`${apiUrl}/blocks/ids`, config);
+
+          if (data.total != undefined) {
+            setTotalBlock(data.total);
+          }
+        } catch (error) {
+          router.push("/login");
         }
       };
       getIsAuth();
