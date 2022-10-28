@@ -28,6 +28,7 @@ type Config struct {
 		TrustedProxies []string `env:"TRUSTED_PROXIES" envSeparator:","`
 		MaxAge         int      `env:"CORS_MAX_AGE"`
 		Port           string   `env:"ROUTING_PORT"`
+		CsrfSecure     bool     `env:"CSRF_SECURE"`
 	}
 	Session struct {
 		Name   string `env:"SESSION_NAME"`

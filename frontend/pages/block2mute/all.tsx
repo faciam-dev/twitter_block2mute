@@ -4,25 +4,34 @@ import { NextPage } from "next";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
-import LogoutButton from "../../components/LogoutButton";
+import LogoutButton from "../../components/logoutButton";
+import useFetchSession from "../../hooks/useFetchSession";
 
 const AllPage: NextPage = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL_BASE;
+  const { csrfToken, isLoading } = useFetchSession(apiUrl);
+
   const router = useRouter();
   const didEffect = useRef(false);
   const [message, setMessage] = useState("現在、変換中です。");
   const isLoggedout = useRef(false);
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
     if (!didEffect.current) {
       didEffect.current = true;
       const getIsAuth = async () => {
         const config = {
-          withCredentials: true,
+          headers: { "X-CSRF-Token": csrfToken },
         };
-
         try {
-          const { data } = await axios.get(`${apiUrl}/block2mute/all`, config);
+          const { data } = await axios.post(
+            `${apiUrl}/block2mute/all`,
+            {},
+            config
+          );
 
           if (data.num_success != undefined) {
             setMessage(
@@ -40,9 +49,9 @@ const AllPage: NextPage = () => {
   const onClickLogout = async (event: FormEvent) => {
     event.preventDefault();
     const config = {
-      withCredentials: true,
+      headers: { "X-CSRF-Token": csrfToken },
     };
-    const { data } = await axios.get(`${apiUrl}/auth/logout`, config);
+    const { data } = await axios.post(`${apiUrl}/auth/logout`, {}, config);
     if (data.result == 1) {
       setMessage("ログアウトしました。ウィンドウを閉じてください。");
       isLoggedout.current = true;

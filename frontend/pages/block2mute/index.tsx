@@ -4,23 +4,27 @@ import { NextPage } from "next";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import useFetchSession from "../../hooks/useFetchSession";
 
 const IndexPage: NextPage = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL_BASE;
   const router = useRouter();
   const didEffect = useRef(false);
   const [totalBlock, setTotalBlock] = useState(0);
+  const { csrfToken, isLoading } = useFetchSession(apiUrl);
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
     if (!didEffect.current) {
       didEffect.current = true;
       const getIsAuth = async () => {
         const config = {
-          withCredentials: true,
+          headers: { "X-CSRF-Token": csrfToken },
         };
-
         try {
-          const { data } = await axios.get(`${apiUrl}/blocks/ids`, config);
+          const { data } = await axios.post(`${apiUrl}/blocks/ids`, {}, config);
 
           if (data.total != undefined) {
             setTotalBlock(data.total);
