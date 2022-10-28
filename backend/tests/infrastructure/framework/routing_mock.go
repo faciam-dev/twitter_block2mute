@@ -172,31 +172,31 @@ func (t *TestRouting) setTestRouting() {
 
 	// ルーティング割当
 	// user
-	t.Gin.GET("/user/user/:id", func(c *gin.Context) {
+	t.Gin.POST("/user/user/:id", func(c *gin.Context) {
 		userController.GetUserByID(framework.NewGinContextHandler(c))
 	})
 
 	// auth
-	t.Gin.GET("/auth/auth", func(c *gin.Context) {
+	t.Gin.POST("/auth/auth", func(c *gin.Context) {
 		authController.Auth(framework.NewGinContextHandler(c))
 	})
-	t.Gin.GET("/auth/is_auth", func(c *gin.Context) {
+	t.Gin.POST("/auth/is_auth", func(c *gin.Context) {
 		authController.IsAuth(framework.NewGinContextHandler(c))
 	})
 	t.Gin.GET("/auth/auth_callback", func(c *gin.Context) {
 		authController.Callback(framework.NewGinContextHandler(c))
 	})
-	t.Gin.GET("/auth/logout", func(c *gin.Context) {
+	t.Gin.POST("/auth/logout", func(c *gin.Context) {
 		authController.Logout(framework.NewGinContextHandler(c))
 	})
 
 	// block
-	t.Gin.GET("/blocks/ids", func(c *gin.Context) {
+	t.Gin.POST("/blocks/ids", func(c *gin.Context) {
 		blockController.GetBlockByID(framework.NewGinContextHandler(c))
 	})
 
 	// block2mute
-	t.Gin.GET("/block2mute/all", func(c *gin.Context) {
+	t.Gin.POST("/block2mute/all", func(c *gin.Context) {
 		block2MuteController.All(framework.NewGinContextHandler(c))
 	})
 

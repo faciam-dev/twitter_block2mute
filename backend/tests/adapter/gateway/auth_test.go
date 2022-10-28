@@ -1,7 +1,6 @@
 package gateway_test
 
 import (
-	"math/rand"
 	"regexp"
 	"strings"
 	"testing"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
+	"github.com/faciam_dev/twitter_block2mute/backend/common"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 	"github.com/faciam_dev/twitter_block2mute/backend/tests/adapter/gateway/mock_handler"
@@ -190,7 +190,7 @@ func TestAuth(t *testing.T) {
 
 			// twtterHandler
 			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
-			mockTwitterHandler.EXPECT().AuthorizationURL().Return(args.AuthUrl+"?token="+RandomString(16), nil)
+			mockTwitterHandler.EXPECT().AuthorizationURL().Return(args.AuthUrl+"?token="+common.RandomString(16), nil)
 
 			// sessionHandler
 			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)
@@ -391,14 +391,4 @@ func TestLogout(t *testing.T) {
 			}
 		})
 	}
-}
-
-func RandomString(n int) string {
-	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(b)
 }

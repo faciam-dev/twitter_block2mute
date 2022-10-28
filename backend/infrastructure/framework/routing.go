@@ -1,17 +1,22 @@
 package framework
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/controller"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/presenter"
+	"github.com/faciam_dev/twitter_block2mute/backend/common"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"github.com/gorilla/csrf"
+	adapter "github.com/gwatts/gin-adapter"
 )
 
 type Routing struct {
@@ -27,6 +32,7 @@ func NewRouting(config *config.Config, dbHandler database.GormDbHandler, twitter
 		Port:   config.Routing.Port,
 	}
 	r.AllowOrigins() // before set routing
+	r.CsrfConfig()
 	sessionHandler := NewGinSessionHandler(config, r.Gin)
 	r.setRouting(dbHandler, twitterHandler, sessionHandler)
 	return r
@@ -37,8 +43,6 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 		OutputFactory: presenter.NewUserOutputPort,
 		InputFactory:  interactor.NewUserInputPort,
 		RepoFactory:   gateway.NewUserRepository,
-		//UserDbHandler: database.NewDbEntityHandler[handler.UserDbHandler, entity.User, *model.UserModelForDomain[entity.User]],
-		//UserDbHandler: database.NewDbEntityHandler[handler.UserDbHandler, entity.User, model.ModelForDomain[entity.User]](dbHandler),
 		UserDbHandler: database.NewUserDbHandler(dbHandler),
 	}
 
@@ -76,29 +80,34 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 	r.Gin.SetTrustedProxies(r.config.Routing.TrustedProxies)
 
 	// ルーティング割当
+	// session
+	r.Gin.GET("/session", func(c *gin.Context) {
+		c.Header("X-CSRF-Token", csrf.Token(c.Request))
+		c.JSON(http.StatusOK, map[string]interface{}{})
+	})
 	// user
-	r.Gin.GET("/user/user/:id", func(c *gin.Context) {
+	r.Gin.POST("/user/user/:id", func(c *gin.Context) {
 		userController.GetUserByID(NewGinContextHandler(c))
 	})
 	// auth
-	r.Gin.GET("/auth/auth", func(c *gin.Context) {
+	r.Gin.POST("/auth/auth", func(c *gin.Context) {
 		authController.Auth(NewGinContextHandler(c))
 	})
-	r.Gin.GET("/auth/is_auth", func(c *gin.Context) {
+	r.Gin.POST("/auth/is_auth", func(c *gin.Context) {
 		authController.IsAuth(NewGinContextHandler(c))
+	})
+	r.Gin.POST("/auth/logout", func(c *gin.Context) {
+		authController.Logout(NewGinContextHandler(c))
 	})
 	r.Gin.GET("/auth/auth_callback", func(c *gin.Context) {
 		authController.Callback(NewGinContextHandler(c))
 	})
-	r.Gin.GET("/auth/logout", func(c *gin.Context) {
-		authController.Logout(NewGinContextHandler(c))
-	})
 	// block
-	r.Gin.GET("/blocks/ids", func(c *gin.Context) {
+	r.Gin.POST("/blocks/ids", func(c *gin.Context) {
 		blockController.GetBlockByID(NewGinContextHandler(c))
 	})
 	// block2mute
-	r.Gin.GET("/block2mute/all", func(c *gin.Context) {
+	r.Gin.POST("/block2mute/all", func(c *gin.Context) {
 		block2MuteController.All(NewGinContextHandler(c))
 	})
 }
@@ -112,6 +121,15 @@ func (r *Routing) AllowOrigins() {
 	corsConfig.AllowCredentials = true
 	corsConfig.MaxAge = time.Duration(r.config.Routing.MaxAge)
 	r.Gin.Use(cors.New(corsConfig))
+}
+
+func (r *Routing) CsrfConfig() {
+	csrfMiddleware := csrf.Protect(
+		[]byte(common.RandomString(32)),
+		csrf.TrustedOrigins(r.config.Routing.AllowOrigins),
+		csrf.Secure(r.config.Routing.CsrfSecure),
+	)
+	r.Gin.Use(adapter.Wrap(csrfMiddleware))
 }
 
 func (r *Routing) Run() {

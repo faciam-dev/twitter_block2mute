@@ -1,6 +1,7 @@
 package framework_test
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -21,14 +22,14 @@ func TestGetUserByID(t *testing.T) {
 	}{
 		{
 			"success_200",
-			"GET",
+			"POST",
 			1,
 			200,
 			"{\"id\":\"1\",\"name\":\"test\"}",
 		},
 		{
 			"success_404",
-			"GET",
+			"POST",
 			2,
 			404,
 			"",
@@ -44,12 +45,9 @@ func TestGetUserByID(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			/*
-				requestBody := bytes.NewBufferString("{\"name\":\"foo\"}")
-				c.Request, _ = http.NewRequest("POST", "/user/user", requestBody)
-			*/
+			requestBody := bytes.NewBufferString("")
 
-			c.Request, _ = http.NewRequest(tt.method, "/user/user/"+strconv.Itoa(tt.id), nil)
+			c.Request, _ = http.NewRequest(tt.method, "/user/user/"+strconv.Itoa(tt.id), requestBody)
 
 			router.Gin.ServeHTTP(w, c.Request)
 
@@ -76,7 +74,7 @@ func TestIsAuth(t *testing.T) {
 	}{
 		{
 			"success_200",
-			"GET",
+			"POST",
 			200,
 			"{\"result\":1}",
 		},
@@ -91,7 +89,8 @@ func TestIsAuth(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Request, _ = http.NewRequest(tt.method, "/auth/is_auth", nil)
+			requestBody := bytes.NewBufferString("")
+			c.Request, _ = http.NewRequest(tt.method, "/auth/is_auth", requestBody)
 
 			router.Gin.ServeHTTP(w, c.Request)
 
@@ -118,7 +117,7 @@ func TestAuth(t *testing.T) {
 	}{
 		{
 			"success_200",
-			"GET",
+			"POST",
 			200,
 			"{\"to_url\":\"http://test/test\"}",
 		},
@@ -133,7 +132,8 @@ func TestAuth(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Request, _ = http.NewRequest(tt.method, "/auth/auth", nil)
+			requestBody := bytes.NewBufferString("")
+			c.Request, _ = http.NewRequest(tt.method, "/auth/auth", requestBody)
 
 			router.Gin.ServeHTTP(w, c.Request)
 
@@ -235,7 +235,7 @@ func TestLogout(t *testing.T) {
 	}{
 		{
 			"success_200",
-			"GET",
+			"POST",
 			200,
 			"{\"result\":1}",
 		},
@@ -250,7 +250,8 @@ func TestLogout(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			c.Request, _ = http.NewRequest(tt.method, "/auth/logout", nil)
+			requestBody := bytes.NewBufferString("")
+			c.Request, _ = http.NewRequest(tt.method, "/auth/logout", requestBody)
 
 			router.Gin.ServeHTTP(w, c.Request)
 
@@ -278,7 +279,7 @@ func TestGetBlockByID(t *testing.T) {
 	}{
 		{
 			"success_200",
-			"GET",
+			"POST",
 			1,
 			200,
 			"{\"ids\":[\"1\",\"2\",\"3\"],\"total\":3}",
@@ -294,12 +295,9 @@ func TestGetBlockByID(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			/*
-				requestBody := bytes.NewBufferString("{\"name\":\"foo\"}")
-				c.Request, _ = http.NewRequest("POST", "/user/user", requestBody)
-			*/
 
-			c.Request, _ = http.NewRequest(tt.method, "/blocks/ids", nil)
+			requestBody := bytes.NewBufferString("")
+			c.Request, _ = http.NewRequest(tt.method, "/blocks/ids", requestBody)
 
 			router.Gin.ServeHTTP(w, c.Request)
 
@@ -327,7 +325,7 @@ func TestAll(t *testing.T) {
 	}{
 		{
 			"success_200",
-			"GET",
+			"POST",
 			1,
 			200,
 			"{\"num_success\":3,\"success_ids\":[\"1\",\"2\",\"3\"]}",
@@ -343,12 +341,8 @@ func TestAll(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
-			/*
-				requestBody := bytes.NewBufferString("{\"name\":\"foo\"}")
-				c.Request, _ = http.NewRequest("POST", "/user/user", requestBody)
-			*/
-
-			c.Request, _ = http.NewRequest(tt.method, "/block2mute/all", nil)
+			requestBody := bytes.NewBufferString("")
+			c.Request, _ = http.NewRequest(tt.method, "/block2mute/all", requestBody)
 
 			router.Gin.ServeHTTP(w, c.Request)
 

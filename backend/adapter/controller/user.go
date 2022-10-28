@@ -11,7 +11,7 @@ type User struct {
 	// -> interactor.NewUserInputPort
 	InputFactory func(o port.UserOutputPort, u port.UserRepository) port.UserInputPort
 	// -> gateway.NewUserRepository
-	RepoFactory func(dbHandler handler.UserDbHandler) port.UserRepository
+	RepoFactory   func(dbHandler handler.UserDbHandler) port.UserRepository
 	UserDbHandler handler.UserDbHandler
 }
 

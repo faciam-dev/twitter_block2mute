@@ -19,6 +19,7 @@ require (
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 )
 
 require (
@@ -32,6 +33,8 @@ require (
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
+	github.com/gorilla/csrf v1.7.1
+	github.com/gwatts/gin-adapter v1.0.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/joho/godotenv v1.4.0
 	github.com/json-iterator/go v1.1.12 // indirect
