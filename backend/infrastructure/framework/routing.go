@@ -83,7 +83,7 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 	// session
 	r.Gin.GET("/session", func(c *gin.Context) {
 		c.Header("X-CSRF-Token", csrf.Token(c.Request))
-		c.JSON(http.StatusOK, map[string]interface{}{"token": csrf.Token(c.Request)})
+		c.JSON(http.StatusOK, map[string]interface{}{})
 	})
 	// user
 	r.Gin.POST("/user/user/:id", func(c *gin.Context) {
