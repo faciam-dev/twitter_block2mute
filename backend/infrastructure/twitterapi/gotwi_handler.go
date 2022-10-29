@@ -107,28 +107,46 @@ func (g *GotwiHandler) GetCredentials(token string, secret string) (handler.Twit
 }
 
 func (g *GotwiHandler) GetBlockedUser(twitterID string) (handler.TwitterUserIds, error) {
-	p := &blocktypes.ListInput{ID: twitterID}
 
+	tokenDefault := "NEXT"
+	tokenEnd := "0"
+	nextToken := tokenDefault
+	total := 0
 	twitterIDs := []string{}
+	var err error
 
-	listOutput, err := block.List(context.Background(), g.Api, p)
+	for nextToken != tokenEnd {
+		p := &blocktypes.ListInput{ID: twitterID}
 
-	if err != nil {
-		return TwitterUserIds{
-			IDs:   twitterIDs,
-			Total: 0,
-		}, err
-	}
+		if nextToken != tokenDefault {
+			p.PaginationToken = nextToken
+		}
 
-	total := listOutput.Meta.ResultCount
+		listOutput, err := block.List(context.Background(), g.Api, p)
 
-	for _, user := range listOutput.Data {
-		twitterIDs = append(twitterIDs, *user.ID)
+		if err != nil {
+			return TwitterUserIds{
+				IDs:   twitterIDs,
+				Total: total,
+			}, err
+		}
+
+		if listOutput.Meta.NextToken == nil {
+			nextToken = tokenEnd
+		} else {
+			nextToken = *listOutput.Meta.NextToken
+		}
+
+		total += *listOutput.Meta.ResultCount
+
+		for _, user := range listOutput.Data {
+			twitterIDs = append(twitterIDs, *user.ID)
+		}
 	}
 
 	return TwitterUserIds{
 		IDs:   twitterIDs,
-		Total: *total,
+		Total: total,
 	}, err
 }
 

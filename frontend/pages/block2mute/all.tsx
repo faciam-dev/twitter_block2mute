@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import LogoutButton from "../../components/logoutButton";
 import useFetchSession from "../../hooks/useFetchSession";
+import Notice from "../../components/notice";
 
 const AllPage: NextPage = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL_BASE;
@@ -39,7 +40,10 @@ const AllPage: NextPage = () => {
             );
           }
         } catch (error) {
-          router.push("/login");
+          let errorMessage = "変換中にエラーが発生しました。";
+          if (error.error != undefined && error.error.detail != undefined) {
+            setMessage(errorMessage + error.error.detail);
+          }
         }
       };
       getIsAuth();
@@ -64,8 +68,8 @@ const AllPage: NextPage = () => {
       <p>
         {message}
         <br></br>
-        ※0件変換の場合はAPI制限がかかっている可能性があります。<br></br>
       </p>
+      <Notice></Notice>
       <LogoutButton
         clickLogout={onClickLogout}
         isLoggedout={isLoggedout.current}
