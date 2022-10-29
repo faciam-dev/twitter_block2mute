@@ -12,6 +12,8 @@ import (
 const projectDirName = "backend"
 
 type Config struct {
+	ReleaseMode string `env:"RELEASE_MODE"`
+
 	DB struct {
 		Type     string `env:"DB_TYPE"`
 		Host     string `env:"DB_HOST"`

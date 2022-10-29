@@ -2,6 +2,7 @@ package framework
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/controller"
@@ -31,6 +32,7 @@ func NewRouting(config *config.Config, dbHandler database.GormDbHandler, twitter
 		Gin:    gin.Default(),
 		Port:   config.Routing.Port,
 	}
+	r.GinModeConfig()
 	r.AllowOrigins() // before set routing
 	r.CsrfConfig()
 	sessionHandler := NewGinSessionHandler(config, r.Gin)
@@ -40,10 +42,11 @@ func NewRouting(config *config.Config, dbHandler database.GormDbHandler, twitter
 
 func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler) {
 	userController := controller.User{
-		OutputFactory: presenter.NewUserOutputPort,
-		InputFactory:  interactor.NewUserInputPort,
-		RepoFactory:   gateway.NewUserRepository,
-		UserDbHandler: database.NewUserDbHandler(dbHandler),
+		OutputFactory:  presenter.NewUserOutputPort,
+		InputFactory:   interactor.NewUserInputPort,
+		RepoFactory:    gateway.NewUserRepository,
+		SessionHandler: sessionHandler,
+		UserDbHandler:  database.NewUserDbHandler(dbHandler),
 	}
 
 	authController := controller.Auth{
@@ -86,8 +89,8 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 		c.JSON(http.StatusOK, map[string]interface{}{})
 	})
 	// user
-	r.Gin.POST("/user/user/:id", func(c *gin.Context) {
-		userController.GetUserByID(NewGinContextHandler(c))
+	r.Gin.POST("/user/user/self", func(c *gin.Context) {
+		userController.GetUserSelf(NewGinContextHandler(c))
 	})
 	// auth
 	r.Gin.POST("/auth/auth", func(c *gin.Context) {
@@ -128,8 +131,15 @@ func (r *Routing) CsrfConfig() {
 		[]byte(common.RandomString(32)),
 		csrf.TrustedOrigins(r.config.Routing.AllowOrigins),
 		csrf.Secure(r.config.Routing.CsrfSecure),
+		csrf.Path("/"),
 	)
 	r.Gin.Use(adapter.Wrap(csrfMiddleware))
+}
+
+func (r *Routing) GinModeConfig() {
+	if strings.ToLower(r.config.ReleaseMode) == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 }
 
 func (r *Routing) Run() {

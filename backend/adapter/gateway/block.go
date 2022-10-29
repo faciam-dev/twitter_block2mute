@@ -51,7 +51,10 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 
 	// blocks
 	twitterUserIds, err := u.twitterHandler.GetBlockedUser(user.TwitterID)
-	if err != nil {
+
+	// 0件以外は変換できるようにする。
+	// ブロック数が多い場合の対策。
+	if err != nil && len(twitterUserIds.GetTwitterIDs()) == 0 {
 		return &blocks, 0, err
 	}
 

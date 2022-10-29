@@ -17,7 +17,7 @@ import (
 type User struct {
 }
 
-func (u *User) GetUserByID(contextHandler handler.ContextHandler) {
+func (u *User) GetUserSelf(contextHandler handler.ContextHandler) {
 	table := []struct {
 		id   string
 		name string
@@ -28,7 +28,7 @@ func (u *User) GetUserByID(contextHandler handler.ContextHandler) {
 		},
 	}
 
-	userID := contextHandler.Param("id")
+	userID := "1"
 	outputFlag := false
 	for _, tt := range table {
 		if tt.id == userID {
@@ -172,8 +172,8 @@ func (t *TestRouting) setTestRouting() {
 
 	// ルーティング割当
 	// user
-	t.Gin.POST("/user/user/:id", func(c *gin.Context) {
-		userController.GetUserByID(framework.NewGinContextHandler(c))
+	t.Gin.POST("/user/user/self", func(c *gin.Context) {
+		userController.GetUserSelf(framework.NewGinContextHandler(c))
 	})
 
 	// auth

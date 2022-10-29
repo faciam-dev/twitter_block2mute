@@ -4,6 +4,7 @@ import { NextPage } from "next";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import Notice from "../../components/notice";
 import useFetchSession from "../../hooks/useFetchSession";
 
 const IndexPage: NextPage = () => {
@@ -11,6 +12,7 @@ const IndexPage: NextPage = () => {
   const router = useRouter();
   const didEffect = useRef(false);
   const [totalBlock, setTotalBlock] = useState(0);
+  const [screenName, setScreenName] = useState("");
   const { csrfToken, isLoading } = useFetchSession(apiUrl);
 
   useEffect(() => {
@@ -23,6 +25,22 @@ const IndexPage: NextPage = () => {
         const config = {
           headers: { "X-CSRF-Token": csrfToken },
         };
+        // ユーザー情報処理
+        try {
+          const { data } = await axios.post(
+            `${apiUrl}/user/user/self`,
+            {},
+            config
+          );
+
+          if (data.name != undefined) {
+            setScreenName(data.name);
+          }
+        } catch (error) {
+          setScreenName("(スクリーンネーム未取得)");
+        }
+
+        // ブロックユーザー処理
         try {
           const { data } = await axios.post(`${apiUrl}/blocks/ids`, {}, config);
 
@@ -51,10 +69,10 @@ const IndexPage: NextPage = () => {
     <div>
       <h1>ブロックミュート変換</h1>
       <p>
-        現在あなたは{totalBlock}
+        現在@{screenName}さんは{totalBlock}
         件ブロックしています。ブロックを全てミュートに変換しますか。 <br />
       </p>
-
+      <Notice></Notice>
       <form>
         <p>
           <button type="button" onClick={onClickOk}>

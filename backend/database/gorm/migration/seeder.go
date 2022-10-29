@@ -77,12 +77,12 @@ func Seeder() {
 		}
 	}
 
-	err = gormHandler.Conn.Model(&model.UserBlock{}).Create(&userBlocks).Error
+	err = gormHandler.Conn.Debug().Model(&model.UserBlock{}).Create(&userBlocks).Error
 	if err != nil {
 		log.Fatalf("cannot seed user_blocks table: %v", err)
 	}
 
-	err = gormHandler.Conn.Model(&model.UserMute{}).Create(&userMutes).Error
+	err = gormHandler.Conn.Debug().Model(&model.UserMute{}).Create(&userMutes).Error
 	if err != nil {
 		log.Fatalf("cannot seed user_mutes table: %v", err)
 	}

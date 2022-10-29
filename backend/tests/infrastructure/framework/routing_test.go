@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"github.com/gin-gonic/gin"
 )
 
-func TestGetUserByID(t *testing.T) {
+func TestGetUserSelf(t *testing.T) {
 
 	table := []struct {
 		name       string
@@ -27,13 +26,6 @@ func TestGetUserByID(t *testing.T) {
 			200,
 			"{\"id\":\"1\",\"name\":\"test\"}",
 		},
-		{
-			"success_404",
-			"POST",
-			2,
-			404,
-			"",
-		},
 	}
 
 	for _, tt := range table {
@@ -47,7 +39,7 @@ func TestGetUserByID(t *testing.T) {
 			c, _ := gin.CreateTestContext(w)
 			requestBody := bytes.NewBufferString("")
 
-			c.Request, _ = http.NewRequest(tt.method, "/user/user/"+strconv.Itoa(tt.id), requestBody)
+			c.Request, _ = http.NewRequest(tt.method, "/user/user/self", requestBody)
 
 			router.Gin.ServeHTTP(w, c.Request)
 
