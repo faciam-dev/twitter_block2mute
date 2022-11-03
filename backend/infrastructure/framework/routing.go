@@ -93,6 +93,7 @@ func (r *Routing) setRouting(
 		OutputFactory:  presenter.NewUserOutputPort,
 		InputFactory:   interactor.NewUserInputPort,
 		RepoFactory:    gateway.NewUserRepository,
+		LoggerHandler:  loggerHandler,
 		SessionHandler: sessionHandler,
 		UserDbHandler:  database.NewUserDbHandler(dbHandler),
 	}
@@ -111,6 +112,7 @@ func (r *Routing) setRouting(
 		OutputFactory:  presenter.NewBlockOutputPort,
 		InputFactory:   interactor.NewBlockInputPort,
 		RepoFactory:    gateway.NewBlockRepository,
+		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
 		BlockDbHandler: database.NewBlockDbHandler(dbHandler),
@@ -121,6 +123,7 @@ func (r *Routing) setRouting(
 		OutputFactory:  presenter.NewBlock2MuteOutputPort,
 		InputFactory:   interactor.NewBlock2MuteInputPort,
 		RepoFactory:    gateway.NewBlock2MuteRepository,
+		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
 		BlockDbHandler: database.NewBlockDbHandler(dbHandler),

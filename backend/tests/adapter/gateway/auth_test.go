@@ -111,6 +111,10 @@ func TestIsAuthenticated(t *testing.T) {
 			// contextHandler
 			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
 
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes().Return()
+
 			// twtterHandler
 			mockTwitterUser := mock_handler.NewMockTwitterUser(mockCtrl)
 			mockTwitterUser.EXPECT().GetTwitterID().Return(args.TwitterID).AnyTimes()
@@ -131,6 +135,7 @@ func TestIsAuthenticated(t *testing.T) {
 			// repository
 			authRepository := gateway.NewAuthRepository(
 				contextHandler,
+				loggerHandler,
 				mockTwitterHandler,
 				sessionHandler,
 				dbUserHandler,
@@ -188,6 +193,10 @@ func TestAuth(t *testing.T) {
 			// contextHandler
 			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
 
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes().Return()
+
 			// twtterHandler
 			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
 			mockTwitterHandler.EXPECT().AuthorizationURL().Return(args.AuthUrl+"?token="+common.RandomString(16), nil)
@@ -198,6 +207,7 @@ func TestAuth(t *testing.T) {
 
 			authRepository := gateway.NewAuthRepository(
 				contextHandler,
+				loggerHandler,
 				mockTwitterHandler,
 				sessionHandler,
 				dbUserHandler,
@@ -283,6 +293,11 @@ func TestCallback(t *testing.T) {
 			// contextHandler
 			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
 
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debug(gomock.Any()).AnyTimes().Return()
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes().Return()
+
 			// twtterHandler
 			mockTwitterCredentials := mock_handler.NewMockTwitterCredentials(mockCtrl)
 			mockTwitterCredentials.EXPECT().GetToken().Return(args.SessionToken).AnyTimes()
@@ -312,6 +327,7 @@ func TestCallback(t *testing.T) {
 			// repository
 			authRepository := gateway.NewAuthRepository(
 				contextHandler,
+				loggerHandler,
 				mockTwitterHandler,
 				sessionHandler,
 				dbUserHandler,
@@ -365,6 +381,11 @@ func TestLogout(t *testing.T) {
 			// contextHandler
 			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
 
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debug(gomock.Any()).AnyTimes().Return()
+			loggerHandler.EXPECT().Debugf(gomock.Any()).AnyTimes().Return()
+
 			// twtterHandler
 			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
 
@@ -372,9 +393,11 @@ func TestLogout(t *testing.T) {
 			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)
 			sessionHandler.EXPECT().SetContextHandler(contextHandler).Return()
 			sessionHandler.EXPECT().Clear().Return()
+			sessionHandler.EXPECT().Save().Return(nil)
 
 			authRepository := gateway.NewAuthRepository(
 				contextHandler,
+				loggerHandler,
 				mockTwitterHandler,
 				sessionHandler,
 				dbUserHandler,

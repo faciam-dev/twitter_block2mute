@@ -1,18 +1,25 @@
 package interactor
 
 import (
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 )
 
 type User struct {
-	OutputPort port.UserOutputPort
-	UserRepo   port.UserRepository
+	OutputPort    port.UserOutputPort
+	UserRepo      port.UserRepository
+	LoggerHandler handler.LoggerHandler
 }
 
-func NewUserInputPort(outputPort port.UserOutputPort, userRepository port.UserRepository) port.UserInputPort {
+func NewUserInputPort(
+	outputPort port.UserOutputPort,
+	userRepository port.UserRepository,
+	loggerHandler handler.LoggerHandler,
+) port.UserInputPort {
 	return &User{
-		OutputPort: outputPort,
-		UserRepo:   userRepository,
+		OutputPort:    outputPort,
+		UserRepo:      userRepository,
+		LoggerHandler: loggerHandler,
 	}
 }
 

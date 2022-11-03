@@ -11,6 +11,7 @@ import (
 )
 
 type Block2MuteRepository struct {
+	loggerHandler  handler.LoggerHandler
 	blockDbHandler handler.BlockDbHandler
 	userDbHandler  handler.UserDbHandler
 	muteDbHandler  handler.MuteDbHandler
@@ -20,12 +21,15 @@ type Block2MuteRepository struct {
 
 // NewBlockRepository はBlockRepositoryを返します．
 func NewBlock2MuteRepository(
+	loggerHandler handler.LoggerHandler,
 	dbHandler handler.BlockDbHandler,
 	userDbHandler handler.UserDbHandler,
 	muteDbHandler handler.MuteDbHandler,
 	twitterHandler handler.TwitterHandler,
-	sessionHandler handler.SessionHandler) port.Block2MuteRepository {
+	sessionHandler handler.SessionHandler,
+) port.Block2MuteRepository {
 	return &Block2MuteRepository{
+		loggerHandler:  loggerHandler,
 		blockDbHandler: dbHandler,
 		userDbHandler:  userDbHandler,
 		muteDbHandler:  muteDbHandler,
@@ -39,6 +43,7 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 	user := entity.User{}
 
 	if err := b.userDbHandler.First(&user, userID); err != nil {
+		b.loggerHandler.Errorf("user not found (user_id=%s)", userID)
 		return &block2Mute, err
 	}
 
@@ -51,6 +56,7 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 	}
 
 	b.twitterHandler.UpdateTwitterApi(token.(string), secret.(string))
+	b.loggerHandler.Debugf("update twitter api (user_id=%s token=%s secret=%s)", userID, token.(string), secret.(string))
 
 	// update blocks table
 	convertedIDs := []string{}
@@ -58,21 +64,23 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 		// block2mute
 		registedBlockEntities := []entity.Block{}
 		if err := b.blockDbHandler.FindAllByUserID(&registedBlockEntities, userID); err != nil {
-			log.Print(err)
+			b.loggerHandler.Errorw("blockDbHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
 			return err
 		}
 		sort.Slice(registedBlockEntities, func(i, j int) bool {
 			return registedBlockEntities[i].TargetTwitterID <= registedBlockEntities[j].TargetTwitterID
 		})
+		b.loggerHandler.Debugf("user_id=%s Num_Of_blocks=%d", userID, len(registedBlockEntities))
 
 		registedMuteEntities := []entity.Mute{}
 		if err := b.muteDbHandler.FindAllByUserID(&registedMuteEntities, userID); err != nil {
-			log.Print(err)
+			b.loggerHandler.Errorw("muteDbHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
 			return err
 		}
 		sort.Slice(registedMuteEntities, func(i, j int) bool {
 			return registedMuteEntities[i].TargetTwitterID <= registedMuteEntities[j].TargetTwitterID
 		})
+		b.loggerHandler.Debugf("user_id=%s Num_Of_mutes=%d", userID, len(registedMuteEntities))
 
 		// MuteでFlag=1のものはスキップし、Blockは変換できたものだけFlag=1をたてる。それ以外は処理しない。
 		convertedBlockEntities := []entity.Block{}
@@ -86,26 +94,42 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 			})
 
 			if len(registedMuteEntities) > idx && registedMuteEntities[idx].Flag == 1 {
+				b.loggerHandler.Debugf("skip mute flag=1 user_id=%s target_twitter_id=%s", userID, registedMuteEntities[idx].TargetTwitterID)
 				continue
 			}
 
 			// block除外
 			if registedBlockEntity.Flag == 1 {
+				b.loggerHandler.Debugf("skip block flag=1 user_id=%s target_twitter_id=%s", userID, registedMuteEntities[idx].TargetTwitterID)
 				continue
 			}
 
 			// 移行処理
 			// NOTE: 既にブロックを解除している場合はエラーを返さないようにする。
 			if err := b.twitterHandler.DestroyBlock(user.TwitterID, registedBlockEntity.TargetTwitterID); err != nil {
-				log.Printf("destroy block :%v %v", user.TwitterID, registedBlockEntity.TargetTwitterID)
-				log.Print(err)
+				b.loggerHandler.Warnw(
+					"destroy block error.",
+					"TwitterID",
+					user.TwitterID,
+					"TargetTwitterID",
+					registedBlockEntity.TargetTwitterID,
+					"error",
+					err,
+				)
 				continue
 			}
 
 			// NOTE: 既にミュートにしている場合はエラーを返さないようにする。
 			if err := b.twitterHandler.CreateMute(user.TwitterID, registedBlockEntity.TargetTwitterID); err != nil {
-				log.Printf("create mute :%v %v", user.TwitterID, registedBlockEntity.TargetTwitterID)
-				log.Print(err)
+				b.loggerHandler.Warnw(
+					"create mute error.",
+					"TwitterID",
+					user.TwitterID,
+					"TargetTwitterID",
+					registedBlockEntity.TargetTwitterID,
+					"error",
+					err,
+				)
 				continue
 			}
 			registedBlockEntity.Flag = 1
@@ -121,13 +145,29 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 		// 移行完了処理 blocks更新とmute更新
 		if len(convertedBlockEntities) > 0 {
 			if err := b.blockDbHandler.CreateNewBlocks(&convertedBlockEntities, "user_id", "twitter_id"); err != nil {
-				log.Print(err)
+				b.loggerHandler.Errorw(
+					"fail to create new blocks.",
+					"user_id",
+					userID,
+					"twitter_id",
+					user.TwitterID,
+					"error",
+					err,
+				)
 				return err
 			}
 		}
 		if len(muteEntities) > 0 {
 			if err := b.muteDbHandler.CreateNew(&muteEntities, "user_id", "twitter_id"); err != nil {
-				log.Print(err)
+				b.loggerHandler.Errorw(
+					"fail to create new mutes.",
+					"user_id",
+					userID,
+					"twitter_id",
+					user.TwitterID,
+					"error",
+					err,
+				)
 				return err
 			}
 

@@ -213,6 +213,11 @@ func TestAll(t *testing.T) {
 			mockCtrl := gomock.NewController(t)
 			defer mockCtrl.Finish()
 
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return()
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return()
+
 			// twitterHandler
 			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
 			mockTwitterHandler.EXPECT().UpdateTwitterApi(args.OAuthToken, args.OAuthTokenSecret).Return().AnyTimes()
@@ -229,6 +234,7 @@ func TestAll(t *testing.T) {
 
 			// repository
 			repository := gateway.NewBlock2MuteRepository(
+				loggerHandler,
 				blockDbHandler,
 				userDbHandler,
 				muteDbHandler,

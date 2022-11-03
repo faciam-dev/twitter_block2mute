@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"github.com/faciam_dev/twitter_block2mute/backend/tests/adapter/gateway/mock_handler"
 	mock_port "github.com/faciam_dev/twitter_block2mute/backend/tests/usecase/port/mock"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
 	"github.com/golang/mock/gomock"
@@ -53,6 +54,10 @@ func TestAll(t *testing.T) {
 			mockCtrl := gomock.NewController(t)
 			defer mockCtrl.Finish()
 
+			// loggerモックの設定
+			logger := mock_handler.NewMockLoggerHandler(mockCtrl)
+			logger.EXPECT().Debugf(gomock.Any()).AnyTimes().Return()
+
 			// outputPort の設定
 			outputPort := mock_port.NewMockBlock2MuteOutputPort(mockCtrl)
 			outputPort.EXPECT().Render(&tt.args.Block2Mute).Return().AnyTimes()
@@ -63,7 +68,7 @@ func TestAll(t *testing.T) {
 			block2MuteRepository.EXPECT().All(tt.args.UserID).Return(&tt.args.Block2Mute, tt.args.RepositoryError)
 
 			// テスト対象の構築
-			interactor := interactor.NewBlock2MuteInputPort(outputPort, block2MuteRepository)
+			interactor := interactor.NewBlock2MuteInputPort(outputPort, block2MuteRepository, logger)
 
 			// 得られるものはないため、実行できればテスト通過とする。
 			interactor.All(tt.args.UserID)

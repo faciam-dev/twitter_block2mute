@@ -11,12 +11,14 @@ type Auth struct {
 		contextHandler handler.ContextHandler,
 		LoggerHandler handler.LoggerHandler,
 	) port.AuthOutputPort
+
 	// -> interactor.NewAuthInputPort
 	InputFactory func(
 		outputPort port.AuthOutputPort,
 		repository port.AuthRepository,
-		logger handler.LoggerHandler,
+		LoggerHandler handler.LoggerHandler,
 	) port.AuthInputPort
+
 	// -> gateway.NewAuthRepository
 	RepoFactory func(
 		contextHandler handler.ContextHandler,
@@ -25,6 +27,7 @@ type Auth struct {
 		sessionHandler handler.SessionHandler,
 		UserDbHandler handler.UserDbHandler,
 	) port.AuthRepository
+
 	LoggerHandler  handler.LoggerHandler
 	TwitterHandler handler.TwitterHandler
 	SessionHandler handler.SessionHandler
