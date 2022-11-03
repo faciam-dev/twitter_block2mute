@@ -1,63 +1,26 @@
 package logger
 
 import (
-	"strings"
-
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 type ZapHandler struct {
-	LoggerLevel            string
-	LoggerOutputPaths      []string
-	LoggerErrorOutputPaths []string
-	logger                 *zap.SugaredLogger
+	config *config.Config
+	logger *zap.SugaredLogger
 }
 
 func NewZapHandler(config *config.Config) handler.LoggerHandler {
 	return newZapHandler(ZapHandler{
-		LoggerLevel:            config.Logger.LoggerLevel,
-		LoggerOutputPaths:      config.Logger.LoggerOutputPaths,
-		LoggerErrorOutputPaths: config.Logger.LoggerErrorOutputPaths,
+		config: config,
 	})
 }
 
 func newZapHandler(z ZapHandler) handler.LoggerHandler {
 	zapHandler := new(ZapHandler)
 
-	level := zap.NewAtomicLevel()
-	switch strings.ToLower(z.LoggerLevel) {
-	case "info":
-		level.SetLevel(zapcore.InfoLevel)
-	case "debug":
-		level.SetLevel(zapcore.DebugLevel)
-	case "warn":
-		level.SetLevel(zapcore.WarnLevel)
-	default:
-		level.SetLevel(zapcore.ErrorLevel)
-
-	}
-
-	myConfig := zap.Config{
-		Level:    level,
-		Encoding: "json",
-		EncoderConfig: zapcore.EncoderConfig{
-			TimeKey:        "Time",
-			LevelKey:       "Level",
-			NameKey:        "Name",
-			CallerKey:      "Caller",
-			MessageKey:     "Msg",
-			StacktraceKey:  "St",
-			EncodeLevel:    zapcore.CapitalLevelEncoder,
-			EncodeTime:     zapcore.ISO8601TimeEncoder,
-			EncodeDuration: zapcore.StringDurationEncoder,
-			EncodeCaller:   zapcore.ShortCallerEncoder,
-		},
-		OutputPaths:      z.LoggerOutputPaths,
-		ErrorOutputPaths: z.LoggerErrorOutputPaths,
-	}
+	myConfig := NewZapConfig(*z.config)
 
 	logger, _ := myConfig.Build()
 	//logger, _ := zap.NewProduction()
