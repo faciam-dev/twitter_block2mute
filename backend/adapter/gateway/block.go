@@ -13,6 +13,7 @@ import (
 )
 
 type BlockRepository struct {
+	loggerHandler  handler.LoggerHandler
 	blockDbHandler handler.BlockDbHandler
 	userDbHandler  handler.UserDbHandler
 	twitterHandler handler.TwitterHandler
@@ -20,8 +21,15 @@ type BlockRepository struct {
 }
 
 // NewBlockRepository はBlockRepositoryを返します．
-func NewBlockRepository(dbHandler handler.BlockDbHandler, userDbHandler handler.UserDbHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler) port.BlockRepository {
+func NewBlockRepository(
+	loggerHandler handler.LoggerHandler,
+	dbHandler handler.BlockDbHandler,
+	userDbHandler handler.UserDbHandler,
+	twitterHandler handler.TwitterHandler,
+	sessionHandler handler.SessionHandler,
+) port.BlockRepository {
 	return &BlockRepository{
+		loggerHandler:  loggerHandler,
 		blockDbHandler: dbHandler,
 		userDbHandler:  userDbHandler,
 		twitterHandler: twitterHandler,
@@ -36,6 +44,7 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 	user := entity.User{}
 
 	if err := u.userDbHandler.First(&user, userID); err != nil {
+		u.loggerHandler.Errorf("user not found (user_id=%s)", userID)
 		return &blocks, 0, err
 	}
 
@@ -48,6 +57,7 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 	}
 
 	u.twitterHandler.UpdateTwitterApi(token.(string), secret.(string))
+	u.loggerHandler.Debugf("update twitter api (user_id=%s token=%s secret=%s)", userID, token.(string), secret.(string))
 
 	// blocks
 	twitterUserIds, err := u.twitterHandler.GetBlockedUser(user.TwitterID)
@@ -55,6 +65,7 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 	// 0件以外は変換できるようにする。
 	// ブロック数が多い場合の対策。
 	if err != nil && len(twitterUserIds.GetTwitterIDs()) == 0 {
+		u.loggerHandler.Warnw("twitter blocklist API error.", "twitter_id", user.TwitterID, "error", err)
 		return &blocks, 0, err
 	}
 
@@ -76,6 +87,8 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 	sort.Slice(blocks, func(i, j int) bool {
 		return blocks[i].TargetTwitterID <= blocks[j].TargetTwitterID
 	})
+
+	u.loggerHandler.Debugf("user_id=%s Num_Of_blocks=%d", userID, len(blocks))
 
 	// update blocks table
 	err = u.blockDbHandler.Transaction(func() error {
@@ -101,6 +114,7 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 			// blocksの長さが0なら登録されていない。
 			// または、idxがblocks総数以上の場合は登録されていない
 			if len(blocks) == 0 || len(blocks) <= idx {
+				u.loggerHandler.Debugf("Target(target_twitter_id=%s,flag=%d) is converted entry", registedBlockEntity.TargetTwitterID, registedBlockEntity.Flag)
 				IDs = append(IDs, registedBlockEntity.ID)
 			}
 		}
@@ -123,12 +137,21 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 
 				if len(registedBlockEntities) < idx && registedBlockEntities[idx].TargetTwitterID == needle {
 					blocks[n].Flag = registedBlockEntities[idx].Flag
+					u.loggerHandler.Debugf("Target(target_twitter_id=%s,flag=%d) won`t be updated", blocks[n].TargetTwitterID, blocks[n].Flag)
 				}
 			}
 		}
 		if len(blocks) > 0 {
 			if err := u.blockDbHandler.CreateNewBlocks(&blocks, "user_id", "twitter_id"); err != nil {
-				log.Print(err)
+				u.loggerHandler.Errorw(
+					"fail to create new blocks.",
+					"user_id",
+					userID,
+					"twitter_id",
+					user.TwitterID,
+					"error",
+					err,
+				)
 				return err
 			}
 		}

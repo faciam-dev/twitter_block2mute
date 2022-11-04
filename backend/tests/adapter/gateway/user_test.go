@@ -9,6 +9,8 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"github.com/faciam_dev/twitter_block2mute/backend/tests/adapter/gateway/mock_handler"
+	"github.com/golang/mock/gomock"
 )
 
 // GetUserByIDに対するテスト
@@ -64,6 +66,9 @@ func TestGetUserByID(t *testing.T) {
 			}
 
 			// モックの生成
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
 			// sqlmock処理
 			// dbHandler
 			dbMock.ExpectQuery(
@@ -71,8 +76,13 @@ func TestGetUserByID(t *testing.T) {
 				WithArgs(strconv.FormatInt(args.SearchID, 10)).
 				WillReturnRows(sqlmock.NewRows([]string{"id", "name", "twitter_id"}).AddRow(args.UserID, args.UserName, args.UserTwitterID))
 
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes().Return()
+
 			// repository
 			userRepository := gateway.NewUserRepository(
+				loggerHandler,
 				dbUserHandler,
 			)
 

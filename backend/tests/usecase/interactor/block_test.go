@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"github.com/faciam_dev/twitter_block2mute/backend/tests/adapter/gateway/mock_handler"
 	mock_port "github.com/faciam_dev/twitter_block2mute/backend/tests/usecase/port/mock"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
 	"github.com/golang/mock/gomock"
@@ -57,6 +58,10 @@ func TestGetUserIDs(t *testing.T) {
 			mockCtrl := gomock.NewController(t)
 			defer mockCtrl.Finish()
 
+			// loggerモックの設定
+			logger := mock_handler.NewMockLoggerHandler(mockCtrl)
+			logger.EXPECT().Debugf(gomock.Any()).AnyTimes().Return()
+
 			// outputPort の設定
 			outputPort := mock_port.NewMockBlockOutputPort(mockCtrl)
 			outputPort.EXPECT().Render(&tt.args.BlockEntities, tt.args.Total).Return().AnyTimes()
@@ -67,7 +72,7 @@ func TestGetUserIDs(t *testing.T) {
 			blockRepository.EXPECT().GetUserIDs(tt.args.UserID).Return(&tt.args.BlockEntities, tt.args.Total, tt.args.RepositoryError)
 
 			// テスト対象の構築
-			interactor := interactor.NewBlockInputPort(outputPort, blockRepository)
+			interactor := interactor.NewBlockInputPort(outputPort, blockRepository, logger)
 
 			// 得られるものはないため、実行できればテスト通過とする。
 			interactor.GetUserIDs(tt.args.UserID)

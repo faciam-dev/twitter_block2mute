@@ -1,7 +1,10 @@
 package framework
 
 import (
+	"io"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -12,6 +15,8 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/common"
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/framework/ginmiddleware"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/logger"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -26,25 +31,69 @@ type Routing struct {
 	Port   string
 }
 
-func NewRouting(config *config.Config, dbHandler database.GormDbHandler, twitterHandler handler.TwitterHandler) *Routing {
+func NewRouting(
+	config *config.Config,
+	loggerHandler handler.LoggerHandler,
+	dbHandler database.GormDbHandler,
+	twitterHandler handler.TwitterHandler,
+) *Routing {
+	// setup
+	g := gin.New()
+	g.Use(gin.Recovery())
 	r := &Routing{
 		config: config,
-		Gin:    gin.Default(),
+		Gin:    g,
 		Port:   config.Routing.Port,
+	}
+	if config.UseFrameworkLogger {
+		r.setGinLogger(config)
 	}
 	r.GinModeConfig()
 	r.AllowOrigins() // before set routing
 	r.CsrfConfig()
+	r.LoggerConfig()
 	sessionHandler := NewGinSessionHandler(config, r.Gin)
-	r.setRouting(dbHandler, twitterHandler, sessionHandler)
+	r.setRouting(loggerHandler, dbHandler, twitterHandler, sessionHandler)
 	return r
 }
 
-func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler) {
+func (r *Routing) setGinLogger(config *config.Config) {
+	r.Gin.Use(gin.Logger())
+	writers := []io.Writer{}
+	for _, loggerOutputPath := range config.Logger.FrameworkLoggerOutputPaths {
+		var writer io.Writer
+		if strings.ToLower(loggerOutputPath) == "stdout" {
+			writer = os.Stdout
+		} else {
+			f, err := os.Create(loggerOutputPath)
+			if err != nil {
+				log.Println(err)
+				log.Printf("error: skip logger output path: %v", loggerOutputPath)
+				continue
+			}
+			writer = io.MultiWriter(f)
+		}
+		writers = append(writers, writer)
+	}
+
+	// パス未設定の場合はGinのデフォルトに従う。
+	if len(writers) > 0 {
+		gin.DefaultWriter = io.MultiWriter(writers...)
+	}
+
+}
+
+func (r *Routing) setRouting(
+	loggerHandler handler.LoggerHandler,
+	dbHandler database.GormDbHandler,
+	twitterHandler handler.TwitterHandler,
+	sessionHandler handler.SessionHandler,
+) {
 	userController := controller.User{
 		OutputFactory:  presenter.NewUserOutputPort,
 		InputFactory:   interactor.NewUserInputPort,
 		RepoFactory:    gateway.NewUserRepository,
+		LoggerHandler:  loggerHandler,
 		SessionHandler: sessionHandler,
 		UserDbHandler:  database.NewUserDbHandler(dbHandler),
 	}
@@ -53,6 +102,7 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 		OutputFactory:  presenter.NewAuthOutputPort,
 		InputFactory:   interactor.NewAuthInputPort,
 		RepoFactory:    gateway.NewAuthRepository,
+		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
 		UserDbHandler:  database.NewUserDbHandler(dbHandler),
@@ -62,6 +112,7 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 		OutputFactory:  presenter.NewBlockOutputPort,
 		InputFactory:   interactor.NewBlockInputPort,
 		RepoFactory:    gateway.NewBlockRepository,
+		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
 		BlockDbHandler: database.NewBlockDbHandler(dbHandler),
@@ -72,6 +123,7 @@ func (r *Routing) setRouting(dbHandler database.GormDbHandler, twitterHandler ha
 		OutputFactory:  presenter.NewBlock2MuteOutputPort,
 		InputFactory:   interactor.NewBlock2MuteInputPort,
 		RepoFactory:    gateway.NewBlock2MuteRepository,
+		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
 		BlockDbHandler: database.NewBlockDbHandler(dbHandler),
@@ -134,6 +186,14 @@ func (r *Routing) CsrfConfig() {
 		csrf.Path("/"),
 	)
 	r.Gin.Use(adapter.Wrap(csrfMiddleware))
+}
+
+func (r *Routing) LoggerConfig() {
+	config := logger.NewZapConfig(*r.config)
+	logger, _ := config.Build()
+	defer logger.Sync()
+
+	r.Gin.Use(ginmiddleware.Logger(logger))
 }
 
 func (r *Routing) GinModeConfig() {

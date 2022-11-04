@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
@@ -11,15 +10,23 @@ import (
 
 type AuthRepository struct {
 	contextHandler handler.ContextHandler
+	loggerHandler  handler.LoggerHandler
 	twitterHandler handler.TwitterHandler
 	sessionHandler handler.SessionHandler
 	userDbHandler  handler.UserDbHandler
 }
 
 // NewAuthRepository はAuthRepositoryを返します．
-func NewAuthRepository(contextHandler handler.ContextHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler, userDbHandler handler.UserDbHandler) port.AuthRepository {
+func NewAuthRepository(
+	contextHandler handler.ContextHandler,
+	loggerHandler handler.LoggerHandler,
+	twitterHandler handler.TwitterHandler,
+	sessionHandler handler.SessionHandler,
+	userDbHandler handler.UserDbHandler,
+) port.AuthRepository {
 	authRepository := &AuthRepository{
 		contextHandler: contextHandler,
+		loggerHandler:  loggerHandler,
 		twitterHandler: twitterHandler,
 		sessionHandler: sessionHandler,
 		userDbHandler:  userDbHandler,
@@ -47,8 +54,10 @@ func (a *AuthRepository) IsAuthenticated() (*entity.Auth, error) {
 	if err == nil {
 		// 認証成功
 		auth.Authenticated = 1
+		a.loggerHandler.Debugf("IsAuthenticated(%s) OK: token=%s secret=%s", twitterID.(string), token.(string), secret.(string))
 	} else {
-		log.Printf("GetUser() error: %v", err.Error())
+		a.loggerHandler.Errorw("IsAuthenticated() error", "error", err.Error())
+		//log.Printf("GetUser() error: %v", err.Error())
 	}
 
 	return &auth, nil
@@ -63,8 +72,11 @@ func (a *AuthRepository) Auth() (*entity.Auth, error) {
 	uri, err := a.twitterHandler.AuthorizationURL()
 
 	if err != nil {
+		a.loggerHandler.Errorw("Auth() error", "error", err.Error())
 		return &auth, err
 	}
+
+	a.loggerHandler.Debugf("Auth(): url=%s", uri)
 
 	auth.AuthUrl = uri
 
@@ -81,19 +93,22 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 	credentials, values, err := a.twitterHandler.GetCredentials(token, secret)
 
 	if err != nil {
-		log.Printf("token=%v,secret=%v", token, secret)
-		log.Println(err)
+		a.loggerHandler.Errorf("token=%s,secret=%s", token, secret)
+		a.loggerHandler.Errorw("error", "error", err)
 		return &auth, err
 	}
+
+	a.loggerHandler.Debugf("Callback() OK: token=%s secret=%s", token, secret)
 
 	// 認証成功後処理
 	// DB
 	user := entity.User{}
 	if err := a.userDbHandler.FindByTwitterID(&user, values.GetTwitterID()); err != nil {
-		log.Println(err)
+		a.loggerHandler.Errorw("Callback() FindByTwitterID: error", "error", err)
 		return &auth, err
 	}
 
+	a.loggerHandler.Debugf("user-> id:%s tid:%s", user.ID, user.TwitterID)
 	//log.Printf("user-> id:%v tid:%v", user.ID, user.TwitterID)
 	if user.ID == 0 {
 		user.Name = values.GetTwitterScreenName()
@@ -101,9 +116,10 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 		user.TwitterID = values.GetTwitterID()
 	}
 	if err := a.userDbHandler.Upsert(&user, "twitter_id", user.TwitterID); err != nil {
-		log.Println(err)
+		a.loggerHandler.Errorw("Callback() Upsert", "error", err)
 		return &auth, err
 	}
+	a.loggerHandler.Debugf("user(ID:%s TwitterID:%s) Upsert OK", user.ID, user.TwitterID)
 
 	a.twitterHandler.UpdateTwitterApi(credentials.GetToken(), credentials.GetSecret())
 	auth.Authenticated = 1
@@ -115,9 +131,11 @@ func (a *AuthRepository) Callback(token string, secret string, twitterID string,
 	a.sessionHandler.Set("twitter_id", values.GetTwitterID())
 
 	if err := a.sessionHandler.Save(); err != nil {
-		log.Println(err)
+		a.loggerHandler.Errorw("Session error", "error", err)
 		return &auth, err
 	}
+
+	a.loggerHandler.Debug("Session Set OK")
 
 	return &auth, nil
 }
@@ -132,9 +150,11 @@ func (a *AuthRepository) Logout() (*entity.Auth, error) {
 	auth.Logout = 1
 
 	if err := a.sessionHandler.Save(); err != nil {
-		log.Println(err)
+		a.loggerHandler.Errorw("Session error", "error", err)
 		return &auth, err
 	}
+
+	a.loggerHandler.Debug("Session Clear OK")
 
 	return &auth, nil
 }

@@ -9,11 +9,28 @@ import (
 
 type Block struct {
 	// -> presenter.NewBlockOutputPort
-	OutputFactory func(contextHandler handler.ContextHandler) port.BlockOutputPort
+	OutputFactory func(
+		contextHandler handler.ContextHandler,
+		LoggerHandler handler.LoggerHandler,
+	) port.BlockOutputPort
+
 	// -> interactor.NewBlockInputPort
-	InputFactory func(o port.BlockOutputPort, u port.BlockRepository) port.BlockInputPort
+	InputFactory func(
+		o port.BlockOutputPort,
+		u port.BlockRepository,
+		LoggerHandler handler.LoggerHandler,
+	) port.BlockInputPort
+
 	// -> gateway.NewBlockRepository
-	RepoFactory    func(dbHandler handler.BlockDbHandler, userDbHandler handler.UserDbHandler, twitterHandler handler.TwitterHandler, sessionHandler handler.SessionHandler) port.BlockRepository
+	RepoFactory func(
+		loggerHandler handler.LoggerHandler,
+		dbHandler handler.BlockDbHandler,
+		userDbHandler handler.UserDbHandler,
+		twitterHandler handler.TwitterHandler,
+		sessionHandler handler.SessionHandler,
+	) port.BlockRepository
+
+	LoggerHandler  handler.LoggerHandler
 	TwitterHandler handler.TwitterHandler
 	BlockDbHandler handler.BlockDbHandler
 	UserDbHandler  handler.UserDbHandler
@@ -26,12 +43,12 @@ func (b *Block) GetBlockByID(contextHandler handler.ContextHandler) {
 
 	id := b.SessionHandler.Get("user_id")
 
-	outputPort := b.OutputFactory(contextHandler)
-	repository := b.RepoFactory(b.BlockDbHandler, b.UserDbHandler, b.TwitterHandler, b.SessionHandler)
-	inputPort := b.InputFactory(outputPort, repository)
+	outputPort := b.OutputFactory(contextHandler, b.LoggerHandler)
+	repository := b.RepoFactory(b.LoggerHandler, b.BlockDbHandler, b.UserDbHandler, b.TwitterHandler, b.SessionHandler)
+	inputPort := b.InputFactory(outputPort, repository, b.LoggerHandler)
 
 	if id == nil {
-		outputPort.RenderError(errors.New("session user_id is not found"))
+		outputPort.RenderError(errors.New("session user_id is not found."))
 		return
 	}
 	inputPort.GetUserIDs(id.(string))

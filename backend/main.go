@@ -7,6 +7,7 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/database/gorm/migration"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/framework"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/logger"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/twitterapi"
 )
 
@@ -24,9 +25,10 @@ func main() {
 func server() {
 	config := config.NewConfig(".env")
 
+	loggerHandler := logger.NewZapHandler(config)
 	dbHandler := database.NewGormDbHandler(config)
 	twitterHandler := twitterapi.NewGotwiHandler(config)
 
-	r := framework.NewRouting(config, dbHandler, twitterHandler)
+	r := framework.NewRouting(config, loggerHandler, dbHandler, twitterHandler)
 	r.Run()
 }

@@ -10,12 +10,14 @@ import (
 
 type Auth struct {
 	contextHandler handler.ContextHandler
+	loggerHandler  handler.LoggerHandler
 }
 
 // NewUserOutputPort はUserOutputPortを取得します．
-func NewAuthOutputPort(contextHandler handler.ContextHandler) port.AuthOutputPort {
+func NewAuthOutputPort(contextHandler handler.ContextHandler, loggerHandler handler.LoggerHandler) port.AuthOutputPort {
 	return &Auth{
 		contextHandler: contextHandler,
+		loggerHandler:  loggerHandler,
 	}
 }
 

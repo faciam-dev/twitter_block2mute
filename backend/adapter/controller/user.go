@@ -7,11 +7,25 @@ import (
 
 type User struct {
 	// -> presenter.NewUserOutputPort
-	OutputFactory func(contextHandler handler.ContextHandler) port.UserOutputPort
+	OutputFactory func(
+		contextHandler handler.ContextHandler,
+		LoggerHandler handler.LoggerHandler,
+	) port.UserOutputPort
+
 	// -> interactor.NewUserInputPort
-	InputFactory func(o port.UserOutputPort, u port.UserRepository) port.UserInputPort
+	InputFactory func(
+		o port.UserOutputPort,
+		u port.UserRepository,
+		LoggerHandler handler.LoggerHandler,
+	) port.UserInputPort
+
 	// -> gateway.NewUserRepository
-	RepoFactory    func(dbHandler handler.UserDbHandler) port.UserRepository
+	RepoFactory func(
+		LoggerHandler handler.LoggerHandler,
+		dbHandler handler.UserDbHandler,
+	) port.UserRepository
+
+	LoggerHandler  handler.LoggerHandler
 	SessionHandler handler.SessionHandler
 	UserDbHandler  handler.UserDbHandler
 }
@@ -26,9 +40,9 @@ func (u *User) GetUserSelf(contextHandler handler.ContextHandler) {
 		userID = ""
 	}
 
-	outputPort := u.OutputFactory(contextHandler)
-	repository := u.RepoFactory(u.UserDbHandler)
-	inputPort := u.InputFactory(outputPort, repository)
+	outputPort := u.OutputFactory(contextHandler, u.LoggerHandler)
+	repository := u.RepoFactory(u.LoggerHandler, u.UserDbHandler)
+	inputPort := u.InputFactory(outputPort, repository, u.LoggerHandler)
 	inputPort.GetUserByID(userID.(string))
 
 }

@@ -10,12 +10,17 @@ import (
 
 type Block struct {
 	contextHandler handler.ContextHandler
+	loggerHandler  handler.LoggerHandler
 }
 
 // NewBlockOutputPort はBlockOutputPortを取得します．
-func NewBlockOutputPort(contextHandler handler.ContextHandler) port.BlockOutputPort {
+func NewBlockOutputPort(
+	contextHandler handler.ContextHandler,
+	loggerHandler handler.LoggerHandler,
+) port.BlockOutputPort {
 	return &Block{
 		contextHandler: contextHandler,
+		loggerHandler:  loggerHandler,
 	}
 }
 

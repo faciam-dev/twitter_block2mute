@@ -12,8 +12,14 @@ import (
 const projectDirName = "backend"
 
 type Config struct {
-	ReleaseMode string `env:"RELEASE_MODE"`
-
+	ReleaseMode        string `env:"RELEASE_MODE"`
+	UseFrameworkLogger bool   `env:"USE_FRAMEWORK_LOGGER"`
+	Logger             struct {
+		LoggerLevel                string   `env:"LOGGER_LEVEL"`
+		LoggerOutputPaths          []string `env:"LOGGER_OUTPUT_PATHS" envSeparator:","`
+		LoggerErrorOutputPaths     []string `env:"LOGGER_ERROR_OUTPUT_PATHS" envSeparator:","`
+		FrameworkLoggerOutputPaths []string `env:"FRAMEWORK_LOGGER_OUTPUT_PATHS" envSeparator:","`
+	}
 	DB struct {
 		Type     string `env:"DB_TYPE"`
 		Host     string `env:"DB_HOST"`

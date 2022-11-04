@@ -192,6 +192,11 @@ func TestGetUserIDs(t *testing.T) {
 			mockTwitterHandler.EXPECT().GetBlockedUser(args.UserTwitterID).Return(mockTwitterUser, tt.err).AnyTimes()
 			mockTwitterHandler.EXPECT().UpdateTwitterApi(args.OAuthToken, args.OAuthTokenSecret).Return().AnyTimes()
 
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return()
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return()
+
 			// sessionHandler
 			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)
 			sessionHandler.EXPECT().Get("token").Return(args.OAuthToken).AnyTimes()
@@ -200,6 +205,7 @@ func TestGetUserIDs(t *testing.T) {
 
 			// repository
 			repository := gateway.NewBlockRepository(
+				loggerHandler,
 				blockDbHandler,
 				userDbHandler,
 				mockTwitterHandler,

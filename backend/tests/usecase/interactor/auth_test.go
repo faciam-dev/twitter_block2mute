@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"github.com/faciam_dev/twitter_block2mute/backend/tests/adapter/gateway/mock_handler"
 	mock_port "github.com/faciam_dev/twitter_block2mute/backend/tests/usecase/port/mock"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/interactor"
 	"github.com/golang/mock/gomock"
@@ -126,6 +127,10 @@ func TestAuth(t *testing.T) {
 			// エンティティ類
 			fromRepositoryAuth := &entity.Auth{Authenticated: tt.args.Authenticated, AuthUrl: tt.args.AuthUrl}
 
+			// loggerモックの設定
+			logger := mock_handler.NewMockLoggerHandler(mockCtrl)
+			logger.EXPECT().Debugf(gomock.Any()).AnyTimes().Return()
+
 			// outputPort の設定
 			outputPort := mock_port.NewMockAuthOutputPort(mockCtrl)
 			outputPort.EXPECT().RenderAuth(fromRepositoryAuth).Return().AnyTimes()
@@ -136,7 +141,7 @@ func TestAuth(t *testing.T) {
 			authRepository.EXPECT().Auth().Return(fromRepositoryAuth, tt.args.RepositoryError)
 
 			// テスト対象の構築
-			interactor := interactor.NewAuthInputPort(outputPort, authRepository)
+			interactor := interactor.NewAuthInputPort(outputPort, authRepository, logger)
 
 			// 得られるものはないため、実行できればテスト通過とする。
 			interactor.Auth()
@@ -155,6 +160,10 @@ func TestIsAuthenticated(t *testing.T) {
 			// エンティティ類
 			fromRepositoryAuth := &entity.Auth{Authenticated: tt.args.Authenticated, AuthUrl: tt.args.AuthUrl}
 
+			// loggerモックの設定
+			logger := mock_handler.NewMockLoggerHandler(mockCtrl)
+			logger.EXPECT().Debugf(gomock.Any()).AnyTimes().Return()
+
 			// outputPort の設定
 			outputPort := mock_port.NewMockAuthOutputPort(mockCtrl)
 			outputPort.EXPECT().RenderIsAuth(fromRepositoryAuth).Return().AnyTimes()
@@ -165,7 +174,7 @@ func TestIsAuthenticated(t *testing.T) {
 			authRepository.EXPECT().IsAuthenticated().Return(fromRepositoryAuth, tt.args.RepositoryError)
 
 			// テスト対象の構築
-			interactor := interactor.NewAuthInputPort(outputPort, authRepository)
+			interactor := interactor.NewAuthInputPort(outputPort, authRepository, logger)
 
 			// 得られるものはないため、実行できればテスト通過とする。
 			interactor.IsAuthenticated()
@@ -184,6 +193,10 @@ func TestCallback(t *testing.T) {
 			// エンティティ類
 			fromRepositoryAuth := &entity.Auth{Authenticated: tt.args.Authenticated, AuthUrl: tt.args.AuthUrl}
 
+			// loggerモックの設定
+			logger := mock_handler.NewMockLoggerHandler(mockCtrl)
+			logger.EXPECT().Debugf(gomock.Any()).AnyTimes().Return()
+
 			// outputPort の設定
 			outputPort := mock_port.NewMockAuthOutputPort(mockCtrl)
 			outputPort.EXPECT().RenderCallback(fromRepositoryAuth).Return().AnyTimes()
@@ -199,7 +212,7 @@ func TestCallback(t *testing.T) {
 			).Return(fromRepositoryAuth, tt.args.RepositoryError)
 
 			// テスト対象の構築
-			interactor := interactor.NewAuthInputPort(outputPort, authRepository)
+			interactor := interactor.NewAuthInputPort(outputPort, authRepository, logger)
 
 			// 得られるものはないため、実行できればテスト通過とする。
 			interactor.Callback(
@@ -222,6 +235,10 @@ func TestLogout(t *testing.T) {
 			// エンティティ類
 			fromRepositoryAuth := &entity.Auth{Logout: tt.args.Logout}
 
+			// loggerモックの設定
+			logger := mock_handler.NewMockLoggerHandler(mockCtrl)
+			logger.EXPECT().Debugf(gomock.Any()).AnyTimes().Return()
+
 			// outputPort の設定
 			outputPort := mock_port.NewMockAuthOutputPort(mockCtrl)
 			outputPort.EXPECT().RenderLogout(fromRepositoryAuth).Return().AnyTimes()
@@ -232,7 +249,7 @@ func TestLogout(t *testing.T) {
 			authRepository.EXPECT().Logout().Return(fromRepositoryAuth, tt.args.RepositoryError)
 
 			// テスト対象の構築
-			interactor := interactor.NewAuthInputPort(outputPort, authRepository)
+			interactor := interactor.NewAuthInputPort(outputPort, authRepository, logger)
 
 			// 得られるものはないため、実行できればテスト通過とする。
 			interactor.Logout()

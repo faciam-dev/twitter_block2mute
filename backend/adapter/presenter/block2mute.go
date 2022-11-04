@@ -10,12 +10,17 @@ import (
 
 type Block2Mute struct {
 	contextHandler handler.ContextHandler
+	loggerHandler  handler.LoggerHandler
 }
 
 // NewBlockOutputPort はBlockOutputPortを取得します．
-func NewBlock2MuteOutputPort(contextHandler handler.ContextHandler) port.Block2MuteOutputPort {
+func NewBlock2MuteOutputPort(
+	contextHandler handler.ContextHandler,
+	loggerHandler handler.LoggerHandler,
+) port.Block2MuteOutputPort {
 	return &Block2Mute{
 		contextHandler: contextHandler,
+		loggerHandler:  loggerHandler,
 	}
 }
 
