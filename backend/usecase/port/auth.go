@@ -1,13 +1,14 @@
 package port
 
 import (
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 )
 
 type AuthInputPort interface {
 	IsAuthenticated()
 	Auth()
-	Callback(token string, secret string, twitterID string, twitterName string)
+	Callback(token string, secret string)
 	Logout()
 }
 
@@ -20,8 +21,12 @@ type AuthOutputPort interface {
 }
 
 type AuthRepository interface {
-	IsAuthenticated() (*entity.Auth, error)
-	Auth() (*entity.Auth, error)
-	Callback(token string, secret string, twitterID string, twitterName string) (*entity.Auth, error)
-	Logout() (*entity.Auth, error)
+	IsAuthenticated() error
+	GetAuthUrl() (string, error)
+	AuthByCallbackParams(token string, secret string) (handler.TwitterCredentials, handler.TwitterValues, error)
+	FindUserByTwitterID(twitterID string) (*entity.User, error)
+	UpsertUser(user *entity.User) error
+	UpdateTwitterApi(token string, secret string)
+	UpdateSession(token string, secret string, userID int, twitterID string) error
+	Logout() error
 }

@@ -7,6 +7,7 @@ package mock_port
 import (
 	reflect "reflect"
 
+	handler "github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	entity "github.com/faciam_dev/twitter_block2mute/backend/entity"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -47,15 +48,15 @@ func (mr *MockAuthInputPortMockRecorder) Auth() *gomock.Call {
 }
 
 // Callback mocks base method.
-func (m *MockAuthInputPort) Callback(token, secret, twitterID, twitterName string) {
+func (m *MockAuthInputPort) Callback(token, secret string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Callback", token, secret, twitterID, twitterName)
+	m.ctrl.Call(m, "Callback", token, secret)
 }
 
 // Callback indicates an expected call of Callback.
-func (mr *MockAuthInputPortMockRecorder) Callback(token, secret, twitterID, twitterName interface{}) *gomock.Call {
+func (mr *MockAuthInputPortMockRecorder) Callback(token, secret interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Callback", reflect.TypeOf((*MockAuthInputPort)(nil).Callback), token, secret, twitterID, twitterName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Callback", reflect.TypeOf((*MockAuthInputPort)(nil).Callback), token, secret)
 }
 
 // IsAuthenticated mocks base method.
@@ -188,43 +189,58 @@ func (m *MockAuthRepository) EXPECT() *MockAuthRepositoryMockRecorder {
 	return m.recorder
 }
 
-// Auth mocks base method.
-func (m *MockAuthRepository) Auth() (*entity.Auth, error) {
+// AuthByCallbackParams mocks base method.
+func (m *MockAuthRepository) AuthByCallbackParams(token, secret string) (handler.TwitterCredentials, handler.TwitterValues, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Auth")
-	ret0, _ := ret[0].(*entity.Auth)
+	ret := m.ctrl.Call(m, "AuthByCallbackParams", token, secret)
+	ret0, _ := ret[0].(handler.TwitterCredentials)
+	ret1, _ := ret[1].(handler.TwitterValues)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// AuthByCallbackParams indicates an expected call of AuthByCallbackParams.
+func (mr *MockAuthRepositoryMockRecorder) AuthByCallbackParams(token, secret interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthByCallbackParams", reflect.TypeOf((*MockAuthRepository)(nil).AuthByCallbackParams), token, secret)
+}
+
+// FindUserByTwitterID mocks base method.
+func (m *MockAuthRepository) FindUserByTwitterID(twitterID string) (*entity.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindUserByTwitterID", twitterID)
+	ret0, _ := ret[0].(*entity.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Auth indicates an expected call of Auth.
-func (mr *MockAuthRepositoryMockRecorder) Auth() *gomock.Call {
+// FindUserByTwitterID indicates an expected call of FindUserByTwitterID.
+func (mr *MockAuthRepositoryMockRecorder) FindUserByTwitterID(twitterID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Auth", reflect.TypeOf((*MockAuthRepository)(nil).Auth))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindUserByTwitterID", reflect.TypeOf((*MockAuthRepository)(nil).FindUserByTwitterID), twitterID)
 }
 
-// Callback mocks base method.
-func (m *MockAuthRepository) Callback(token, secret, twitterID, twitterName string) (*entity.Auth, error) {
+// GetAuthUrl mocks base method.
+func (m *MockAuthRepository) GetAuthUrl() (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Callback", token, secret, twitterID, twitterName)
-	ret0, _ := ret[0].(*entity.Auth)
+	ret := m.ctrl.Call(m, "GetAuthUrl")
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Callback indicates an expected call of Callback.
-func (mr *MockAuthRepositoryMockRecorder) Callback(token, secret, twitterID, twitterName interface{}) *gomock.Call {
+// GetAuthUrl indicates an expected call of GetAuthUrl.
+func (mr *MockAuthRepositoryMockRecorder) GetAuthUrl() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Callback", reflect.TypeOf((*MockAuthRepository)(nil).Callback), token, secret, twitterID, twitterName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuthUrl", reflect.TypeOf((*MockAuthRepository)(nil).GetAuthUrl))
 }
 
 // IsAuthenticated mocks base method.
-func (m *MockAuthRepository) IsAuthenticated() (*entity.Auth, error) {
+func (m *MockAuthRepository) IsAuthenticated() error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsAuthenticated")
-	ret0, _ := ret[0].(*entity.Auth)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // IsAuthenticated indicates an expected call of IsAuthenticated.
@@ -234,16 +250,55 @@ func (mr *MockAuthRepositoryMockRecorder) IsAuthenticated() *gomock.Call {
 }
 
 // Logout mocks base method.
-func (m *MockAuthRepository) Logout() (*entity.Auth, error) {
+func (m *MockAuthRepository) Logout() error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Logout")
-	ret0, _ := ret[0].(*entity.Auth)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Logout indicates an expected call of Logout.
 func (mr *MockAuthRepositoryMockRecorder) Logout() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockAuthRepository)(nil).Logout))
+}
+
+// UpdateSession mocks base method.
+func (m *MockAuthRepository) UpdateSession(token, secret string, userID int, twitterID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSession", token, secret, userID, twitterID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateSession indicates an expected call of UpdateSession.
+func (mr *MockAuthRepositoryMockRecorder) UpdateSession(token, secret, userID, twitterID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSession", reflect.TypeOf((*MockAuthRepository)(nil).UpdateSession), token, secret, userID, twitterID)
+}
+
+// UpdateTwitterApi mocks base method.
+func (m *MockAuthRepository) UpdateTwitterApi(token, secret string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "UpdateTwitterApi", token, secret)
+}
+
+// UpdateTwitterApi indicates an expected call of UpdateTwitterApi.
+func (mr *MockAuthRepositoryMockRecorder) UpdateTwitterApi(token, secret interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTwitterApi", reflect.TypeOf((*MockAuthRepository)(nil).UpdateTwitterApi), token, secret)
+}
+
+// UpsertUser mocks base method.
+func (m *MockAuthRepository) UpsertUser(user *entity.User) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpsertUser", user)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertUser indicates an expected call of UpsertUser.
+func (mr *MockAuthRepositoryMockRecorder) UpsertUser(user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertUser", reflect.TypeOf((*MockAuthRepository)(nil).UpsertUser), user)
 }

@@ -59,7 +59,7 @@ func TestIsAuthenticated(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "success",
+			name: "success_1",
 			args: args{
 				SessionToken:       "token",
 				SessionTokenSecret: "secret",
@@ -69,13 +69,11 @@ func TestIsAuthenticated(t *testing.T) {
 				OAuthToken:         "token",
 				OAuthTokenSecret:   "secret",
 			},
-			want: entity.Auth{
-				Authenticated: 1,
-			},
-			err: nil,
+			want: *entity.NewAuth("").SuccessAuthenticated(),
+			err:  nil,
 		},
 		{
-			name: "success",
+			name: "success_2",
 			args: args{
 				SessionToken:       nil,
 				SessionTokenSecret: nil,
@@ -85,10 +83,8 @@ func TestIsAuthenticated(t *testing.T) {
 				OAuthToken:         "token",
 				OAuthTokenSecret:   "secret",
 			},
-			want: entity.Auth{
-				Authenticated: 0,
-			},
-			err: nil,
+			want: *entity.NewAuth(""),
+			err:  nil,
 		},
 	}
 
@@ -141,13 +137,9 @@ func TestIsAuthenticated(t *testing.T) {
 				dbUserHandler,
 			)
 
-			got, err := authRepository.IsAuthenticated()
+			err = authRepository.IsAuthenticated()
 			if tt.err != err {
 				t.Errorf("IsAuthenticated() err = %v, want %v", err, tt.err)
-			}
-
-			if got.Authenticated != tt.want.Authenticated {
-				t.Errorf("IsAuthenticated() Authenticated = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -169,11 +161,8 @@ func TestAuth(t *testing.T) {
 			args: args{
 				AuthUrl: "https://api.twitter.com/oauth/authenticate",
 			},
-			want: entity.Auth{
-				Authenticated: 0,
-				AuthUrl:       "https://api.twitter.com/oauth/authenticate",
-			},
-			err: nil,
+			want: *entity.NewAuth("https://api.twitter.com/oauth/authenticate"),
+			err:  nil,
 		},
 	}
 
@@ -213,21 +202,21 @@ func TestAuth(t *testing.T) {
 				dbUserHandler,
 			)
 
-			got, err := authRepository.Auth()
+			got, err := authRepository.GetAuthUrl()
 
 			if tt.err != err {
 				t.Errorf("Auth() err = %v, want %v", err, tt.err)
 			}
 
-			if got.Authenticated != tt.want.Authenticated || strings.Index(got.AuthUrl, tt.want.AuthUrl) > 0 {
-				t.Errorf("Auth() auth = %v, want %v", got, tt.want)
+			if strings.Index(tt.want.GetAuthUrl(), got) > 0 {
+				t.Errorf("Auth() auth = %v, want %v", got, tt.want.GetAuthUrl())
 			}
 		})
 	}
 }
 
-// Callbackに対するテスト
-func TestCallback(t *testing.T) {
+// AuthByCallbackParamsに対するテスト
+func TestAuthByCallbackParams(t *testing.T) {
 	type args struct {
 		SessionToken       interface{}
 		SessionTokenSecret interface{}
@@ -237,10 +226,16 @@ func TestCallback(t *testing.T) {
 		OAuthToken         string
 		OAuthTokenSecret   string
 	}
+	type wantResult struct {
+		OAuthToken       string
+		OAuthTokenSecret string
+		TwitterName      string
+		TwitterID        string
+	}
 	table := []struct {
 		name string
 		args args
-		want entity.Auth
+		want wantResult
 		err  error
 	}{
 		{
@@ -254,8 +249,11 @@ func TestCallback(t *testing.T) {
 				OAuthToken:         "token",
 				OAuthTokenSecret:   "secret",
 			},
-			want: entity.Auth{
-				Authenticated: 1,
+			want: wantResult{
+				OAuthToken:       "token",
+				OAuthTokenSecret: "secret",
+				TwitterName:      "test",
+				TwitterID:        "1234567890",
 			},
 			err: nil,
 		},
@@ -265,27 +263,13 @@ func TestCallback(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, dbMock, err := newMockGormDbUserHandler()
+			dbUserHandler, _, err := newMockGormDbUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
 			}
 
 			// モックの生成
-			// sqlmock処理
-			// dbHandler
-			dbMock.ExpectQuery(
-				regexp.QuoteMeta("SELECT * FROM `users` WHERE twitter_id = ?")).
-				WithArgs(args.TwitterID).
-				WillReturnRows(sqlmock.NewRows([]string{"id", "name", "account_name", "twitter_id"}).AddRow(1, args.TwitterName, args.TwitterAccountName, args.TwitterID))
-
-			dbMock.ExpectBegin()
-			dbMock.ExpectExec(
-				regexp.QuoteMeta("INSERT INTO `users` (`created_at`,`updated_at`,`deleted_at`,`name`,`account_name`,`twitter_id`,`id`) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE `updated_at`=?,`deleted_at`=VALUES(`deleted_at`),`name`=VALUES(`name`),`account_name`=VALUES(`account_name`),`twitter_id`=VALUES(`twitter_id`)")).
-				WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), args.TwitterName, args.TwitterAccountName, args.TwitterID, sqlmock.AnyArg(), sqlmock.AnyArg()).
-				WillReturnResult(sqlmock.NewResult(1, 1))
-			dbMock.ExpectCommit()
-
 			// gomock処理
 			mockCtrl := gomock.NewController(t)
 			defer mockCtrl.Finish()
@@ -333,18 +317,370 @@ func TestCallback(t *testing.T) {
 				dbUserHandler,
 			)
 
-			got, err := authRepository.Callback(args.OAuthToken, args.OAuthTokenSecret, args.TwitterID, args.TwitterName)
+			gotTwitterCredentials, gotTwitterValues, err := authRepository.AuthByCallbackParams(args.OAuthToken, args.OAuthTokenSecret)
+
+			if tt.err != err {
+				t.Errorf("AuthByCallbackParams() err = %v, want %v", err, tt.err)
+			}
+
+			if gotTwitterCredentials.GetSecret() != tt.want.OAuthTokenSecret || gotTwitterCredentials.GetToken() != tt.want.OAuthToken {
+				t.Errorf(
+					"AuthByCallbackParams() Credentials = secret:%v token:%v , want = secret: %v token:%v",
+					gotTwitterCredentials.GetSecret(),
+					gotTwitterCredentials.GetToken(),
+					tt.want.OAuthTokenSecret,
+					tt.want.OAuthToken,
+				)
+			}
+
+			if gotTwitterValues.GetTwitterID() != tt.args.TwitterID || gotTwitterValues.GetTwitterScreenName() != tt.args.TwitterName {
+				t.Errorf(
+					"AuthByCallbackParams() TwitterValues = twitterID:%v twitterScreenName:%v , want = twitterID:%v twitterScreenName:%v",
+					gotTwitterValues.GetTwitterID(),
+					gotTwitterValues.GetTwitterScreenName(),
+					tt.want.TwitterID,
+					tt.want.TwitterName,
+				)
+			}
+
+		})
+	}
+}
+
+// FindUserByTwitterIDに対するテスト
+func TestFindUserByTwitterID(t *testing.T) {
+	type args struct {
+		UserID             uint
+		TwitterName        string
+		TwitterAccountName string
+		TwitterID          string
+	}
+	table := []struct {
+		name string
+		args args
+		want *entity.User
+		err  error
+	}{
+		{
+			name: "success",
+			args: args{
+				UserID:             1,
+				TwitterName:        "test",
+				TwitterAccountName: "Test",
+				TwitterID:          "1234567890",
+			},
+			want: &entity.User{
+				ID:          1,
+				TwitterID:   "1234567890",
+				Name:        "test",
+				AccountName: "Test",
+			}, // TODO: ファクトリ関数に書き換える。
+			err: nil,
+		},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.name, func(t *testing.T) {
+			args := tt.args
+
+			dbUserHandler, dbMock, err := newMockGormDbUserHandler()
+
+			if err != nil {
+				t.Error("sqlmock not work")
+			}
+
+			// モックの生成
+			// sqlmock処理
+			// dbHandler
+			dbMock.ExpectQuery(
+				regexp.QuoteMeta("SELECT * FROM `users` WHERE twitter_id = ?")).
+				WithArgs(args.TwitterID).
+				WillReturnRows(sqlmock.NewRows([]string{"id", "name", "account_name", "twitter_id"}).AddRow(args.UserID, args.TwitterName, args.TwitterAccountName, args.TwitterID))
+
+			// gomock処理
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// contextHandler
+			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
+
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debug(gomock.Any()).AnyTimes().Return()
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes().Return()
+
+			// twtterHandler
+			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
+
+			// sessionHandler
+			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)
+			sessionHandler.EXPECT().SetContextHandler(contextHandler).Return()
+
+			// repository
+			authRepository := gateway.NewAuthRepository(
+				contextHandler,
+				loggerHandler,
+				mockTwitterHandler,
+				sessionHandler,
+				dbUserHandler,
+			)
+
+			got, err := authRepository.FindUserByTwitterID(args.TwitterID)
 
 			if err := dbMock.ExpectationsWereMet(); err != nil {
-				t.Errorf("IsAuthenticated(): %v", err)
+				t.Errorf("FindUserByTwitterID(): %v", err)
 			}
 
 			if tt.err != err {
-				t.Errorf("IsAuthenticated() err = %v, want %v", err, tt.err)
+				t.Errorf("FindUserByTwitterID() err = %v, want %v", err, tt.err)
 			}
 
-			if got.Authenticated != tt.want.Authenticated {
-				t.Errorf("IsAuthenticated() Authenticated = %v, want %v", got, tt.want)
+			if *got != *tt.want {
+				t.Errorf(
+					"FindUserByTwitterID() = %v , want = %v", got, tt.want,
+				)
+			}
+
+		})
+	}
+}
+
+// UpsertUserに対するテスト
+func TestUpsertUser(t *testing.T) {
+	type args struct {
+		UserID             uint
+		TwitterName        string
+		TwitterAccountName string
+		TwitterID          string
+	}
+	table := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "success",
+			args: args{
+				UserID:             1,
+				TwitterName:        "test",
+				TwitterAccountName: "Test",
+				TwitterID:          "1234567890",
+			},
+			err: nil,
+		},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.name, func(t *testing.T) {
+			args := tt.args
+
+			dbUserHandler, dbMock, err := newMockGormDbUserHandler()
+
+			if err != nil {
+				t.Error("sqlmock not work")
+			}
+
+			// モックの生成
+			// sqlmock処理
+
+			// dbHandler
+			dbMock.ExpectBegin()
+			dbMock.ExpectExec(
+				regexp.QuoteMeta("INSERT INTO `users` (`created_at`,`updated_at`,`deleted_at`,`name`,`account_name`,`twitter_id`,`id`) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE `updated_at`=?,`deleted_at`=VALUES(`deleted_at`),`name`=VALUES(`name`),`account_name`=VALUES(`account_name`),`twitter_id`=VALUES(`twitter_id`)")).
+				WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), args.TwitterName, args.TwitterAccountName, args.TwitterID, sqlmock.AnyArg(), sqlmock.AnyArg()).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+			dbMock.ExpectCommit()
+
+			// gomock処理
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// contextHandler
+			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
+
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes().Return()
+
+			// twtterHandler
+			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
+
+			// sessionHandler
+			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)
+			sessionHandler.EXPECT().SetContextHandler(contextHandler).Return()
+
+			// repository
+			authRepository := gateway.NewAuthRepository(
+				contextHandler,
+				loggerHandler,
+				mockTwitterHandler,
+				sessionHandler,
+				dbUserHandler,
+			)
+
+			user := &entity.User{
+				ID:          args.UserID,
+				TwitterID:   args.TwitterID,
+				Name:        args.TwitterName,
+				AccountName: args.TwitterAccountName,
+			} // TODO:ファクトリ関数を使う
+			err = authRepository.UpsertUser(user)
+
+			if err := dbMock.ExpectationsWereMet(); err != nil {
+				t.Errorf("FindUserByTwitterID(): %v", err)
+			}
+
+			if tt.err != err {
+				t.Errorf("FindUserByTwitterID() err = %v, want %v", err, tt.err)
+			}
+
+		})
+	}
+}
+
+func TestUpdateTwitterApi(t *testing.T) {
+	type args struct {
+		OAuthToken       string
+		OAuthTokenSecret string
+	}
+	table := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "success",
+			args: args{
+				OAuthToken:       "token",
+				OAuthTokenSecret: "secret",
+			},
+			err: nil,
+		},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.name, func(t *testing.T) {
+			args := tt.args
+
+			dbUserHandler, _, err := newMockGormDbUserHandler()
+
+			if err != nil {
+				t.Error("sqlmock not work")
+			}
+
+			// gomock処理
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// contextHandler
+			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
+
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+
+			// twtterHandler
+			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
+			mockTwitterHandler.EXPECT().UpdateTwitterApi(args.OAuthToken, args.OAuthTokenSecret).Return().AnyTimes()
+
+			// sessionHandler
+			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)
+			sessionHandler.EXPECT().SetContextHandler(contextHandler).Return()
+
+			// repository
+			authRepository := gateway.NewAuthRepository(
+				contextHandler,
+				loggerHandler,
+				mockTwitterHandler,
+				sessionHandler,
+				dbUserHandler,
+			)
+
+			// エラーなしで実行できること。
+			authRepository.UpdateTwitterApi(args.OAuthToken, args.OAuthTokenSecret)
+		})
+	}
+}
+
+// UpdateSessionに対するテスト
+func TestUpdateSession(t *testing.T) {
+	type args struct {
+		TwitterName        string
+		TwitterAccountName string
+		TwitterID          string
+		UserID             int
+		OAuthToken         string
+		OAuthTokenSecret   string
+	}
+	table := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "success",
+			args: args{
+				TwitterName:        "test",
+				TwitterAccountName: "Test",
+				TwitterID:          "1234567890",
+				UserID:             1,
+				OAuthToken:         "token",
+				OAuthTokenSecret:   "secret",
+			},
+			err: nil,
+		},
+	}
+
+	for _, tt := range table {
+		t.Run(tt.name, func(t *testing.T) {
+			args := tt.args
+
+			dbUserHandler, _, err := newMockGormDbUserHandler()
+
+			if err != nil {
+				t.Error("sqlmock not work")
+			}
+
+			// モックの生成
+			// gomock処理
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// contextHandler
+			contextHandler := mock_handler.NewMockContextHandler(mockCtrl)
+
+			// loggerHandler
+			loggerHandler := mock_handler.NewMockLoggerHandler(mockCtrl)
+			loggerHandler.EXPECT().Debug(gomock.Any()).AnyTimes().Return()
+			loggerHandler.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes().Return()
+
+			// twtterHandler
+			mockTwitterHandler := mock_handler.NewMockTwitterHandler(mockCtrl)
+
+			// sessionHandler
+			sessionHandler := mock_handler.NewMockSessionHandler(mockCtrl)
+			sessionHandler.EXPECT().SetContextHandler(contextHandler).Return()
+			sessionHandler.EXPECT().Set(gomock.Any(), gomock.Any()).Return().AnyTimes()
+			sessionHandler.EXPECT().Set(gomock.Any(), gomock.Any()).Return().AnyTimes()
+			sessionHandler.EXPECT().Save().Return(nil).AnyTimes()
+
+			// repository
+			authRepository := gateway.NewAuthRepository(
+				contextHandler,
+				loggerHandler,
+				mockTwitterHandler,
+				sessionHandler,
+				dbUserHandler,
+			)
+
+			err = authRepository.UpdateSession(
+				args.OAuthToken,
+				args.OAuthTokenSecret,
+				args.UserID,
+				args.TwitterID,
+			)
+
+			if tt.err != err {
+				t.Errorf("AuthByCallbackParams() err = %v, want %v", err, tt.err)
 			}
 		})
 	}
@@ -359,10 +695,8 @@ func TestLogout(t *testing.T) {
 	}{
 		{
 			name: "success",
-			want: entity.Auth{
-				Logout: 1,
-			},
-			err: nil,
+			want: *entity.NewAuth("").SuccessLogout(),
+			err:  nil,
 		},
 	}
 
@@ -403,14 +737,10 @@ func TestLogout(t *testing.T) {
 				dbUserHandler,
 			)
 
-			got, err := authRepository.Logout()
+			err := authRepository.Logout()
 
 			if tt.err != err {
-				t.Errorf("Auth() err = %v, want %v", err, tt.err)
-			}
-
-			if got.Logout != tt.want.Logout {
-				t.Errorf("Auth() auth = %v, want %v", got, tt.want)
+				t.Errorf("Logout() err = %v, want %v", err, tt.err)
 			}
 		})
 	}

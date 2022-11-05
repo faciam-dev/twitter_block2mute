@@ -51,22 +51,19 @@ type Auth struct {
 }
 
 func (a *Auth) IsAuth(contextHandler handler.ContextHandler) {
-	auth := entity.Auth{
-		Authenticated: 1,
-	}
+	auth := entity.NewAuth("")
+	auth.SuccessAuthenticated()
 
 	contextHandler.JSON(http.StatusOK, map[string]interface{}{
-		"result": auth.Authenticated,
+		"result": auth.GetAuthenticated(),
 	})
 }
 
 func (a *Auth) Auth(contextHandler handler.ContextHandler) {
-	auth := entity.Auth{
-		AuthUrl: "http://test/test",
-	}
+	auth := entity.NewAuth("http://test/test")
 
 	contextHandler.JSON(http.StatusOK, map[string]interface{}{
-		"to_url": auth.AuthUrl,
+		"to_url": auth.GetAuthUrl(),
 	})
 }
 
@@ -89,12 +86,11 @@ func (a *Auth) Callback(contextHandler handler.ContextHandler) {
 }
 
 func (a *Auth) Logout(contextHandler handler.ContextHandler) {
-	auth := entity.Auth{
-		Logout: 1,
-	}
+	auth := entity.NewAuth("")
+	auth.SuccessLogout()
 
 	contextHandler.JSON(http.StatusOK, map[string]interface{}{
-		"result": auth.Logout,
+		"result": auth.GetLogout(),
 	})
 }
 

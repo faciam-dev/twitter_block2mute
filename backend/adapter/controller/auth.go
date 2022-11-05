@@ -55,13 +55,11 @@ func (a *Auth) Auth(contextHandler handler.ContextHandler) {
 func (a *Auth) Callback(contextHandler handler.ContextHandler) {
 	token := contextHandler.Query("oauth_token")
 	secret := contextHandler.Query("oauth_verifier")
-	twitterID := contextHandler.Query("user_id")
-	twitterName := contextHandler.Query("screen_name")
 
 	outputPort := a.OutputFactory(contextHandler, a.LoggerHandler)
 	repository := a.RepoFactory(contextHandler, a.LoggerHandler, a.TwitterHandler, a.SessionHandler, a.UserDbHandler)
 	inputPort := a.InputFactory(outputPort, repository, a.LoggerHandler)
-	inputPort.Callback(token, secret, twitterID, twitterName)
+	inputPort.Callback(token, secret)
 }
 
 // ログアウト処理

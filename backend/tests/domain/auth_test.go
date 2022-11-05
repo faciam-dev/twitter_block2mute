@@ -8,45 +8,47 @@ import (
 
 func TestCreateAuthDomain(t *testing.T) {
 	type args struct {
-		Authenticated    int
-		AuthUrl          string
-		OAuthToken       string
-		OAuthTokenSecret string
-		Logout           int
+		Authenticated int
+		AuthUrl       string
+		Logout        int
 	}
+
 	tests := []struct {
 		name string
 		args args
-		want entity.Auth
+		want *entity.Auth
 	}{
+
 		{
-			name: "success",
+			name: "success_1",
 			args: args{
-				Authenticated:    1,
-				AuthUrl:          "http://localhost/auth/auth",
-				OAuthToken:       "token",
-				OAuthTokenSecret: "secret",
-				Logout:           0,
+				Authenticated: 1,
+				AuthUrl:       "http://localhost/auth/auth",
+				Logout:        0,
 			},
-			want: entity.Auth{
-				Authenticated:    1,
-				AuthUrl:          "http://localhost/auth/auth",
-				OAuthToken:       "token",
-				OAuthTokenSecret: "secret",
-				Logout:           0,
+			want: entity.NewAuth("http://localhost/auth/auth").SuccessAuthenticated(),
+		},
+		{
+			name: "success_2",
+			args: args{
+				Authenticated: 0,
+				AuthUrl:       "http://localhost/auth/auth",
+				Logout:        1,
 			},
+			want: entity.NewAuth("http://localhost/auth/auth").SuccessLogout(),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := entity.Auth{
-				Authenticated:    tt.args.Authenticated,
-				AuthUrl:          tt.args.AuthUrl,
-				OAuthToken:       tt.args.OAuthToken,
-				OAuthTokenSecret: tt.args.OAuthTokenSecret,
-				Logout:           tt.args.Logout,
+			got := entity.NewAuth(tt.args.AuthUrl)
+			if tt.args.Authenticated == 1 {
+				got.SuccessAuthenticated()
 			}
-			if got != tt.want {
+			if tt.args.Logout == 1 {
+				got.SuccessLogout()
+			}
+
+			if *got != *tt.want {
 				t.Errorf("createAuthDomain() = %v, want %v", got, tt.want)
 			}
 		})
