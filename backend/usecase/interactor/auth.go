@@ -2,6 +2,7 @@ package interactor
 
 import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
+	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 )
 
@@ -23,38 +24,76 @@ func NewAuthInputPort(
 	}
 }
 
+// auth url取得のusecase
 func (a *Auth) Auth() {
-	auth, err := a.AuthRepo.Auth()
+	url, err := a.AuthRepo.GetAuthUrl()
 	if err != nil {
 		a.OutputPort.RenderError(err)
 		return
 	}
+	auth := entity.NewAuth(url)
 	a.OutputPort.RenderAuth(auth)
 }
 
+// auth判定のusecase
 func (a *Auth) IsAuthenticated() {
-	auth, err := a.AuthRepo.IsAuthenticated()
-	if err != nil {
+	if err := a.AuthRepo.IsAuthenticated(); err != nil {
+		a.LoggerHandler.Errorw("IsAuthenticated() error", "error", err.Error())
 		a.OutputPort.RenderError(err)
 		return
 	}
+	auth := entity.NewAuth("")
+	auth.SuccessAuthenticated()
 	a.OutputPort.RenderIsAuth(auth)
 }
 
-func (a *Auth) Callback(token string, secret string, twitterID string, twitterName string) {
-	auth, err := a.AuthRepo.Callback(token, secret, twitterID, twitterName)
+// callback処理のusecase
+func (a *Auth) Callback(token string, secret string) {
+	twitterCredentials, twitterValues, err := a.AuthRepo.AuthByCallbackParams(token, secret)
 	if err != nil {
 		a.OutputPort.RenderError(err)
 		return
 	}
+
+	user, err := a.AuthRepo.FindUserByTwitterID(twitterValues.GetTwitterID())
+	if err != nil {
+		a.OutputPort.RenderError(err)
+		return
+	}
+
+	// 新規ユーザー向け処理
+	if user.ID == 0 {
+		user.Name = twitterValues.GetTwitterScreenName()
+		user.AccountName = twitterValues.GetTwitterScreenName()
+		user.TwitterID = twitterValues.GetTwitterID()
+	}
+
+	if err := a.AuthRepo.UpsertUser(user); err != nil {
+		a.OutputPort.RenderError(err)
+		return
+	}
+
+	a.AuthRepo.UpdateTwitterApi(twitterCredentials.GetToken(), twitterCredentials.GetSecret())
+
+	if err := a.AuthRepo.UpdateSession(twitterCredentials.GetToken(), twitterCredentials.GetSecret(), int(user.ID), user.TwitterID); err != nil {
+		a.OutputPort.RenderError(err)
+		return
+	}
+
+	auth := entity.NewAuth("")
+	auth.SuccessAuthenticated()
+
 	a.OutputPort.RenderCallback(auth)
 }
 
+// logout処理のusecase
 func (a *Auth) Logout() {
-	auth, err := a.AuthRepo.Logout()
+	err := a.AuthRepo.Logout()
 	if err != nil {
 		a.OutputPort.RenderError(err)
 		return
 	}
+	auth := entity.NewAuth("")
+	auth.SuccessLogout()
 	a.OutputPort.RenderLogout(auth)
 }
