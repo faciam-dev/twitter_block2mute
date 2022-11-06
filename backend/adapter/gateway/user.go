@@ -32,7 +32,7 @@ func (u *UserRepository) GetUserByID(userID string) (*entity.User, error) {
 		u.loggerHandler.Errorf("user not found (user_id=%s)", userID)
 		return &entity.User{}, err
 	}
-	if strconv.FormatUint(uint64(user.ID), 10) != userID {
+	if strconv.FormatUint(uint64(user.GetID()), 10) != userID {
 		return &entity.User{}, errors.New("user is not found")
 	}
 	u.loggerHandler.Debugf("user found (user_id=%s)", userID)

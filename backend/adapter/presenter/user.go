@@ -25,8 +25,8 @@ func NewUserOutputPort(contextHandler handler.ContextHandler, loggerHandler hand
 // Render はUserモデルを出力します．
 func (u *User) Render(user *entity.User) {
 	u.contextHandler.JSON(http.StatusOK, map[string]interface{}{
-		"id":   user.ID,
-		"name": user.Name,
+		"id":   user.GetID(),
+		"name": user.GetName(),
 	})
 }
 

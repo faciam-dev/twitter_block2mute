@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 
 	// userテーブルから何も得られない場合はseederを実行
 	user := &entity.User{}
-	if err := UserDbHandler.Find(user, "id", "1"); err != nil || user.ID == 0 {
+	if err := UserDbHandler.Find(user, "id", "1"); err != nil || user.GetID() == 0 {
 		migration.Seeder()
 	}
 

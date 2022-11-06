@@ -60,12 +60,12 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 	u.loggerHandler.Debugf("update twitter api (user_id=%s token=%s secret=%s)", userID, token.(string), secret.(string))
 
 	// blocks
-	twitterUserIds, err := u.twitterHandler.GetBlockedUser(user.TwitterID)
+	twitterUserIds, err := u.twitterHandler.GetBlockedUser(user.GetTwitterID())
 
 	// 0件以外は変換できるようにする。
 	// ブロック数が多い場合の対策。
 	if err != nil && len(twitterUserIds.GetTwitterIDs()) == 0 {
-		u.loggerHandler.Warnw("twitter blocklist API error.", "twitter_id", user.TwitterID, "error", err)
+		u.loggerHandler.Warnw("twitter blocklist API error.", "twitter_id", user.GetTwitterID(), "error", err)
 		return &blocks, 0, err
 	}
 
@@ -148,7 +148,7 @@ func (u *BlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error
 					"user_id",
 					userID,
 					"twitter_id",
-					user.TwitterID,
+					user.GetTwitterID(),
 					"error",
 					err,
 				)

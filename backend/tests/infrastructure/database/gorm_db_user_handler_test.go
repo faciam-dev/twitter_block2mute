@@ -22,10 +22,12 @@ func TestFirst(t *testing.T) {
 			arg{
 				value: "1",
 			},
-			entity.User{
-				Name:      "name1",
-				TwitterID: "1234567890",
-			},
+			*entity.NewBlankUser().Update(
+				1,
+				"name1",
+				"name1",
+				"1234567890",
+			),
 		},
 	}
 
@@ -35,7 +37,7 @@ func TestFirst(t *testing.T) {
 			UserDbHandler.First(&user, tt.arg.value)
 
 			// 中身の比較
-			if user.Name != tt.wantUser.Name || user.TwitterID != tt.wantUser.TwitterID {
+			if user.GetName() != tt.wantUser.GetName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
 				t.Errorf("First()  = %v, want %v", user, tt.wantUser)
 			}
 		})
@@ -55,17 +57,19 @@ func TestCreate(t *testing.T) {
 		{
 			"success",
 			arg{
-				createSource: entity.User{
-					Name:        "name2",
-					AccountName: "Name2",
-					TwitterID:   "1234567892",
-				},
+				createSource: *entity.NewBlankUser().Update(
+					0,
+					"name2",
+					"name2",
+					"1234567892",
+				),
 			},
-			entity.User{
-				Name:        "name2",
-				AccountName: "Name2",
-				TwitterID:   "1234567892",
-			},
+			*entity.NewBlankUser().Update(
+				0,
+				"name2",
+				"name2",
+				"1234567892",
+			),
 		},
 	}
 
@@ -77,7 +81,7 @@ func TestCreate(t *testing.T) {
 				UserDbHandler.Create(&user)
 
 				// 中身の比較
-				if user.Name != tt.wantUser.Name || user.AccountName != tt.wantUser.AccountName || user.TwitterID != tt.wantUser.TwitterID {
+				if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
 					t.Errorf("Create()  = %v, want %v", user, tt.wantUser)
 				}
 			})
@@ -103,17 +107,19 @@ func TestUpdate(t *testing.T) {
 			arg{
 				column: "id",
 				value:  "1",
-				createSource: entity.User{
-					Name:        "newname1",
-					AccountName: "newName1",
-					TwitterID:   "1234567890",
-				},
+				createSource: *entity.NewBlankUser().Update(
+					0,
+					"newname1",
+					"newname1",
+					"1234567890",
+				),
 			},
-			entity.User{
-				Name:        "newname1",
-				AccountName: "newName1",
-				TwitterID:   "1234567890",
-			},
+			*entity.NewBlankUser().Update(
+				0,
+				"newname1",
+				"newname1",
+				"1234567890",
+			),
 		},
 	}
 
@@ -125,7 +131,7 @@ func TestUpdate(t *testing.T) {
 				UserDbHandler.Update(&user, tt.arg.value)
 
 				// 中身の比較
-				if user.Name != tt.wantUser.Name || user.AccountName != tt.wantUser.AccountName || user.TwitterID != tt.wantUser.TwitterID {
+				if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
 					t.Errorf("Update()  = %v, want %v", user, tt.wantUser)
 				}
 			})
@@ -151,34 +157,38 @@ func TestUpsert(t *testing.T) {
 			arg{
 				column: "id",
 				value:  "2",
-				createSource: entity.User{
-					Name:        "name2",
-					AccountName: "Name2",
-					TwitterID:   "1234567892",
-				},
+				createSource: *entity.NewBlankUser().Update(
+					0,
+					"name2",
+					"name2",
+					"1234567892",
+				),
 			},
-			entity.User{
-				Name:        "name2",
-				AccountName: "Name2",
-				TwitterID:   "1234567892",
-			},
+			*entity.NewBlankUser().Update(
+				0,
+				"name2",
+				"name2",
+				"1234567892",
+			),
 		},
 		{
 			"success_update",
 			arg{
 				column: "id",
 				value:  "1",
-				createSource: entity.User{
-					Name:        "newname1",
-					AccountName: "newName1",
-					TwitterID:   "1234567890",
-				},
+				createSource: *entity.NewBlankUser().Update(
+					0,
+					"newName1",
+					"newName1",
+					"1234567890",
+				),
 			},
-			entity.User{
-				Name:        "newname1",
-				AccountName: "newName1",
-				TwitterID:   "1234567890",
-			},
+			*entity.NewBlankUser().Update(
+				0,
+				"newName1",
+				"newName1",
+				"1234567890",
+			),
 		},
 	}
 
@@ -190,7 +200,7 @@ func TestUpsert(t *testing.T) {
 				UserDbHandler.Upsert(&user, tt.arg.column, tt.arg.value)
 
 				// 中身の比較
-				if user.Name != tt.wantUser.Name || user.AccountName != tt.wantUser.AccountName || user.TwitterID != tt.wantUser.TwitterID {
+				if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
 					t.Errorf("Upsert()  = %v, want %v", user, tt.wantUser)
 				}
 			})
@@ -217,10 +227,12 @@ func TestFind(t *testing.T) {
 				column: "id",
 				value:  "1",
 			},
-			entity.User{
-				Name:      "name1",
-				TwitterID: "1234567890",
-			},
+			*entity.NewBlankUser().Update(
+				0,
+				"name1",
+				"name1",
+				"1234567890",
+			),
 		},
 	}
 
@@ -232,7 +244,7 @@ func TestFind(t *testing.T) {
 			}
 
 			// 中身の比較
-			if user.Name != tt.wantUser.Name || user.TwitterID != tt.wantUser.TwitterID {
+			if user.GetName() != tt.wantUser.GetName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
 				t.Errorf("Find(%v, %v)  = %v, want %v", tt.arg.column, tt.arg.value, user, tt.wantUser)
 			}
 		})
@@ -254,10 +266,12 @@ func TestFindByTwitterID(t *testing.T) {
 			arg{
 				value: "1234567890",
 			},
-			entity.User{
-				Name:      "name1",
-				TwitterID: "1234567890",
-			},
+			*entity.NewBlankUser().Update(
+				0,
+				"name1",
+				"name1",
+				"1234567890",
+			),
 		},
 	}
 
@@ -267,7 +281,7 @@ func TestFindByTwitterID(t *testing.T) {
 			UserDbHandler.FindByTwitterID(&user, tt.arg.value)
 
 			// 中身の比較
-			if user.Name != tt.wantUser.Name || user.TwitterID != tt.wantUser.TwitterID {
+			if user.GetName() != tt.wantUser.GetName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
 				t.Errorf("FindByTwitterID(%v)  = %v, want %v", tt.arg.value, user, tt.wantUser)
 			}
 		})
