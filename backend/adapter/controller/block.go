@@ -48,7 +48,7 @@ func (b *Block) GetBlockByID(contextHandler handler.ContextHandler) {
 	inputPort := b.InputFactory(outputPort, repository, b.LoggerHandler)
 
 	if id == nil {
-		outputPort.RenderError(errors.New("session user_id is not found."))
+		outputPort.RenderError(errors.New("session user_id is not found"))
 		return
 	}
 	inputPort.GetUserIDs(id.(string))

@@ -106,11 +106,11 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 
 			// 移行処理
 			// NOTE: 既にブロックを解除している場合はエラーを返さないようにする。
-			if err := b.twitterHandler.DestroyBlock(user.TwitterID, registedBlockEntity.TargetTwitterID); err != nil {
+			if err := b.twitterHandler.DestroyBlock(user.GetTwitterID(), registedBlockEntity.TargetTwitterID); err != nil {
 				b.loggerHandler.Warnw(
 					"destroy block error.",
 					"TwitterID",
-					user.TwitterID,
+					user.GetTwitterID(),
 					"TargetTwitterID",
 					registedBlockEntity.TargetTwitterID,
 					"error",
@@ -120,11 +120,11 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 			}
 
 			// NOTE: 既にミュートにしている場合はエラーを返さないようにする。
-			if err := b.twitterHandler.CreateMute(user.TwitterID, registedBlockEntity.TargetTwitterID); err != nil {
+			if err := b.twitterHandler.CreateMute(user.GetTwitterID(), registedBlockEntity.TargetTwitterID); err != nil {
 				b.loggerHandler.Warnw(
 					"create mute error.",
 					"TwitterID",
-					user.TwitterID,
+					user.GetTwitterID(),
 					"TargetTwitterID",
 					registedBlockEntity.TargetTwitterID,
 					"error",
@@ -150,7 +150,7 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 					"user_id",
 					userID,
 					"twitter_id",
-					user.TwitterID,
+					user.GetTwitterID(),
 					"error",
 					err,
 				)
@@ -164,7 +164,7 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 					"user_id",
 					userID,
 					"twitter_id",
-					user.TwitterID,
+					user.GetTwitterID(),
 					"error",
 					err,
 				)

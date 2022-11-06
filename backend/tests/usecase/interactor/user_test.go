@@ -53,7 +53,7 @@ func TestGetUserByID(t *testing.T) {
 
 			// エンティティ類
 			userID, _ := strconv.ParseUint(tt.args.UserID, 10, 64)
-			fromRepositoryUser := &entity.User{ID: uint(userID)}
+			fromRepositoryUser := entity.NewBlankUser().Update(uint(userID), "", "", "")
 
 			// loggerモックの設定
 			logger := mock_handler.NewMockLoggerHandler(mockCtrl)

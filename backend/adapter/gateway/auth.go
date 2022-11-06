@@ -93,19 +93,19 @@ func (a *AuthRepository) FindUserByTwitterID(twitterID string) (*entity.User, er
 		return &user, err
 	}
 
-	a.loggerHandler.Debugf("user-> id:%s tid:%s", user.ID, twitterID)
+	a.loggerHandler.Debugf("user-> id:%s tid:%s", user.GetID(), twitterID)
 
 	return &user, nil
 }
 
 // userのUpsert処理
 func (a *AuthRepository) UpsertUser(user *entity.User) error {
-	if err := a.userDbHandler.Upsert(user, "twitter_id", user.TwitterID); err != nil {
+	if err := a.userDbHandler.Upsert(user, "twitter_id", user.GetTwitterID()); err != nil {
 		a.loggerHandler.Errorw("Callback() Upsert", "error", err)
 		return err
 	}
 
-	a.loggerHandler.Debugf("user(ID:%s TwitterID:%s) Upsert OK", user.ID, user.TwitterID)
+	a.loggerHandler.Debugf("user(ID:%s TwitterID:%s) Upsert OK", user.GetID(), user.GetTwitterID())
 
 	return nil
 }

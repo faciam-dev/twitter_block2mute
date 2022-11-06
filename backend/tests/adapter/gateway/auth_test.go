@@ -369,13 +369,8 @@ func TestFindUserByTwitterID(t *testing.T) {
 				TwitterAccountName: "Test",
 				TwitterID:          "1234567890",
 			},
-			want: &entity.User{
-				ID:          1,
-				TwitterID:   "1234567890",
-				Name:        "test",
-				AccountName: "Test",
-			}, // TODO: ファクトリ関数に書き換える。
-			err: nil,
+			want: entity.NewBlankUser().Update(1, "test", "Test", "1234567890"),
+			err:  nil,
 		},
 	}
 
@@ -518,12 +513,13 @@ func TestUpsertUser(t *testing.T) {
 				dbUserHandler,
 			)
 
-			user := &entity.User{
-				ID:          args.UserID,
-				TwitterID:   args.TwitterID,
-				Name:        args.TwitterName,
-				AccountName: args.TwitterAccountName,
-			} // TODO:ファクトリ関数を使う
+			user := entity.NewBlankUser().Update(
+				args.UserID,
+				args.TwitterName,
+				args.TwitterAccountName,
+				args.TwitterID,
+			)
+
 			err = authRepository.UpsertUser(user)
 
 			if err := dbMock.ExpectationsWereMet(); err != nil {

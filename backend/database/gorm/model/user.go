@@ -15,11 +15,12 @@ type User struct {
 	UserMute    []UserMute
 }
 
+/*
 func (u *User) FromUserDomain(userEntity *entity.User) {
-	u.ID = userEntity.ID
-	u.Name = userEntity.Name
-	u.AccountName = userEntity.AccountName
-	u.TwitterID = userEntity.TwitterID
+	u.ID = userEntity.GetID()
+	u.Name = userEntity.GetName()
+	u.AccountName = userEntity.GetAccountName()
+	u.TwitterID = userEntity.GetTwitterID()
 }
 
 func (u *User) ToUserDomain(i interface{}) {
@@ -30,6 +31,7 @@ func (u *User) ToUserDomain(i interface{}) {
 		s.TwitterID = u.TwitterID
 	}
 }
+*/
 
 // for domain
 type UserModelForDomain struct {
@@ -38,19 +40,23 @@ type UserModelForDomain struct {
 }
 
 func (u *UserModelForDomain) FromDomain(userEntity *entity.User) User {
-	u.User.ID = userEntity.ID
-	u.User.Name = userEntity.Name
-	u.User.AccountName = userEntity.AccountName
-	u.User.TwitterID = userEntity.TwitterID
+	u.User.ID = userEntity.GetID()
+	u.User.Name = userEntity.GetName()
+	u.User.AccountName = userEntity.GetAccountName()
+	u.User.TwitterID = userEntity.GetTwitterID()
 
 	return u.User
 }
 
 func (u *UserModelForDomain) ToDomain(userModel User, userEntity *entity.User) {
-	userEntity.ID = userModel.ID
-	userEntity.Name = userModel.Name
-	userEntity.AccountName = userModel.AccountName
-	userEntity.TwitterID = userModel.TwitterID
+
+	userEntity.Update(userModel.ID, userModel.Name, userModel.AccountName, userModel.TwitterID)
+	/*
+		userEntity.ID = userModel.ID
+		userEntity.Name = userModel.Name
+		userEntity.AccountName = userModel.AccountName
+		userEntity.TwitterID = userModel.TwitterID
+	*/
 }
 
 func (u *UserModelForDomain) ToDomains(models []User, entities *[]entity.User) {
@@ -60,23 +66,3 @@ func (u *UserModelForDomain) ToDomains(models []User, entities *[]entity.User) {
 		*entities = append(*entities, *entity)
 	}
 }
-
-/*
-	func (u *UserModelForDomain[E, M]) ToDomain(userModel User, userEntity interface{}) {
-		switch userEntity.(type) {
-		case E:
-			log.Print("cast")
-				casted.ID = userModel.ID
-				casted.Name = userModel.Name
-				casted.AccountName = userModel.AccountName
-				casted.TwitterID = userModel.TwitterID
-		default:
-			log.Print("nottt")
-		}
-	}
-*/
-/*
-func (u *UserModelForDomain[E, M]) Blank() M {
-	return M(u.User)
-}
-*/

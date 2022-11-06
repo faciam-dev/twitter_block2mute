@@ -35,11 +35,12 @@ func TestGetUserByID(t *testing.T) {
 				UserName:      "test",
 				UserTwitterID: "1234567890",
 			},
-			want: &entity.User{
-				ID:        1,
-				Name:      "test",
-				TwitterID: "1234567890",
-			},
+			want: entity.NewBlankUser().Update(
+				1,
+				"test",
+				"Test",
+				"1234567890",
+			),
 			err: nil,
 		},
 		{
@@ -96,7 +97,7 @@ func TestGetUserByID(t *testing.T) {
 				t.Errorf("GetUserByID() err = %v, want = %v", err, tt.err)
 			}
 
-			if got.ID != tt.want.ID {
+			if got.GetID() != tt.want.GetID() {
 				t.Errorf("GetUserByID(%v) user = %v, want = %v", strconv.FormatInt(args.SearchID, 10), got, tt.want)
 			}
 		})

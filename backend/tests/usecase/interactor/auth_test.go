@@ -240,7 +240,7 @@ func TestCallback(t *testing.T) {
 			authRepository.EXPECT().UpdateSession(
 				mockTwitterCredentials.GetToken(),
 				mockTwitterCredentials.GetSecret(),
-				int(user.ID),
+				int(user.GetID()),
 				mockTwitterValue.GetTwitterID(),
 			).Return(tt.args.RepositoryError).AnyTimes()
 

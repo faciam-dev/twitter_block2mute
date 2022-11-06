@@ -11,8 +11,6 @@ func TestCreateUserDomain(t *testing.T) {
 		ID        uint
 		Name      string
 		TwitterID string
-		CreatedAt int64
-		UpdatedAt int64
 	}
 	tests := []struct {
 		name string
@@ -25,27 +23,24 @@ func TestCreateUserDomain(t *testing.T) {
 				ID:        1,
 				Name:      "test1",
 				TwitterID: "12345678901234567890",
-				CreatedAt: 1663673740,
-				UpdatedAt: 1663673800,
 			},
-			want: entity.User{
-				ID:        1,
-				Name:      "test1",
-				TwitterID: "12345678901234567890",
-				CreatedAt: 1663673740,
-				UpdatedAt: 1663673800,
-			},
+			want: *entity.NewBlankUser().Update(
+				1,
+				"test1",
+				"test1",
+				"12345678901234567890",
+			),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := entity.User{
-				ID:        tt.args.ID,
-				Name:      tt.args.Name,
-				TwitterID: tt.args.TwitterID,
-				CreatedAt: tt.args.CreatedAt,
-				UpdatedAt: tt.args.UpdatedAt,
-			}
+			got := *entity.NewBlankUser().Update(
+				tt.args.ID,
+				tt.args.Name,
+				tt.args.Name,
+				tt.args.TwitterID,
+			)
+
 			if got != tt.want {
 				t.Errorf("createUserDomain() = %v, want %v", got, tt.want)
 			}

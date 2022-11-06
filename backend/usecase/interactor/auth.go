@@ -62,10 +62,19 @@ func (a *Auth) Callback(token string, secret string) {
 	}
 
 	// 新規ユーザー向け処理
-	if user.ID == 0 {
-		user.Name = twitterValues.GetTwitterScreenName()
-		user.AccountName = twitterValues.GetTwitterScreenName()
-		user.TwitterID = twitterValues.GetTwitterID()
+	if user.GetID() == 0 {
+		user.Update(
+			user.GetID(),
+			twitterValues.GetTwitterScreenName(),
+			twitterValues.GetTwitterScreenName(),
+			twitterValues.GetTwitterID(),
+		)
+
+		/*
+			user.Name = twitterValues.GetTwitterScreenName()
+			user.AccountName = twitterValues.GetTwitterScreenName()
+			user.TwitterID = twitterValues.GetTwitterID()
+		*/
 	}
 
 	if err := a.AuthRepo.UpsertUser(user); err != nil {
@@ -75,7 +84,7 @@ func (a *Auth) Callback(token string, secret string) {
 
 	a.AuthRepo.UpdateTwitterApi(twitterCredentials.GetToken(), twitterCredentials.GetSecret())
 
-	if err := a.AuthRepo.UpdateSession(twitterCredentials.GetToken(), twitterCredentials.GetSecret(), int(user.ID), user.TwitterID); err != nil {
+	if err := a.AuthRepo.UpdateSession(twitterCredentials.GetToken(), twitterCredentials.GetSecret(), int(user.GetID()), user.GetTwitterID()); err != nil {
 		a.OutputPort.RenderError(err)
 		return
 	}
