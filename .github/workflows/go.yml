@@ -12,6 +12,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: 1234
+          MYSQL_DATABASE: test_db_name
+          MYSQL_USER: username
+          MYSQL_PASSWORD: password
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v3
 
@@ -19,6 +34,9 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.19
+
+      - name: Copy test env file
+        run: cp backend/.env.test.sample backend/.env.test
 
       - name: Build
         run: cd backend && go build -v ./...
