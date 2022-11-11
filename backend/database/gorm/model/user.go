@@ -15,24 +15,6 @@ type User struct {
 	UserMute    []UserMute
 }
 
-/*
-func (u *User) FromUserDomain(userEntity *entity.User) {
-	u.ID = userEntity.GetID()
-	u.Name = userEntity.GetName()
-	u.AccountName = userEntity.GetAccountName()
-	u.TwitterID = userEntity.GetTwitterID()
-}
-
-func (u *User) ToUserDomain(i interface{}) {
-	if s, ok := i.(*entity.User); ok {
-		s.ID = u.ID
-		s.Name = u.Name
-		s.AccountName = u.AccountName
-		s.TwitterID = u.TwitterID
-	}
-}
-*/
-
 // for domain
 type UserModelForDomain struct {
 	User
@@ -49,14 +31,7 @@ func (u *UserModelForDomain) FromDomain(userEntity *entity.User) User {
 }
 
 func (u *UserModelForDomain) ToDomain(userModel User, userEntity *entity.User) {
-
 	userEntity.Update(userModel.ID, userModel.Name, userModel.AccountName, userModel.TwitterID)
-	/*
-		userEntity.ID = userModel.ID
-		userEntity.Name = userModel.Name
-		userEntity.AccountName = userModel.AccountName
-		userEntity.TwitterID = userModel.TwitterID
-	*/
 }
 
 func (u *UserModelForDomain) ToDomains(models []User, entities *[]entity.User) {

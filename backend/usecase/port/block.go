@@ -9,11 +9,13 @@ type BlockInputPort interface {
 }
 
 type BlockOutputPort interface {
-	Render(*[]entity.Block, int)
+	Render(*entity.Blocks, int)
 	RenderNotFound()
 	RenderError(error)
 }
 
 type BlockRepository interface {
-	GetUserIDs(userID string) (*[]entity.Block, int, error)
+	GetUser(userID string) *entity.User
+	GetBlocks(user *entity.User) (*entity.Blocks, int, error)
+	TxUpdateAndDeleteBlocks(user *entity.User, blocks *entity.Blocks) error
 }

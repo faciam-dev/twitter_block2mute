@@ -30,24 +30,20 @@ func TestCreateBlockDomain(t *testing.T) {
 				CreatedAt:       timeNow,
 				UpdatedAt:       timeNow,
 			},
-			want: entity.Block{
-				ID:              1,
-				TargetTwitterID: "1234567890",
-				Flag:            1,
-				CreatedAt:       timeNow,
-				UpdatedAt:       timeNow,
-			},
+			want: *entity.NewBlock(
+				1, "1234567890", 1, timeNow, timeNow,
+			),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := entity.Block{
-				ID:              tt.args.ID,
-				TargetTwitterID: tt.args.TargetTwitterID,
-				Flag:            tt.args.Flag,
-				CreatedAt:       tt.args.CreatedAt,
-				UpdatedAt:       tt.args.UpdatedAt,
-			}
+			got := *entity.NewBlock(
+				tt.args.ID,
+				tt.args.TargetTwitterID,
+				tt.args.Flag,
+				tt.args.CreatedAt,
+				tt.args.UpdatedAt,
+			)
 			if got != tt.want {
 				t.Errorf("createBlockDomain() = %v, want %v", got, tt.want)
 			}

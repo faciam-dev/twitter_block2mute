@@ -26,10 +26,10 @@ func NewBlockOutputPort(
 
 // usecase.BlockOutputPortを実装している
 // Render はBlockモデルを出力します．
-func (u *Block) Render(blocks *[]entity.Block, total int) {
+func (u *Block) Render(blocks *entity.Blocks, total int) {
 	twitterIDs := []string{}
 	for _, block := range *blocks {
-		twitterIDs = append(twitterIDs, block.TargetTwitterID)
+		twitterIDs = append(twitterIDs, block.GetTargetTwitterID())
 	}
 
 	u.contextHandler.JSON(http.StatusOK, map[string]interface{}{

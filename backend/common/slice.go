@@ -8,3 +8,8 @@ func Contains(elems []string, v string) bool {
 	}
 	return false
 }
+
+// スライスの指定要素を削除する
+func Remove[T any](arr []T, i int) []T {
+	return arr[:i+copy(arr[i:], arr[i+1:])]
+}

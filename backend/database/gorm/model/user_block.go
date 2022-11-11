@@ -14,27 +14,6 @@ type UserBlock struct {
 	User            User
 }
 
-/*
-func (u *UserBlock) FromDomain(blockEntity *entity.Block) {
-	u.ID = blockEntity.ID
-	u.TargetTwitterID = blockEntity.TargetTwitterID
-	u.Flag = blockEntity.Flag
-	u.UserID = blockEntity.UserID
-	u.CreatedAt = blockEntity.CreatedAt
-	u.UpdatedAt = blockEntity.UpdatedAt
-}
-
-func (u *UserBlock) ToDomain(i interface{}) {
-	if s, ok := i.(*entity.Block); ok {
-		s.ID = u.ID
-		s.TargetTwitterID = u.TargetTwitterID
-		s.Flag = u.Flag
-		s.UserID = u.UserID
-		s.CreatedAt = u.CreatedAt
-		s.UpdatedAt = u.UpdatedAt
-	}
-}
-*/
 // for domain
 type UserBlockModelForDomain struct {
 	UserBlock
@@ -42,23 +21,33 @@ type UserBlockModelForDomain struct {
 }
 
 func (u *UserBlockModelForDomain) FromDomain(entity *entity.Block) UserBlock {
-	u.UserBlock.ID = entity.ID
-	u.UserBlock.TargetTwitterID = entity.TargetTwitterID
-	u.UserBlock.Flag = entity.Flag
-	u.UserBlock.UserID = entity.UserID
-	u.UserBlock.CreatedAt = entity.CreatedAt
-	u.UserBlock.UpdatedAt = entity.UpdatedAt
+	u.UserBlock.ID = entity.GetID()
+	u.UserBlock.TargetTwitterID = entity.GetTargetTwitterID()
+	u.UserBlock.Flag = entity.GetFlag()
+	u.UserBlock.UserID = entity.GetUserID()
+	u.UserBlock.CreatedAt = entity.GetCreatedAt()
+	u.UserBlock.UpdatedAt = entity.GetUpdatedAt()
 
 	return u.UserBlock
 }
 
 func (u *UserBlockModelForDomain) ToDomain(model UserBlock, entity *entity.Block) {
-	entity.ID = model.ID
-	entity.TargetTwitterID = model.TargetTwitterID
-	entity.Flag = model.Flag
-	entity.UserID = model.UserID
-	entity.CreatedAt = model.CreatedAt
-	entity.UpdatedAt = model.UpdatedAt
+	/*
+		entity.ID = model.ID
+		entity.UserID = model.UserID
+		entity.TargetTwitterID = model.TargetTwitterID
+		entity.Flag = model.Flag
+		entity.CreatedAt = model.CreatedAt
+		entity.UpdatedAt = model.UpdatedAt
+	*/
+	entity.Update(
+		model.ID,
+		model.UserID,
+		model.TargetTwitterID,
+		model.Flag,
+		model.CreatedAt,
+		model.UpdatedAt,
+	)
 }
 
 func (u *UserBlockModelForDomain) ToDomains(models []UserBlock, entities *[]entity.Block) {

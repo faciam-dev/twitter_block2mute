@@ -68,7 +68,7 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 			return err
 		}
 		sort.Slice(registedBlockEntities, func(i, j int) bool {
-			return registedBlockEntities[i].TargetTwitterID <= registedBlockEntities[j].TargetTwitterID
+			return registedBlockEntities[i].GetTargetTwitterID() <= registedBlockEntities[j].GetTargetTwitterID()
 		})
 		b.loggerHandler.Debugf("user_id=%s Num_Of_blocks=%d", userID, len(registedBlockEntities))
 
@@ -88,7 +88,7 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 		for _, registedBlockEntity := range registedBlockEntities {
 
 			// mute除外
-			needleTwitterID := registedBlockEntity.TargetTwitterID
+			needleTwitterID := registedBlockEntity.GetTargetTwitterID()
 			idx := sort.Search(len(registedMuteEntities), func(i int) bool {
 				return string(registedMuteEntities[i].TargetTwitterID) == needleTwitterID
 			})
@@ -99,20 +99,20 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 			}
 
 			// block除外
-			if registedBlockEntity.Flag == 1 {
+			if registedBlockEntity.GetFlag() == 1 {
 				b.loggerHandler.Debugf("skip block flag=1 user_id=%s target_twitter_id=%s", userID, registedMuteEntities[idx].TargetTwitterID)
 				continue
 			}
 
 			// 移行処理
 			// NOTE: 既にブロックを解除している場合はエラーを返さないようにする。
-			if err := b.twitterHandler.DestroyBlock(user.GetTwitterID(), registedBlockEntity.TargetTwitterID); err != nil {
+			if err := b.twitterHandler.DestroyBlock(user.GetTwitterID(), registedBlockEntity.GetTargetTwitterID()); err != nil {
 				b.loggerHandler.Warnw(
 					"destroy block error.",
 					"TwitterID",
 					user.GetTwitterID(),
 					"TargetTwitterID",
-					registedBlockEntity.TargetTwitterID,
+					registedBlockEntity.GetTargetTwitterID(),
 					"error",
 					err,
 				)
@@ -120,23 +120,23 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 			}
 
 			// NOTE: 既にミュートにしている場合はエラーを返さないようにする。
-			if err := b.twitterHandler.CreateMute(user.GetTwitterID(), registedBlockEntity.TargetTwitterID); err != nil {
+			if err := b.twitterHandler.CreateMute(user.GetTwitterID(), registedBlockEntity.GetTargetTwitterID()); err != nil {
 				b.loggerHandler.Warnw(
 					"create mute error.",
 					"TwitterID",
 					user.GetTwitterID(),
 					"TargetTwitterID",
-					registedBlockEntity.TargetTwitterID,
+					registedBlockEntity.GetTargetTwitterID(),
 					"error",
 					err,
 				)
 				continue
 			}
-			registedBlockEntity.Flag = 1
+			registedBlockEntity.Converted()
 			convertedBlockEntities = append(convertedBlockEntities, registedBlockEntity)
 			mute := entity.Mute{
-				TargetTwitterID: registedBlockEntity.TargetTwitterID,
-				UserID:          registedBlockEntity.UserID,
+				TargetTwitterID: registedBlockEntity.GetTargetTwitterID(),
+				UserID:          registedBlockEntity.GetUserID(),
 				Flag:            1,
 			}
 			muteEntities = append(muteEntities, mute)

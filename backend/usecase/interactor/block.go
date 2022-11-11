@@ -24,7 +24,13 @@ func NewBlockInputPort(
 }
 
 func (b *Block) GetUserIDs(userID string) {
-	blocks, total, err := b.BlockRepo.GetUserIDs(userID)
+	user := b.BlockRepo.GetUser(userID)
+	blocks, total, err := b.BlockRepo.GetBlocks(user)
+	if err != nil {
+		b.OutputPort.RenderError(err)
+		return
+	}
+	err = b.BlockRepo.TxUpdateAndDeleteBlocks(user, blocks)
 	if err != nil {
 		b.OutputPort.RenderError(err)
 		return

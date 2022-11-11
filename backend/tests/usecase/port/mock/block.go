@@ -70,7 +70,7 @@ func (m *MockBlockOutputPort) EXPECT() *MockBlockOutputPortMockRecorder {
 }
 
 // Render mocks base method.
-func (m *MockBlockOutputPort) Render(arg0 *[]entity.Block, arg1 int) {
+func (m *MockBlockOutputPort) Render(arg0 *entity.Blocks, arg1 int) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Render", arg0, arg1)
 }
@@ -128,18 +128,46 @@ func (m *MockBlockRepository) EXPECT() *MockBlockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// GetUserIDs mocks base method.
-func (m *MockBlockRepository) GetUserIDs(userID string) (*[]entity.Block, int, error) {
+// GetBlocks mocks base method.
+func (m *MockBlockRepository) GetBlocks(user *entity.User) (*entity.Blocks, int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserIDs", userID)
-	ret0, _ := ret[0].(*[]entity.Block)
+	ret := m.ctrl.Call(m, "GetBlocks", user)
+	ret0, _ := ret[0].(*entity.Blocks)
 	ret1, _ := ret[1].(int)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-// GetUserIDs indicates an expected call of GetUserIDs.
-func (mr *MockBlockRepositoryMockRecorder) GetUserIDs(userID interface{}) *gomock.Call {
+// GetBlocks indicates an expected call of GetBlocks.
+func (mr *MockBlockRepositoryMockRecorder) GetBlocks(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserIDs", reflect.TypeOf((*MockBlockRepository)(nil).GetUserIDs), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlocks", reflect.TypeOf((*MockBlockRepository)(nil).GetBlocks), user)
+}
+
+// GetUser mocks base method.
+func (m *MockBlockRepository) GetUser(userID string) *entity.User {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUser", userID)
+	ret0, _ := ret[0].(*entity.User)
+	return ret0
+}
+
+// GetUser indicates an expected call of GetUser.
+func (mr *MockBlockRepositoryMockRecorder) GetUser(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockBlockRepository)(nil).GetUser), userID)
+}
+
+// TxUpdateAndDeleteBlocks mocks base method.
+func (m *MockBlockRepository) TxUpdateAndDeleteBlocks(user *entity.User, blocks *entity.Blocks) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TxUpdateAndDeleteBlocks", user, blocks)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// TxUpdateAndDeleteBlocks indicates an expected call of TxUpdateAndDeleteBlocks.
+func (mr *MockBlockRepositoryMockRecorder) TxUpdateAndDeleteBlocks(user, blocks interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TxUpdateAndDeleteBlocks", reflect.TypeOf((*MockBlockRepository)(nil).TxUpdateAndDeleteBlocks), user, blocks)
 }

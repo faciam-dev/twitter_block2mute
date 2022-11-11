@@ -3,6 +3,7 @@ package database_test
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 )
@@ -11,7 +12,7 @@ func TestFindAllByTwitterID(t *testing.T) {
 	type arg struct {
 		value string
 	}
-
+	nowTime := time.Now()
 	table := []struct {
 		name         string
 		arg          arg
@@ -23,21 +24,9 @@ func TestFindAllByTwitterID(t *testing.T) {
 				value: "1",
 			},
 			[]entity.Block{
-				{
-					UserID:          1,
-					TargetTwitterID: "12345678901",
-					Flag:            1,
-				},
-				{
-					UserID:          1,
-					TargetTwitterID: "12345678902",
-					Flag:            1,
-				},
-				{
-					UserID:          1,
-					TargetTwitterID: "12345678903",
-					Flag:            0,
-				},
+				*entity.NewBlock(1, "12345678901", 1, nowTime, nowTime),
+				*entity.NewBlock(1, "12345678902", 1, nowTime, nowTime),
+				*entity.NewBlock(1, "12345678903", 0, nowTime, nowTime),
 			},
 		},
 	}
@@ -53,9 +42,9 @@ func TestFindAllByTwitterID(t *testing.T) {
 			for i, wantBlock := range tt.wantEntities {
 				isError := true
 				for _, gotBlock := range blocks {
-					if gotBlock.UserID == wantBlock.UserID &&
-						gotBlock.TargetTwitterID == wantBlock.TargetTwitterID &&
-						gotBlock.Flag == wantBlock.Flag {
+					if gotBlock.GetUserID() == wantBlock.GetUserID() &&
+						gotBlock.GetTargetTwitterID() == wantBlock.GetTargetTwitterID() &&
+						gotBlock.GetFlag() == wantBlock.GetFlag() {
 						isError = false
 						break
 					}
@@ -74,7 +63,7 @@ func TestCreateNewBlocks(t *testing.T) {
 		value        string
 		createSource entity.Block
 	}
-
+	nowTime := time.Now()
 	table := []struct {
 		name      string
 		arg       arg
@@ -83,36 +72,20 @@ func TestCreateNewBlocks(t *testing.T) {
 		{
 			"success_insert",
 			arg{
-				column: "id",
-				value:  "4",
-				createSource: entity.Block{
-					UserID:          1,
-					TargetTwitterID: "12345678904",
-					Flag:            1,
-				},
+				column:       "id",
+				value:        "4",
+				createSource: *entity.NewBlock(1, "12345678904", 1, nowTime, nowTime),
 			},
-			entity.Block{
-				UserID:          1,
-				TargetTwitterID: "12345678904",
-				Flag:            1,
-			},
+			*entity.NewBlock(1, "12345678904", 1, nowTime, nowTime),
 		},
 		{
 			"success_update",
 			arg{
-				column: "id",
-				value:  "3",
-				createSource: entity.Block{
-					UserID:          1,
-					TargetTwitterID: "12345678903",
-					Flag:            0,
-				},
+				column:       "id",
+				value:        "3",
+				createSource: *entity.NewBlock(1, "12345678903", 0, nowTime, nowTime),
 			},
-			entity.Block{
-				UserID:          1,
-				TargetTwitterID: "12345678903",
-				Flag:            0,
-			},
+			*entity.NewBlock(1, "12345678903", 0, nowTime, nowTime),
 		},
 	}
 
@@ -127,7 +100,7 @@ func TestCreateNewBlocks(t *testing.T) {
 				}
 
 				// 中身の比較
-				if blocks[0].Flag != tt.wantBlock.Flag || blocks[0].UserID != tt.wantBlock.UserID || blocks[0].TargetTwitterID != tt.wantBlock.TargetTwitterID {
+				if blocks[0].GetFlag() != tt.wantBlock.GetFlag() || blocks[0].GetUserID() != tt.wantBlock.GetUserID() || blocks[0].GetTargetTwitterID() != tt.wantBlock.GetTargetTwitterID() {
 					t.Errorf("CreateNewBlocks()  = %v, want %v", blocks[0], tt.wantBlock)
 				}
 			})
