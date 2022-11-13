@@ -28,10 +28,9 @@ var (
 			name: "success",
 			args: argsAll{
 				UserID: "1",
-				Block2Mute: entity.Block2Mute{
-					NumberOfSuccess:   1,
-					SuccessTwitterIDs: []string{"1"},
-				},
+				Block2Mute: *entity.NewBlock2Mute(
+					1, []string{"1"},
+				),
 				RepositoryError: nil,
 			},
 		},

@@ -198,10 +198,9 @@ func TestAuthTwitter(t *testing.T) {
 					},
 				},
 			},
-			want: &entity.Block2Mute{
-				NumberOfSuccess:   1,
-				SuccessTwitterIDs: []string{"1234567891"},
-			},
+			want: entity.NewBlock2Mute(
+				1, []string{"1234567891"},
+			),
 			err: nil,
 		},
 		{
@@ -216,10 +215,9 @@ func TestAuthTwitter(t *testing.T) {
 				blocks:           []blocksRow{},
 				mutes:            []mutesRow{},
 			},
-			want: &entity.Block2Mute{
-				NumberOfSuccess:   0,
-				SuccessTwitterIDs: []string{},
-			},
+			want: entity.NewBlock2Mute(
+				0, []string{},
+			),
 			err: nil,
 		},
 	}
@@ -344,10 +342,9 @@ func TestAll(t *testing.T) {
 					},
 				},
 			},
-			want: &entity.Block2Mute{
-				NumberOfSuccess:   1,
-				SuccessTwitterIDs: []string{"1234567891"},
-			},
+			want: entity.NewBlock2Mute(
+				1, []string{"1234567891"},
+			),
 			err: nil,
 		},
 		{
@@ -362,10 +359,9 @@ func TestAll(t *testing.T) {
 				blocks:           []blocksRow{},
 				mutes:            []mutesRow{},
 			},
-			want: &entity.Block2Mute{
-				NumberOfSuccess:   0,
-				SuccessTwitterIDs: []string{},
-			},
+			want: entity.NewBlock2Mute(
+				0, []string{},
+			),
 			err: nil,
 		},
 	}
@@ -492,8 +488,8 @@ func TestAll(t *testing.T) {
 				t.Errorf("All() err = %v, want = %v", err, tt.err)
 			}
 
-			if !reflect.DeepEqual(gotBlock2Mute.SuccessTwitterIDs, tt.want.SuccessTwitterIDs) ||
-				gotBlock2Mute.NumberOfSuccess != tt.want.NumberOfSuccess {
+			if !reflect.DeepEqual(gotBlock2Mute.GetSuccessTwitterIDs(), tt.want.GetSuccessTwitterIDs()) ||
+				gotBlock2Mute.GetNumberOfSuccess() != tt.want.GetNumberOfSuccess() {
 				t.Errorf("All(%v) got = %v, want = %v", args.UserID, gotBlock2Mute, tt.want)
 			}
 

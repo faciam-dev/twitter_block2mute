@@ -23,20 +23,18 @@ func TestCreateBlock2MuteDomain(t *testing.T) {
 				NumberOfSuccess:   1,
 				SuccessTwitterIDs: []string{"1"},
 			},
-			want: entity.Block2Mute{
-				NumberOfSuccess:   1,
-				SuccessTwitterIDs: []string{"1"},
-			},
+			want: *entity.NewBlock2Mute(
+				1, []string{"1"},
+			),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := entity.Block2Mute{
-				NumberOfSuccess:   tt.args.NumberOfSuccess,
-				SuccessTwitterIDs: tt.args.SuccessTwitterIDs,
-			}
-			if got.NumberOfSuccess != tt.want.NumberOfSuccess ||
-				!reflect.DeepEqual(got.SuccessTwitterIDs, tt.want.SuccessTwitterIDs) {
+			got := entity.NewBlock2Mute(
+				tt.args.NumberOfSuccess, tt.args.SuccessTwitterIDs,
+			)
+			if got.GetNumberOfSuccess() != tt.want.GetNumberOfSuccess() ||
+				!reflect.DeepEqual(got.GetSuccessTwitterIDs(), tt.want.GetSuccessTwitterIDs()) {
 				t.Errorf("createBlock2MuteDomain() = %v, want %v", got, tt.want)
 			}
 		})

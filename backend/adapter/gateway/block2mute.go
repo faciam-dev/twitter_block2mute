@@ -66,7 +66,6 @@ func (b *Block2MuteRepository) AuthTwitter() error {
 }
 
 func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error) {
-	block2Mute := entity.Block2Mute{}
 	userID := strconv.FormatUint(uint64(user.GetID()), 10)
 
 	// update blocks table
@@ -195,12 +194,15 @@ func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error
 	})
 
 	if err != nil {
+		block2Mute := entity.Block2Mute{}
 		b.loggerHandler.Errorw("transaction fails", "error", err)
 		return &block2Mute, err
 	}
 
-	block2Mute.NumberOfSuccess = uint(len(convertedIDs))
-	block2Mute.SuccessTwitterIDs = convertedIDs
+	block2Mute := entity.NewBlock2Mute(
+		uint(len(convertedIDs)),
+		convertedIDs,
+	)
 
-	return &block2Mute, nil
+	return block2Mute, nil
 }
