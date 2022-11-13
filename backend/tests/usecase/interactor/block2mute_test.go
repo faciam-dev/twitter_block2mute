@@ -65,7 +65,9 @@ func TestAll(t *testing.T) {
 
 			// userRepositoryモックの設定
 			block2MuteRepository := mock_port.NewMockBlock2MuteRepository(mockCtrl)
-			block2MuteRepository.EXPECT().All(tt.args.UserID).Return(&tt.args.Block2Mute, tt.args.RepositoryError)
+			block2MuteRepository.EXPECT().GetUser(tt.args.UserID).Return(entity.NewBlankUser())
+			block2MuteRepository.EXPECT().AuthTwitter().Return(tt.args.RepositoryError).AnyTimes()
+			block2MuteRepository.EXPECT().All(entity.NewBlankUser()).Return(&tt.args.Block2Mute, tt.args.RepositoryError).AnyTimes()
 
 			// テスト対象の構築
 			interactor := interactor.NewBlock2MuteInputPort(outputPort, block2MuteRepository, logger)
