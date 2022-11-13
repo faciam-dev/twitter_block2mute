@@ -115,6 +115,8 @@ func (bs *Blocks) FindAllIDsNotFoundWithTwitterID(targetBlocks *Blocks) []uint {
 	return IDs
 }
 
+// フィルタ性質のあるゲッタ
+// 変換済みではないblocksを得る
 func (bs *Blocks) GetNotConvertedBlocks() *Blocks {
 	blocks := &Blocks{}
 	for _, v := range *bs {

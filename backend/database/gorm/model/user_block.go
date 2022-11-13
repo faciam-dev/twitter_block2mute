@@ -32,14 +32,6 @@ func (u *UserBlockModelForDomain) FromDomain(entity *entity.Block) UserBlock {
 }
 
 func (u *UserBlockModelForDomain) ToDomain(model UserBlock, entity *entity.Block) {
-	/*
-		entity.ID = model.ID
-		entity.UserID = model.UserID
-		entity.TargetTwitterID = model.TargetTwitterID
-		entity.Flag = model.Flag
-		entity.CreatedAt = model.CreatedAt
-		entity.UpdatedAt = model.UpdatedAt
-	*/
 	entity.Update(
 		model.ID,
 		model.UserID,
