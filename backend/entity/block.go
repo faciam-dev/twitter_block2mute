@@ -84,6 +84,10 @@ func (b *Block) NotConverted() {
 	b.flag = 0
 }
 
+func (b *Block) IsConverted() bool {
+	return b.flag != 0
+}
+
 // ソート
 func (bs *Blocks) SortByTargetTwtitterID() {
 	sort.Slice(*bs, func(i, j int) bool {

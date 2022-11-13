@@ -15,5 +15,7 @@ type Block2MuteOutputPort interface {
 }
 
 type Block2MuteRepository interface {
-	All(userID string) (*entity.Block2Mute, error)
+	GetUser(userID string) *entity.User
+	AuthTwitter() error
+	All(user *entity.User) (*entity.Block2Mute, error)
 }

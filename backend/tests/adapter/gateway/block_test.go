@@ -123,7 +123,7 @@ func TestGetUser(t *testing.T) {
 			}
 
 			if err != nil && errors.Is(tt.err, err) {
-				t.Errorf("GetUserIDs() err = %v, want = %v", err, tt.err)
+				t.Errorf("GetUser() err = %v, want = %v", err, tt.err)
 			}
 
 			if got.GetID() != tt.wantUser.GetID() ||

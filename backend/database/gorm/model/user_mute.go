@@ -21,23 +21,25 @@ type UserMuteModelForDomain struct {
 }
 
 func (u *UserMuteModelForDomain) FromDomain(entity *entity.Mute) UserMute {
-	u.UserMute.ID = entity.ID
-	u.UserMute.TargetTwitterID = entity.TargetTwitterID
-	u.UserMute.Flag = entity.Flag
-	u.UserMute.UserID = entity.UserID
-	u.UserMute.CreatedAt = entity.CreatedAt
-	u.UserMute.UpdatedAt = entity.UpdatedAt
+	u.UserMute.ID = entity.GetID()
+	u.UserMute.TargetTwitterID = entity.GetTargetTwitterID()
+	u.UserMute.Flag = entity.GetFlag()
+	u.UserMute.UserID = entity.GetUserID()
+	u.UserMute.CreatedAt = entity.GetCreatedAt()
+	u.UserMute.UpdatedAt = entity.GetUpdatedAt()
 
 	return u.UserMute
 }
 
 func (u *UserMuteModelForDomain) ToDomain(model UserMute, entity *entity.Mute) {
-	entity.ID = model.ID
-	entity.TargetTwitterID = model.TargetTwitterID
-	entity.Flag = model.Flag
-	entity.UserID = model.UserID
-	entity.CreatedAt = model.CreatedAt
-	entity.UpdatedAt = model.UpdatedAt
+	entity.Update(
+		model.ID,
+		model.UserID,
+		model.TargetTwitterID,
+		model.Flag,
+		model.CreatedAt,
+		model.UpdatedAt,
+	)
 }
 
 func (u *UserMuteModelForDomain) ToDomains(models []UserMute, entities *[]entity.Mute) {

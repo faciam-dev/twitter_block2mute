@@ -129,16 +129,44 @@ func (m *MockBlock2MuteRepository) EXPECT() *MockBlock2MuteRepositoryMockRecorde
 }
 
 // All mocks base method.
-func (m *MockBlock2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
+func (m *MockBlock2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "All", userID)
+	ret := m.ctrl.Call(m, "All", user)
 	ret0, _ := ret[0].(*entity.Block2Mute)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // All indicates an expected call of All.
-func (mr *MockBlock2MuteRepositoryMockRecorder) All(userID interface{}) *gomock.Call {
+func (mr *MockBlock2MuteRepositoryMockRecorder) All(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "All", reflect.TypeOf((*MockBlock2MuteRepository)(nil).All), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "All", reflect.TypeOf((*MockBlock2MuteRepository)(nil).All), user)
+}
+
+// AuthTwitter mocks base method.
+func (m *MockBlock2MuteRepository) AuthTwitter() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AuthTwitter")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AuthTwitter indicates an expected call of AuthTwitter.
+func (mr *MockBlock2MuteRepositoryMockRecorder) AuthTwitter() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTwitter", reflect.TypeOf((*MockBlock2MuteRepository)(nil).AuthTwitter))
+}
+
+// GetUser mocks base method.
+func (m *MockBlock2MuteRepository) GetUser(userID string) *entity.User {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUser", userID)
+	ret0, _ := ret[0].(*entity.User)
+	return ret0
+}
+
+// GetUser indicates an expected call of GetUser.
+func (mr *MockBlock2MuteRepositoryMockRecorder) GetUser(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockBlock2MuteRepository)(nil).GetUser), userID)
 }

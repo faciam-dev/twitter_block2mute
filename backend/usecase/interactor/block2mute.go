@@ -24,7 +24,12 @@ func NewBlock2MuteInputPort(
 }
 
 func (b *Block2Mute) All(userID string) {
-	block2mute, err := b.Block2MuteRepo.All(userID)
+	user := b.Block2MuteRepo.GetUser(userID)
+	if err := b.Block2MuteRepo.AuthTwitter(); err != nil {
+		b.OutputPort.RenderError(err)
+		return
+	}
+	block2mute, err := b.Block2MuteRepo.All(user)
 	if err != nil {
 		b.OutputPort.RenderError(err)
 		return
