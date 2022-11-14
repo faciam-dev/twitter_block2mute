@@ -35,7 +35,7 @@ func newMockGormDbUserHandler() (handler.UserDbHandler, sqlmock.Sqlmock, error) 
 	)
 
 	gormDbUserHandler := database.NewUserDbHandler(
-		database.GormDbHandler{Conn: db},
+		&database.GormDbHandler{Conn: db},
 	)
 
 	return gormDbUserHandler, mock, err

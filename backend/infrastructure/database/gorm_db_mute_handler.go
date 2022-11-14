@@ -11,7 +11,7 @@ type GormDbMuteHandler struct {
 	GormDbEntityHandler[entity.Mute, model.UserMute]
 }
 
-func NewMuteHandler(gormDbHandler GormDbHandler) handler.MuteDbHandler {
+func NewMuteHandler(gormDbHandler *GormDbHandler) handler.MuteDbHandler {
 	dbHandler := new(GormDbMuteHandler)
 	dbHandler.db = gormDbHandler.Conn
 	dbHandler.ModelForDomain = &model.UserMuteModelForDomain{}

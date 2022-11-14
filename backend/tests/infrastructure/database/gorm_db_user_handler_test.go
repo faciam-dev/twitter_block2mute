@@ -110,14 +110,14 @@ func TestUpdate(t *testing.T) {
 				createSource: *entity.NewBlankUser().Update(
 					0,
 					"newname1",
-					"newname1",
+					"Newname1",
 					"1234567890",
 				),
 			},
 			*entity.NewBlankUser().Update(
 				0,
 				"newname1",
-				"newname1",
+				"Newname1",
 				"1234567890",
 			),
 		},
@@ -126,7 +126,7 @@ func TestUpdate(t *testing.T) {
 	UserDbHandler.Transaction(func() error {
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
-				// 作成する
+				// 更新する
 				user := tt.arg.createSource
 				UserDbHandler.Update(&user, tt.arg.value)
 

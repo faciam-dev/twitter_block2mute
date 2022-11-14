@@ -88,6 +88,7 @@ func TestUserMuteCreateNew(t *testing.T) {
 		},
 	}
 
+	//MuteDbHandler.Begin()
 	MuteDbHandler.Transaction(func() error {
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
@@ -107,4 +108,5 @@ func TestUserMuteCreateNew(t *testing.T) {
 
 		return errors.New("rollback")
 	})
+	//MuteDbHandler.Rollback()
 }

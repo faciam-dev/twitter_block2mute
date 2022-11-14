@@ -11,7 +11,7 @@ type GormDbBlockHandler struct {
 	GormDbEntityHandler[entity.Block, model.UserBlock]
 }
 
-func NewBlockDbHandler(gormDbHandler GormDbHandler) handler.BlockDbHandler {
+func NewBlockDbHandler(gormDbHandler *GormDbHandler) handler.BlockDbHandler {
 	blockDbHandler := new(GormDbBlockHandler)
 	blockDbHandler.db = gormDbHandler.Conn
 	blockDbHandler.ModelForDomain = &model.UserBlockModelForDomain{}

@@ -35,7 +35,7 @@ func newMockGormDbBlockHandler() (handler.BlockDbHandler, sqlmock.Sqlmock, error
 	)
 
 	gormDbBlockHandler := database.NewBlockDbHandler(
-		database.GormDbHandler{Conn: db},
+		&database.GormDbHandler{Conn: db},
 	)
 
 	return gormDbBlockHandler, mock, err

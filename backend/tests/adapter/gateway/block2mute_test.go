@@ -35,7 +35,7 @@ func newMockGormDbMuteHandler() (handler.MuteDbHandler, sqlmock.Sqlmock, error) 
 	)
 
 	gormDbMuteHandler := database.NewMuteHandler(
-		database.GormDbHandler{Conn: db},
+		&database.GormDbHandler{Conn: db},
 	)
 
 	return gormDbMuteHandler, mock, err
