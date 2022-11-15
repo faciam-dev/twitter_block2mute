@@ -428,12 +428,12 @@ func TestAll(t *testing.T) {
 			// mute
 			if len(args.mutes) > 0 {
 				for _, v := range args.blocks {
-					muteDbMock.ExpectBegin()
+					//muteDbMock.ExpectBegin()
 					muteDbMock.ExpectExec(
 						regexp.QuoteMeta("INSERT INTO `user_mutes` (`created_at`,`updated_at`,`deleted_at`,`user_id`,`target_twitter_id`,`flag`) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE `updated_at`=?,`deleted_at`=VALUES(`deleted_at`),`user_id`=VALUES(`user_id`),`target_twitter_id`=VALUES(`target_twitter_id`),`flag`=VALUES(`flag`)")).
 						WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), v.UserID, v.TargetTwitterID, 1, sqlmock.AnyArg()).
 						WillReturnResult(sqlmock.NewResult(1, 0))
-					muteDbMock.ExpectCommit()
+					//muteDbMock.ExpectCommit()
 				}
 			}
 

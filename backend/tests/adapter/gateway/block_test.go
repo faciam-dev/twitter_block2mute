@@ -402,24 +402,24 @@ func TestTxUpdateAndDeleteBlocks(t *testing.T) {
 
 			// 存在しないblockを削除する処理
 			if len(args.blocks) > 0 {
-				blockDbMock.ExpectBegin()
+				//blockDbMock.ExpectBegin()
 				blockDbMock.ExpectExec(
 					regexp.QuoteMeta("UPDATE `user_blocks` SET `deleted_at`=? WHERE `user_blocks`.`id` = ? AND `user_blocks`.`deleted_at` IS NULL")).
 					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				blockDbMock.ExpectCommit()
+				//blockDbMock.ExpectCommit()
 			}
 
 			// Upsert処理。ブロックしたものがある場合だけ実行される。
 			argBlocks := entity.Blocks{}
 			if len(args.IDs) > 0 {
 				convertedUserID64, _ := strconv.ParseInt(args.UserID, 10, 64)
-				blockDbMock.ExpectBegin()
+				//blockDbMock.ExpectBegin()
 				blockDbMock.ExpectExec(
 					regexp.QuoteMeta("INSERT INTO `user_blocks` (`created_at`,`updated_at`,`deleted_at`,`user_id`,`target_twitter_id`,`flag`) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE `updated_at`=?,`deleted_at`=VALUES(`deleted_at`),`user_id`=VALUES(`user_id`),`target_twitter_id`=VALUES(`target_twitter_id`),`flag`=VALUES(`flag`)")).
 					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), convertedUserID64, args.IDs[0], 0, sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(2, 0))
-				blockDbMock.ExpectCommit()
+				//blockDbMock.ExpectCommit()
 				argBlocks = append(argBlocks, *entity.NewBlock(1, args.IDs[0], 0, nowTime, nowTime))
 			}
 			blockDbMock.ExpectCommit()

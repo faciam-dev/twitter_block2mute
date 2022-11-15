@@ -53,9 +53,9 @@ func (g *GormDbHandler) Commit() *gorm.DB {
 	return g.Conn.Commit()
 }
 
-func (g *GormDbHandler) Transaction(fn func(tx *gorm.DB) error) error {
+func (g *GormDbHandler) Transaction(fn func() error) error {
 	return g.Conn.Transaction(func(tx *gorm.DB) error {
-		return fn(tx)
+		return fn()
 	})
 }
 
