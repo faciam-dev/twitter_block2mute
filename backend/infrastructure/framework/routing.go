@@ -34,7 +34,7 @@ type Routing struct {
 func NewRouting(
 	config *config.Config,
 	loggerHandler handler.LoggerHandler,
-	dbHandler *database.GormDbHandler,
+	dbHandler handler.DBConnectionHandler,
 	twitterHandler handler.TwitterHandler,
 ) *Routing {
 	// setup
@@ -85,7 +85,7 @@ func (r *Routing) setGinLogger(config *config.Config) {
 
 func (r *Routing) setRouting(
 	loggerHandler handler.LoggerHandler,
-	dbHandler *database.GormDbHandler,
+	dbHandler handler.DBConnectionHandler,
 	twitterHandler handler.TwitterHandler,
 	sessionHandler handler.SessionHandler,
 ) {
@@ -95,7 +95,7 @@ func (r *Routing) setRouting(
 		RepoFactory:    gateway.NewUserRepository,
 		LoggerHandler:  loggerHandler,
 		SessionHandler: sessionHandler,
-		UserDbHandler:  database.NewUserDbHandler(dbHandler),
+		UserDbHandler:  database.NewUserDbHandler(dbHandler.Connect()),
 	}
 
 	authController := controller.Auth{
@@ -105,7 +105,7 @@ func (r *Routing) setRouting(
 		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
-		UserDbHandler:  database.NewUserDbHandler(dbHandler),
+		UserDbHandler:  database.NewUserDbHandler(dbHandler.Connect()),
 	}
 
 	blockController := controller.Block{
@@ -115,8 +115,7 @@ func (r *Routing) setRouting(
 		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
-		BlockDbHandler: database.NewBlockDbHandler(dbHandler),
-		UserDbHandler:  database.NewUserDbHandler(dbHandler),
+		DBHandler:      dbHandler,
 	}
 
 	block2MuteController := controller.Block2Mute{
@@ -126,9 +125,7 @@ func (r *Routing) setRouting(
 		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
-		BlockDbHandler: database.NewBlockDbHandler(dbHandler),
-		UserDbHandler:  database.NewUserDbHandler(dbHandler),
-		MuteDbHandler:  database.NewMuteHandler(dbHandler),
+		DBHandler:      dbHandler,
 	}
 
 	// PROXY

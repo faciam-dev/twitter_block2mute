@@ -5,7 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 )
 
 func TestFindAllByTwitterID(t *testing.T) {
@@ -89,12 +91,13 @@ func TestCreateNewBlocks(t *testing.T) {
 		},
 	}
 
-	BlockDbHandler.Transaction(func() error {
+	DbHandler.Transaction(func(conn handler.DbConnection) error {
+		blockDbHandler := database.NewBlockDbHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 作成・更新する
 				blocks := []entity.Block{tt.arg.createSource}
-				err := BlockDbHandler.CreateNewBlocks(&blocks, tt.arg.column, tt.arg.value)
+				err := blockDbHandler.CreateNewBlocks(&blocks, tt.arg.column, tt.arg.value)
 				if err != nil {
 					t.Error(err)
 				}
@@ -108,4 +111,26 @@ func TestCreateNewBlocks(t *testing.T) {
 
 		return errors.New("rollback")
 	})
+
+	/*
+		BlockDbHandler.Transaction(func() error {
+			for _, tt := range table {
+				t.Run(tt.name, func(t *testing.T) {
+					// 作成・更新する
+					blocks := []entity.Block{tt.arg.createSource}
+					err := BlockDbHandler.CreateNewBlocks(&blocks, tt.arg.column, tt.arg.value)
+					if err != nil {
+						t.Error(err)
+					}
+
+					// 中身の比較
+					if blocks[0].GetFlag() != tt.wantBlock.GetFlag() || blocks[0].GetUserID() != tt.wantBlock.GetUserID() || blocks[0].GetTargetTwitterID() != tt.wantBlock.GetTargetTwitterID() {
+						t.Errorf("CreateNewBlocks()  = %v, want %v", blocks[0], tt.wantBlock)
+					}
+				})
+			}
+
+			return errors.New("rollback")
+		})
+	*/
 }

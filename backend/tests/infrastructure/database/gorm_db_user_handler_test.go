@@ -4,7 +4,9 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 )
 
 func TestFirst(t *testing.T) {
@@ -73,12 +75,13 @@ func TestCreate(t *testing.T) {
 		},
 	}
 
-	UserDbHandler.Transaction(func() error {
+	DbHandler.Transaction(func(conn handler.DbConnection) error {
+		userDbHandler := database.NewUserDbHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 作成する
 				user := tt.arg.createSource
-				UserDbHandler.Create(&user)
+				userDbHandler.Create(&user)
 
 				// 中身の比較
 				if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -88,6 +91,23 @@ func TestCreate(t *testing.T) {
 		}
 		return errors.New("rollback")
 	})
+	/*
+		UserDbHandler.Transaction(func() error {
+			for _, tt := range table {
+				t.Run(tt.name, func(t *testing.T) {
+					// 作成する
+					user := tt.arg.createSource
+					UserDbHandler.Create(&user)
+
+					// 中身の比較
+					if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
+						t.Errorf("Create()  = %v, want %v", user, tt.wantUser)
+					}
+				})
+			}
+			return errors.New("rollback")
+		})
+	*/
 }
 
 func TestUpdate(t *testing.T) {
@@ -123,12 +143,14 @@ func TestUpdate(t *testing.T) {
 		},
 	}
 
-	UserDbHandler.Transaction(func() error {
+	// イメージ
+	DbHandler.Transaction(func(conn handler.DbConnection) error {
+		userDbHandler := database.NewUserDbHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 更新する
 				user := tt.arg.createSource
-				UserDbHandler.Update(&user, tt.arg.value)
+				userDbHandler.Update(&user, tt.arg.value)
 
 				// 中身の比較
 				if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -138,6 +160,24 @@ func TestUpdate(t *testing.T) {
 		}
 		return errors.New("rollback")
 	})
+
+	/*
+		UserDbHandler.Transaction(func() error {
+			for _, tt := range table {
+				t.Run(tt.name, func(t *testing.T) {
+					// 更新する
+					user := tt.arg.createSource
+					UserDbHandler.Update(&user, tt.arg.value)
+
+					// 中身の比較
+					if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
+						t.Errorf("Update()  = %v, want %v", user, tt.wantUser)
+					}
+				})
+			}
+			return errors.New("rollback")
+		})
+	*/
 }
 
 func TestUpsert(t *testing.T) {
@@ -192,12 +232,13 @@ func TestUpsert(t *testing.T) {
 		},
 	}
 
-	UserDbHandler.Transaction(func() error {
+	DbHandler.Transaction(func(conn handler.DbConnection) error {
+		userDbHandler := database.NewUserDbHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 作成・更新する
 				user := tt.arg.createSource
-				UserDbHandler.Upsert(&user, tt.arg.column, tt.arg.value)
+				userDbHandler.Upsert(&user, tt.arg.column, tt.arg.value)
 
 				// 中身の比較
 				if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -208,6 +249,25 @@ func TestUpsert(t *testing.T) {
 
 		return errors.New("rollback")
 	})
+
+	/*
+		UserDbHandler.Transaction(func() error {
+			for _, tt := range table {
+				t.Run(tt.name, func(t *testing.T) {
+					// 作成・更新する
+					user := tt.arg.createSource
+					UserDbHandler.Upsert(&user, tt.arg.column, tt.arg.value)
+
+					// 中身の比較
+					if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
+						t.Errorf("Upsert()  = %v, want %v", user, tt.wantUser)
+					}
+				})
+			}
+
+			return errors.New("rollback")
+		})
+	*/
 }
 
 func TestFind(t *testing.T) {

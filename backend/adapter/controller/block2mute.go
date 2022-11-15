@@ -24,18 +24,14 @@ type Block2Mute struct {
 	// -> gateway.NewBlock2MuteRepository
 	RepoFactory func(
 		LoggerHandler handler.LoggerHandler,
-		dbHandler handler.BlockDbHandler,
-		userDbHandler handler.UserDbHandler,
-		muteDbHandler handler.MuteDbHandler,
+		dbHandler handler.DBConnectionHandler,
 		twitterHandler handler.TwitterHandler,
 		sessionHandler handler.SessionHandler,
 	) port.Block2MuteRepository
 
 	LoggerHandler  handler.LoggerHandler
 	TwitterHandler handler.TwitterHandler
-	BlockDbHandler handler.BlockDbHandler
-	MuteDbHandler  handler.MuteDbHandler
-	UserDbHandler  handler.UserDbHandler
+	DBHandler      handler.DBConnectionHandler
 	SessionHandler handler.SessionHandler
 }
 
@@ -45,7 +41,7 @@ func (b *Block2Mute) All(contextHandler handler.ContextHandler) {
 	id := b.SessionHandler.Get("user_id")
 
 	outputPort := b.OutputFactory(contextHandler, b.LoggerHandler)
-	repository := b.RepoFactory(b.LoggerHandler, b.BlockDbHandler, b.UserDbHandler, b.MuteDbHandler, b.TwitterHandler, b.SessionHandler)
+	repository := b.RepoFactory(b.LoggerHandler, b.DBHandler, b.TwitterHandler, b.SessionHandler)
 	inputPort := b.InputFactory(outputPort, repository, b.LoggerHandler)
 
 	if id == nil {

@@ -4,6 +4,7 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/database/gorm/model"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -11,9 +12,9 @@ type GormDbBlockHandler struct {
 	GormDbEntityHandler[entity.Block, model.UserBlock]
 }
 
-func NewBlockDbHandler(gormDbHandler *GormDbHandler) handler.BlockDbHandler {
+func NewBlockDbHandler(conn handler.DbConnection) handler.BlockDbHandler {
 	blockDbHandler := new(GormDbBlockHandler)
-	blockDbHandler.db = gormDbHandler.Conn
+	blockDbHandler.db = conn.GetConnection().(*gorm.DB)
 	blockDbHandler.ModelForDomain = &model.UserBlockModelForDomain{}
 
 	return blockDbHandler

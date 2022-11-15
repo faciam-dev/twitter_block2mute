@@ -6,6 +6,7 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/config"
 	"github.com/faciam_dev/twitter_block2mute/backend/database/gorm/model"
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
+	"gorm.io/gorm"
 )
 
 var users = []model.User{
@@ -52,7 +53,9 @@ func Seeder() {
 
 	gormHandler := database.NewGormDbHandler(config)
 
-	err := gormHandler.Conn.Debug().Migrator().DropTable(
+	gormConn := gormHandler.Connect().GetConnection().(*gorm.DB)
+
+	err := gormConn.Debug().Migrator().DropTable(
 		&model.User{},
 		&model.UserBlock{},
 		&model.UserMute{},
@@ -61,7 +64,7 @@ func Seeder() {
 		log.Fatalf("cannot drop table: %v", err)
 	}
 
-	err = gormHandler.Conn.Debug().AutoMigrate(
+	err = gormConn.Debug().AutoMigrate(
 		&model.User{},
 		&model.UserBlock{},
 		&model.UserMute{},
@@ -71,18 +74,18 @@ func Seeder() {
 	}
 
 	for i := range users {
-		err = gormHandler.Conn.Debug().Model(&model.User{}).Create(&users[i]).Error
+		err = gormConn.Debug().Model(&model.User{}).Create(&users[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed users table: %v", err)
 		}
 	}
 
-	err = gormHandler.Conn.Debug().Model(&model.UserBlock{}).Create(&userBlocks).Error
+	err = gormConn.Debug().Model(&model.UserBlock{}).Create(&userBlocks).Error
 	if err != nil {
 		log.Fatalf("cannot seed user_blocks table: %v", err)
 	}
 
-	err = gormHandler.Conn.Debug().Model(&model.UserMute{}).Create(&userMutes).Error
+	err = gormConn.Debug().Model(&model.UserMute{}).Create(&userMutes).Error
 	if err != nil {
 		log.Fatalf("cannot seed user_mutes table: %v", err)
 	}

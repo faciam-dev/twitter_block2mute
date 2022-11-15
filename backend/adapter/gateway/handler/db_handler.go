@@ -1,11 +1,25 @@
 package handler
 
+// 接続
+type DbConnection interface {
+	GetConnection() interface{}
+}
+
+// DB接続に関する操作をするハンドラ
+type DBConnectionHandler interface {
+	Transaction(fn func(DbConnection) error) error
+	Begin() DbConnection
+	Commit() DbConnection
+	Rollback() DbConnection
+	Connect() DbConnection
+}
+
 // このハンドラは各gatewayで共通の基本的な操作のみを扱う
 type DbHandler interface {
-	Transaction(fn func() error) error
-	Begin()
-	Commit()
-	Rollback()
+	//Transaction(fn func(DbConnection) error) error
+	//Begin()
+	//Commit()
+	//Rollback()
 	First(interface{}, string) error
 	Create(interface{}) error
 	Find(interface{}, string, string) error

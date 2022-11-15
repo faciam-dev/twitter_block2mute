@@ -4,6 +4,7 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/database/gorm/model"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -11,9 +12,9 @@ type GormDbMuteHandler struct {
 	GormDbEntityHandler[entity.Mute, model.UserMute]
 }
 
-func NewMuteHandler(gormDbHandler *GormDbHandler) handler.MuteDbHandler {
+func NewMuteHandler(conn handler.DbConnection) handler.MuteDbHandler {
 	dbHandler := new(GormDbMuteHandler)
-	dbHandler.db = gormDbHandler.Conn
+	dbHandler.db = conn.GetConnection().(*gorm.DB)
 	dbHandler.ModelForDomain = &model.UserMuteModelForDomain{}
 
 	return dbHandler

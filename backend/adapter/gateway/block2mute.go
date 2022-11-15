@@ -7,14 +7,13 @@ import (
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 	"github.com/faciam_dev/twitter_block2mute/backend/usecase/port"
 )
 
 type Block2MuteRepository struct {
 	loggerHandler  handler.LoggerHandler
-	blockDbHandler handler.BlockDbHandler
-	userDbHandler  handler.UserDbHandler
-	muteDbHandler  handler.MuteDbHandler
+	dbHandler      handler.DBConnectionHandler
 	twitterHandler handler.TwitterHandler
 	sessionHandler handler.SessionHandler
 }
@@ -22,17 +21,13 @@ type Block2MuteRepository struct {
 // NewBlockRepository はBlockRepositoryを返します．
 func NewBlock2MuteRepository(
 	loggerHandler handler.LoggerHandler,
-	dbHandler handler.BlockDbHandler,
-	userDbHandler handler.UserDbHandler,
-	muteDbHandler handler.MuteDbHandler,
+	dbHandler handler.DBConnectionHandler,
 	twitterHandler handler.TwitterHandler,
 	sessionHandler handler.SessionHandler,
 ) port.Block2MuteRepository {
 	return &Block2MuteRepository{
 		loggerHandler:  loggerHandler,
-		blockDbHandler: dbHandler,
-		userDbHandler:  userDbHandler,
-		muteDbHandler:  muteDbHandler,
+		dbHandler:      dbHandler,
 		twitterHandler: twitterHandler,
 		sessionHandler: sessionHandler,
 	}
@@ -41,8 +36,9 @@ func NewBlock2MuteRepository(
 // ユーザーを取得する
 func (b *Block2MuteRepository) GetUser(userID string) *entity.User {
 	user := entity.User{}
+	userDBHandler := database.NewUserDbHandler(b.dbHandler.Connect())
 
-	if err := b.userDbHandler.First(&user, userID); err != nil {
+	if err := userDBHandler.First(&user, userID); err != nil {
 		b.loggerHandler.Errorf("user not found (user_id=%s)", userID)
 		return &user
 	}
@@ -70,10 +66,15 @@ func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error
 
 	// update blocks table
 	convertedIDs := []string{}
-	err := b.muteDbHandler.Transaction(func() error {
+	//	err := b.muteDbHandler.Transaction(func() error {
+	err := b.dbHandler.Transaction(func(tx handler.DbConnection) error {
+		blockDbHandler := database.NewBlockDbHandler(tx)
+		muteDbHandler := database.NewMuteHandler(tx)
+
+		//err := b.muteDbHandler.Transaction(func() error {
 		// block2mute
 		registedBlocks := []entity.Block{}
-		if err := b.blockDbHandler.FindAllByUserID(&registedBlocks, userID); err != nil {
+		if err := blockDbHandler.FindAllByUserID(&registedBlocks, userID); err != nil {
 			b.loggerHandler.Errorw("blockDbHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
 			return err
 		}
@@ -84,7 +85,7 @@ func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error
 		b.loggerHandler.Debugf("user_id=%s Num_Of_blocks=%d", userID, len(registedBlockEntities))
 
 		registedMutes := []entity.Mute{}
-		if err := b.muteDbHandler.FindAllByUserID(&registedMutes, userID); err != nil {
+		if err := muteDbHandler.FindAllByUserID(&registedMutes, userID); err != nil {
 			b.loggerHandler.Errorw("muteDbHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
 			return err
 		}
@@ -155,7 +156,7 @@ func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error
 
 		// 移行完了処理 blocks更新とmute更新
 		if len(convertedBlockEntities) > 0 {
-			if err := b.blockDbHandler.CreateNewBlocks(&convertedBlockEntities, "user_id", "twitter_id"); err != nil {
+			if err := blockDbHandler.CreateNewBlocks(&convertedBlockEntities, "user_id", "twitter_id"); err != nil {
 				b.loggerHandler.Errorw(
 					"fail to create new blocks.",
 					"user_id",
@@ -169,7 +170,7 @@ func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error
 			}
 		}
 		if len(muteEntities) > 0 {
-			if err := b.muteDbHandler.CreateNew(&muteEntities, "user_id", "twitter_id"); err != nil {
+			if err := muteDbHandler.CreateNew(&muteEntities, "user_id", "twitter_id"); err != nil {
 				b.loggerHandler.Errorw(
 					"fail to create new mutes.",
 					"user_id",

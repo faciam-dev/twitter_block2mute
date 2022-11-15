@@ -9,37 +9,10 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
-	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
-	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 	"github.com/faciam_dev/twitter_block2mute/backend/tests/adapter/gateway/mock_handler"
 	"github.com/golang/mock/gomock"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
-
-// mock化したGormをつかったBlockDbへのハンドラを得る
-func newMockGormDbBlockHandler() (handler.BlockDbHandler, sqlmock.Sqlmock, error) {
-	mockDB, mock, err := sqlmock.New()
-	if err != nil {
-		return nil, mock, err
-	}
-
-	db, err := gorm.Open(mysql.New(
-		mysql.Config{
-			DriverName:                "mysql",
-			Conn:                      mockDB,
-			SkipInitializeWithVersion: true,
-		}),
-		&gorm.Config{},
-	)
-
-	gormDbBlockHandler := database.NewBlockDbHandler(
-		&database.GormDbHandler{Conn: db},
-	)
-
-	return gormDbBlockHandler, mock, err
-}
 
 // GetUserに対するテスト
 func TestGetUser(t *testing.T) {
@@ -76,19 +49,14 @@ func TestGetUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			userDbHandler, userDbMock, err := newMockGormDbUserHandler()
+			dbHandler, dbMock, err := newMockGormDbHandler()
 			if err != nil {
-				t.Error("sqlmock(User) not work")
-			}
-
-			blockDbHandler, _, err := newMockGormDbBlockHandler()
-			if err != nil {
-				t.Error("sqlmock(Block) not work")
+				t.Error("sqlmock(DB) not work")
 			}
 
 			// sqlmock処理
 			// userdbHandler
-			userDbMock.ExpectQuery(
+			dbMock.ExpectQuery(
 				regexp.QuoteMeta("SELECT * FROM `users` WHERE `users`.`id` = ? AND `users`.`deleted_at` IS NULL ORDER BY `users`.`id` LIMIT 1")).
 				WithArgs(args.UserID).
 				WillReturnRows(sqlmock.NewRows([]string{"id", "name", "account_name", "twitter_id"}).AddRow(args.UserID, args.UserName, args.UserName, args.UserTwitterID))
@@ -109,8 +77,7 @@ func TestGetUser(t *testing.T) {
 			// repository
 			repository := gateway.NewBlockRepository(
 				loggerHandler,
-				blockDbHandler,
-				userDbHandler,
+				dbHandler,
 				mockTwitterHandler,
 				sessionHandler,
 			)
@@ -118,7 +85,7 @@ func TestGetUser(t *testing.T) {
 			//gotBlocks, gotTotal, err := repository.GetUser(args.UserID)
 			got := repository.GetUser(args.UserID)
 
-			if err := userDbMock.ExpectationsWereMet(); err != nil {
+			if err := dbMock.ExpectationsWereMet(); err != nil {
 				t.Errorf("GetUser() userDB: %v", err)
 			}
 
@@ -212,14 +179,9 @@ func TestGetBlocks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			userDbHandler, _, err := newMockGormDbUserHandler()
+			dbHandler, _, err := newMockGormDbHandler()
 			if err != nil {
-				t.Error("sqlmock(User) not work")
-			}
-
-			blockDbHandler, _, err := newMockGormDbBlockHandler()
-			if err != nil {
-				t.Error("sqlmock(Block) not work")
+				t.Error("sqlmock(DB) not work")
 			}
 
 			// モックの生成
@@ -248,8 +210,7 @@ func TestGetBlocks(t *testing.T) {
 			// repository
 			repository := gateway.NewBlockRepository(
 				loggerHandler,
-				blockDbHandler,
-				userDbHandler,
+				dbHandler,
 				mockTwitterHandler,
 				sessionHandler,
 			)
@@ -378,14 +339,9 @@ func TestTxUpdateAndDeleteBlocks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			userDbHandler, _, err := newMockGormDbUserHandler()
+			dbHandler, dbMock, err := newMockGormDbHandler()
 			if err != nil {
-				t.Error("sqlmock(User) not work")
-			}
-
-			blockDbHandler, blockDbMock, err := newMockGormDbBlockHandler()
-			if err != nil {
-				t.Error("sqlmock(Block) not work")
+				t.Error("sqlmock(DB) not work")
 			}
 
 			// sqlmock処理
@@ -394,35 +350,31 @@ func TestTxUpdateAndDeleteBlocks(t *testing.T) {
 			for _, v := range args.blocks {
 				mockedUserBlocksRow.AddRow(v.ID, v.UserID, v.TargetTwitterID, v.Flag)
 			}
-			blockDbMock.ExpectBegin()
-			blockDbMock.ExpectQuery(
+			dbMock.ExpectBegin()
+			dbMock.ExpectQuery(
 				regexp.QuoteMeta("SELECT * FROM `user_blocks` WHERE user_id = ? AND `user_blocks`.`deleted_at` IS NULL")).
 				WithArgs(args.UserID).
 				WillReturnRows(mockedUserBlocksRow)
 
 			// 存在しないblockを削除する処理
 			if len(args.blocks) > 0 {
-				//blockDbMock.ExpectBegin()
-				blockDbMock.ExpectExec(
+				dbMock.ExpectExec(
 					regexp.QuoteMeta("UPDATE `user_blocks` SET `deleted_at`=? WHERE `user_blocks`.`id` = ? AND `user_blocks`.`deleted_at` IS NULL")).
 					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				//blockDbMock.ExpectCommit()
 			}
 
 			// Upsert処理。ブロックしたものがある場合だけ実行される。
 			argBlocks := entity.Blocks{}
 			if len(args.IDs) > 0 {
 				convertedUserID64, _ := strconv.ParseInt(args.UserID, 10, 64)
-				//blockDbMock.ExpectBegin()
-				blockDbMock.ExpectExec(
+				dbMock.ExpectExec(
 					regexp.QuoteMeta("INSERT INTO `user_blocks` (`created_at`,`updated_at`,`deleted_at`,`user_id`,`target_twitter_id`,`flag`) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE `updated_at`=?,`deleted_at`=VALUES(`deleted_at`),`user_id`=VALUES(`user_id`),`target_twitter_id`=VALUES(`target_twitter_id`),`flag`=VALUES(`flag`)")).
 					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), convertedUserID64, args.IDs[0], 0, sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(2, 0))
-				//blockDbMock.ExpectCommit()
 				argBlocks = append(argBlocks, *entity.NewBlock(1, args.IDs[0], 0, nowTime, nowTime))
 			}
-			blockDbMock.ExpectCommit()
+			dbMock.ExpectCommit()
 
 			// モックの生成
 			mockCtrl := gomock.NewController(t)
@@ -452,8 +404,7 @@ func TestTxUpdateAndDeleteBlocks(t *testing.T) {
 			// repository
 			repository := gateway.NewBlockRepository(
 				loggerHandler,
-				blockDbHandler,
-				userDbHandler,
+				dbHandler,
 				mockTwitterHandler,
 				sessionHandler,
 			)
@@ -463,8 +414,8 @@ func TestTxUpdateAndDeleteBlocks(t *testing.T) {
 				entity.NewBlankUser().Update(uint(convertedUserID), args.UserName, args.UserName, args.UserTwitterID), &argBlocks,
 			)
 
-			if err := blockDbMock.ExpectationsWereMet(); err != nil {
-				t.Errorf("TxUpdateAndDeleteBlocks() blockDB: %v", err)
+			if err := dbMock.ExpectationsWereMet(); err != nil {
+				t.Errorf("TxUpdateAndDeleteBlocks() DB: %v", err)
 			}
 
 			if err != nil && errors.Is(tt.err, err) {
