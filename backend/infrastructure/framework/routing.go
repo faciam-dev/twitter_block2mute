@@ -34,7 +34,7 @@ type Routing struct {
 func NewRouting(
 	config *config.Config,
 	loggerHandler handler.LoggerHandler,
-	dbHandler database.GormDbHandler,
+	dbHandler *database.GormDbHandler,
 	twitterHandler handler.TwitterHandler,
 ) *Routing {
 	// setup
@@ -85,7 +85,7 @@ func (r *Routing) setGinLogger(config *config.Config) {
 
 func (r *Routing) setRouting(
 	loggerHandler handler.LoggerHandler,
-	dbHandler database.GormDbHandler,
+	dbHandler *database.GormDbHandler,
 	twitterHandler handler.TwitterHandler,
 	sessionHandler handler.SessionHandler,
 ) {

@@ -11,6 +11,7 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 )
 
+var DbHandler *database.GormDbHandler
 var UserDbHandler handler.UserDbHandler
 var BlockDbHandler handler.BlockDbHandler
 var MuteDbHandler handler.MuteDbHandler
@@ -18,12 +19,10 @@ var MuteDbHandler handler.MuteDbHandler
 func TestMain(m *testing.M) {
 	// 前処理
 	config := config.NewConfig(".env.test")
-
-	dbHandler := database.NewGormDbHandler(config)
-
-	UserDbHandler = database.NewUserDbHandler(dbHandler)
-	BlockDbHandler = database.NewBlockDbHandler(dbHandler)
-	MuteDbHandler = database.NewMuteHandler(dbHandler)
+	DbHandler = database.NewGormDbHandler(config)
+	UserDbHandler = database.NewUserDbHandler(DbHandler)
+	BlockDbHandler = database.NewBlockDbHandler(DbHandler)
+	MuteDbHandler = database.NewMuteHandler(DbHandler)
 
 	// userテーブルから何も得られない場合はseederを実行
 	user := &entity.User{}
@@ -31,19 +30,7 @@ func TestMain(m *testing.M) {
 		migration.Seeder()
 	}
 
-	// トランザクション
-	UserDbHandler.Begin()
-	BlockDbHandler.Begin()
-	MuteDbHandler.Begin()
-
 	status := m.Run()
-
-	// 後処理
-	// トランザクションを戻す
-	// MySQLではauto_incrementは戻らない
-	UserDbHandler.Rollback()
-	BlockDbHandler.Rollback()
-	MuteDbHandler.Rollback()
 
 	os.Exit(status)
 }

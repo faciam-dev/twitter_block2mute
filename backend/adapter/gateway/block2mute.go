@@ -2,8 +2,8 @@ package gateway
 
 import (
 	"errors"
-	"log"
-	"sort"
+	"strconv"
+	"time"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
@@ -38,48 +38,60 @@ func NewBlock2MuteRepository(
 	}
 }
 
-func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
-	block2Mute := entity.Block2Mute{}
+// ユーザーを取得する
+func (b *Block2MuteRepository) GetUser(userID string) *entity.User {
 	user := entity.User{}
 
 	if err := b.userDbHandler.First(&user, userID); err != nil {
 		b.loggerHandler.Errorf("user not found (user_id=%s)", userID)
-		return &block2Mute, err
+		return &user
 	}
 
-	// auth Twitter
+	return &user
+}
+
+// auth Twitter
+func (b *Block2MuteRepository) AuthTwitter() error {
 	token := b.sessionHandler.Get("token")
 	secret := b.sessionHandler.Get("secret")
 
 	if token == nil || secret == nil {
-		return &block2Mute, errors.New("session timeout or not found")
+		return errors.New("session timeout or not found")
 	}
 
 	b.twitterHandler.UpdateTwitterApi(token.(string), secret.(string))
-	b.loggerHandler.Debugf("update twitter api (user_id=%s token=%s secret=%s)", userID, token.(string), secret.(string))
+	b.loggerHandler.Debugf("update twitter api (token=%s secret=%s)", token.(string), secret.(string))
+
+	return nil
+}
+
+func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error) {
+	userID := strconv.FormatUint(uint64(user.GetID()), 10)
 
 	// update blocks table
 	convertedIDs := []string{}
 	err := b.muteDbHandler.Transaction(func() error {
 		// block2mute
-		registedBlockEntities := []entity.Block{}
-		if err := b.blockDbHandler.FindAllByUserID(&registedBlockEntities, userID); err != nil {
+		registedBlocks := []entity.Block{}
+		if err := b.blockDbHandler.FindAllByUserID(&registedBlocks, userID); err != nil {
 			b.loggerHandler.Errorw("blockDbHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
 			return err
 		}
-		sort.Slice(registedBlockEntities, func(i, j int) bool {
-			return registedBlockEntities[i].GetTargetTwitterID() <= registedBlockEntities[j].GetTargetTwitterID()
-		})
+		registedBlockEntities := entity.Blocks{}
+		registedBlockEntities.ToBlocksEntity(&registedBlocks)
+		registedBlockEntities.SortByTargetTwtitterID()
+
 		b.loggerHandler.Debugf("user_id=%s Num_Of_blocks=%d", userID, len(registedBlockEntities))
 
-		registedMuteEntities := []entity.Mute{}
-		if err := b.muteDbHandler.FindAllByUserID(&registedMuteEntities, userID); err != nil {
+		registedMutes := []entity.Mute{}
+		if err := b.muteDbHandler.FindAllByUserID(&registedMutes, userID); err != nil {
 			b.loggerHandler.Errorw("muteDbHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
 			return err
 		}
-		sort.Slice(registedMuteEntities, func(i, j int) bool {
-			return registedMuteEntities[i].TargetTwitterID <= registedMuteEntities[j].TargetTwitterID
-		})
+		registedMuteEntities := entity.Mutes{}
+		registedMuteEntities.ToMutesEntity(&registedMutes)
+		registedMuteEntities.SortByTargetTwtitterID()
+
 		b.loggerHandler.Debugf("user_id=%s Num_Of_mutes=%d", userID, len(registedMuteEntities))
 
 		// MuteでFlag=1のものはスキップし、Blockは変換できたものだけFlag=1をたてる。それ以外は処理しない。
@@ -89,18 +101,14 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 
 			// mute除外
 			needleTwitterID := registedBlockEntity.GetTargetTwitterID()
-			idx := sort.Search(len(registedMuteEntities), func(i int) bool {
-				return string(registedMuteEntities[i].TargetTwitterID) == needleTwitterID
-			})
-
-			if len(registedMuteEntities) > idx && registedMuteEntities[idx].Flag == 1 {
-				b.loggerHandler.Debugf("skip mute flag=1 user_id=%s target_twitter_id=%s", userID, registedMuteEntities[idx].TargetTwitterID)
+			if registedMuteEntities.IsConvertedByTwitterID(needleTwitterID) {
+				b.loggerHandler.Debugf("skip mute flag=1 user_id=%s target_twitter_id=%s", userID, needleTwitterID)
 				continue
 			}
 
 			// block除外
-			if registedBlockEntity.GetFlag() == 1 {
-				b.loggerHandler.Debugf("skip block flag=1 user_id=%s target_twitter_id=%s", userID, registedMuteEntities[idx].TargetTwitterID)
+			if registedBlockEntity.IsConverted() {
+				b.loggerHandler.Debugf("skip block flag=1 user_id=%s target_twitter_id=%s", userID, needleTwitterID)
 				continue
 			}
 
@@ -134,12 +142,15 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 			}
 			registedBlockEntity.Converted()
 			convertedBlockEntities = append(convertedBlockEntities, registedBlockEntity)
-			mute := entity.Mute{
-				TargetTwitterID: registedBlockEntity.GetTargetTwitterID(),
-				UserID:          registedBlockEntity.GetUserID(),
-				Flag:            1,
-			}
-			muteEntities = append(muteEntities, mute)
+			nowTime := time.Now()
+			mute := entity.NewMute(
+				registedBlockEntity.GetUserID(),
+				registedBlockEntity.GetTargetTwitterID(),
+				1,
+				nowTime,
+				nowTime,
+			)
+			muteEntities = append(muteEntities, *mute)
 		}
 
 		// 移行完了処理 blocks更新とmute更新
@@ -173,10 +184,9 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 
 			// 移行完了数を数える。
 			for _, v := range muteEntities {
-				if v.Flag == 1 {
-					convertedIDs = append(convertedIDs, v.TargetTwitterID)
+				if v.IsConverted() {
+					convertedIDs = append(convertedIDs, v.GetTargetTwitterID())
 				}
-
 			}
 		}
 
@@ -184,12 +194,15 @@ func (b *Block2MuteRepository) All(userID string) (*entity.Block2Mute, error) {
 	})
 
 	if err != nil {
-		log.Print(err)
+		block2Mute := entity.Block2Mute{}
+		b.loggerHandler.Errorw("transaction fails", "error", err)
 		return &block2Mute, err
 	}
 
-	block2Mute.NumberOfSuccess = uint(len(convertedIDs))
-	block2Mute.SuccessTwitterIDs = convertedIDs
+	block2Mute := entity.NewBlock2Mute(
+		uint(len(convertedIDs)),
+		convertedIDs,
+	)
 
-	return &block2Mute, nil
+	return block2Mute, nil
 }

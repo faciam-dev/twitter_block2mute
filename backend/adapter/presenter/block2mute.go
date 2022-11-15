@@ -28,8 +28,8 @@ func NewBlock2MuteOutputPort(
 // Render はBlockモデルを出力します．
 func (b *Block2Mute) Render(block2Mute *entity.Block2Mute) {
 	b.contextHandler.JSON(http.StatusOK, map[string]interface{}{
-		"num_success": block2Mute.NumberOfSuccess,
-		"success_ids": block2Mute.SuccessTwitterIDs,
+		"num_success": block2Mute.GetNumberOfSuccess(),
+		"success_ids": block2Mute.GetSuccessTwitterIDs(),
 	})
 }
 

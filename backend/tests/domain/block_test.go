@@ -71,7 +71,7 @@ func TestCreateBlockDomain(t *testing.T) {
 	}
 }
 
-func TestSortByTargetTwtitterID(t *testing.T) {
+func TestBlocksSortByTargetTwtitterID(t *testing.T) {
 	timeNow := time.Now()
 	tests := []struct {
 		name string
@@ -130,7 +130,7 @@ func TestSortByTargetTwtitterID(t *testing.T) {
 	}
 }
 
-func TestFindByTargetTwitterID(t *testing.T) {
+func TestBlocksFindByTargetTwitterID(t *testing.T) {
 	timeNow := time.Now()
 	tests := []struct {
 		name   string
@@ -209,7 +209,7 @@ func TestFindByTargetTwitterID(t *testing.T) {
 	}
 }
 
-func TestFindAllIDsNotFoundWithTwitterID(t *testing.T) {
+func TestBlocksFindAllIDsNotFoundWithTwitterID(t *testing.T) {
 	timeNow := time.Now()
 	tests := []struct {
 		name             string

@@ -3,6 +3,7 @@ package database_test
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
 )
@@ -11,7 +12,7 @@ func TestUserMuteFindAllByTwitterID(t *testing.T) {
 	type arg struct {
 		value string
 	}
-
+	nowTime := time.Now()
 	table := []struct {
 		name         string
 		arg          arg
@@ -23,16 +24,8 @@ func TestUserMuteFindAllByTwitterID(t *testing.T) {
 				value: "1",
 			},
 			[]entity.Mute{
-				{
-					UserID:          1,
-					TargetTwitterID: "12345678904",
-					Flag:            1,
-				},
-				{
-					UserID:          1,
-					TargetTwitterID: "12345678905",
-					Flag:            0,
-				},
+				*entity.NewMute(1, "12345678904", 1, nowTime, nowTime),
+				*entity.NewMute(1, "12345678905", 0, nowTime, nowTime),
 			},
 		},
 	}
@@ -48,9 +41,9 @@ func TestUserMuteFindAllByTwitterID(t *testing.T) {
 			for i, wantMute := range tt.wantEntities {
 				isError := true
 				for _, gotMute := range mutes {
-					if gotMute.UserID == wantMute.UserID &&
-						gotMute.TargetTwitterID == wantMute.TargetTwitterID &&
-						gotMute.Flag == wantMute.Flag {
+					if gotMute.GetUserID() == wantMute.GetUserID() &&
+						gotMute.GetTargetTwitterID() == wantMute.GetTargetTwitterID() &&
+						gotMute.GetFlag() == wantMute.GetFlag() {
 						isError = false
 						break
 					}
@@ -69,7 +62,7 @@ func TestUserMuteCreateNew(t *testing.T) {
 		value        string
 		createSource entity.Mute
 	}
-
+	nowTime := time.Now()
 	table := []struct {
 		name     string
 		arg      arg
@@ -78,39 +71,24 @@ func TestUserMuteCreateNew(t *testing.T) {
 		{
 			"success_insert",
 			arg{
-				column: "id",
-				value:  "3",
-				createSource: entity.Mute{
-					UserID:          1,
-					TargetTwitterID: "12345678905",
-					Flag:            1,
-				},
+				column:       "id",
+				value:        "3",
+				createSource: *entity.NewMute(1, "12345678905", 1, nowTime, nowTime),
 			},
-			entity.Mute{
-				UserID:          1,
-				TargetTwitterID: "12345678905",
-				Flag:            1,
-			},
+			*entity.NewMute(1, "12345678905", 1, nowTime, nowTime),
 		},
 		{
 			"success_update",
 			arg{
-				column: "id",
-				value:  "4",
-				createSource: entity.Mute{
-					UserID:          1,
-					TargetTwitterID: "12345678906",
-					Flag:            0,
-				},
+				column:       "id",
+				value:        "4",
+				createSource: *entity.NewMute(1, "12345678906", 0, nowTime, nowTime),
 			},
-			entity.Mute{
-				UserID:          1,
-				TargetTwitterID: "12345678906",
-				Flag:            0,
-			},
+			*entity.NewMute(1, "12345678906", 0, nowTime, nowTime),
 		},
 	}
 
+	//MuteDbHandler.Begin()
 	MuteDbHandler.Transaction(func() error {
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
@@ -122,7 +100,7 @@ func TestUserMuteCreateNew(t *testing.T) {
 				}
 
 				// 中身の比較
-				if mutes[0].Flag != tt.wantMute.Flag || mutes[0].UserID != tt.wantMute.UserID || mutes[0].TargetTwitterID != tt.wantMute.TargetTwitterID {
+				if mutes[0].GetFlag() != tt.wantMute.GetFlag() || mutes[0].GetUserID() != tt.wantMute.GetUserID() || mutes[0].GetTargetTwitterID() != tt.wantMute.GetTargetTwitterID() {
 					t.Errorf("UserMuteCreate()  = %v, want %v", mutes[0], tt.wantMute)
 				}
 			})
@@ -130,4 +108,5 @@ func TestUserMuteCreateNew(t *testing.T) {
 
 		return errors.New("rollback")
 	})
+	//MuteDbHandler.Rollback()
 }

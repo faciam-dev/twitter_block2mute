@@ -11,7 +11,6 @@ import (
 )
 
 type GormDbEntityHandler[E any, M any] struct {
-	//GormCommonDbHandler
 	db *gorm.DB
 	model.ModelForDomain[E, M]
 }
@@ -26,7 +25,11 @@ func NewDbEntityHandler[E any, M any](gormDbHandler GormDbHandler) GormDbEntityH
 // トランザクションfunc
 func (g *GormDbEntityHandler[E, M]) Transaction(fn func() error) error {
 	return g.db.Transaction(func(tx *gorm.DB) error {
-		return fn()
+		backUpDb := g.db
+		g.db = tx
+		err := fn()
+		g.db = backUpDb
+		return err
 	})
 }
 
@@ -54,24 +57,11 @@ func (g *GormDbEntityHandler[E, M]) First(domainEntityInterface interface{}, ID 
 	}
 
 	model := g.ModelForDomain.FromDomain(domainEntity)
-	//model := modelForDomain.FromDomain(domainEntity)
-	/*
-		model, err := g.entityToModel(modelForDomain, domainEntity)
-		if err != nil {
-			log.Print(err)
-			return err
-		}
-	*/
 
 	if err := g.db.First(&model, ID).Error; err != nil {
 		log.Print(err)
 		return err
 	}
-	/*
-		if err = g.GormCommonDbHandler.First(model, ID); err != nil {
-			return err
-		}
-	*/
 
 	g.ModelForDomain.ToDomain(model, domainEntity)
 
@@ -122,16 +112,6 @@ func (g *GormDbEntityHandler[E, M]) Find(domainEntityInterface interface{}, colu
 	}
 
 	model := g.ModelForDomain.FromDomain(domainEntity)
-	//model := modelForDomain.FromDomain(domainEntity)
-	/*
-		model, err := g.entityToModel(modelForDomain, domainEntity)
-		if err != nil {
-			log.Print(err)
-			return err
-		}
-	*/
-
-	//log.Print(model)
 
 	if err := g.db.Where(columnName+" = ?", searchValue).Find(&model).Limit(1).Error; err != nil {
 		log.Print(err)
@@ -140,12 +120,6 @@ func (g *GormDbEntityHandler[E, M]) Find(domainEntityInterface interface{}, colu
 		}
 		return err
 	}
-
-	/*
-		if err = g.GormCommonDbHandler.First(model, ID); err != nil {
-			return err
-		}
-	*/
 
 	g.ModelForDomain.ToDomain(model, domainEntity)
 
@@ -167,13 +141,6 @@ func (g *GormDbEntityHandler[E, M]) FindAll(domainEntitiesInterface interface{},
 		models = append(models, model)
 	}
 
-	/*
-		models, err := g.entitiesToModels(domainEntitiesInterface)
-		if err != nil {
-			return err
-		}
-	*/
-
 	if err := g.db.Where(columnName+" = ?", searchValue).Find(&models).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil
@@ -182,23 +149,6 @@ func (g *GormDbEntityHandler[E, M]) FindAll(domainEntitiesInterface interface{},
 	}
 
 	g.ModelForDomain.ToDomains(models, entities)
-
-	/*
-		resultEntities := []E{}
-		//log.Print(models)
-		for _, model := range models {
-			entity := new(E)
-			g.ModelForDomain.ToDomain(model, entity)
-			//entities = append(entities, *entity)
-			resultEntities = append(resultEntities, *entity)
-		}
-
-		entities = &resultEntities
-
-		domainEntitiesInterface = entities
-
-		log.Print(domainEntitiesInterface)
-	*/
 
 	return nil
 }
@@ -211,14 +161,6 @@ func (g *GormDbEntityHandler[E, M]) Upsert(domainEntitiesInterface interface{}, 
 		return err
 	}
 	model := g.ModelForDomain.FromDomain(domainEntity)
-
-	/*
-		models := []M{}
-		for _, entity := range *entities {
-			model := g.ModelForDomain.FromDomain(&entity)
-			models = append(models, model)
-		}
-	*/
 
 	err = g.db.Clauses(clause.OnConflict{
 		Where:     clause.Where{Exprs: []clause.Expression{clause.Eq{Column: columnName, Value: searchValue}}},
@@ -233,20 +175,6 @@ func (g *GormDbEntityHandler[E, M]) Upsert(domainEntitiesInterface interface{}, 
 
 	return nil
 }
-
-// entityをmodelにする。
-/*
-func (g *GormDbEntityHandler[T, E, MD, M]) entityToModel(modelForDomain MD, domainEntity interface{}) (M, error) {
-	switch casted := domainEntity.(type) {
-	case *E:
-		model := modelForDomain.FromDomain(casted)
-		return model, nil
-	default:
-		model := modelForDomain.Blank()
-		return model, errors.New("argment type is not entity")
-	}
-}
-*/
 
 // プライマリキーに対応するモデルのレコードの削除処理
 func (g *GormDbEntityHandler[E, M]) Delete(domainEntityInterface interface{}, searchValue string) error {
