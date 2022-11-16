@@ -25,20 +25,20 @@ type Auth struct {
 		LoggerHandler handler.LoggerHandler,
 		twitterHandler handler.TwitterHandler,
 		sessionHandler handler.SessionHandler,
-		UserDbHandler handler.UserDbHandler,
+		UserDBHandler handler.UserDBHandler,
 	) port.AuthRepository
 
 	LoggerHandler  handler.LoggerHandler
 	TwitterHandler handler.TwitterHandler
 	SessionHandler handler.SessionHandler
 	ContextHandler handler.ContextHandler
-	UserDbHandler  handler.UserDbHandler
+	UserDBHandler  handler.UserDBHandler
 }
 
 // 認証済みかどうかをセッションと照らし合わせて判別する
 func (a *Auth) IsAuth(contextHandler handler.ContextHandler) {
 	outputPort := a.OutputFactory(contextHandler, a.LoggerHandler)
-	repository := a.RepoFactory(contextHandler, a.LoggerHandler, a.TwitterHandler, a.SessionHandler, a.UserDbHandler)
+	repository := a.RepoFactory(contextHandler, a.LoggerHandler, a.TwitterHandler, a.SessionHandler, a.UserDBHandler)
 	inputPort := a.InputFactory(outputPort, repository, a.LoggerHandler)
 	inputPort.IsAuthenticated()
 }
@@ -46,7 +46,7 @@ func (a *Auth) IsAuth(contextHandler handler.ContextHandler) {
 // 認証を実施する
 func (a *Auth) Auth(contextHandler handler.ContextHandler) {
 	outputPort := a.OutputFactory(contextHandler, a.LoggerHandler)
-	repository := a.RepoFactory(contextHandler, a.LoggerHandler, a.TwitterHandler, a.SessionHandler, a.UserDbHandler)
+	repository := a.RepoFactory(contextHandler, a.LoggerHandler, a.TwitterHandler, a.SessionHandler, a.UserDBHandler)
 	inputPort := a.InputFactory(outputPort, repository, a.LoggerHandler)
 	inputPort.Auth()
 }
@@ -57,7 +57,7 @@ func (a *Auth) Callback(contextHandler handler.ContextHandler) {
 	secret := contextHandler.Query("oauth_verifier")
 
 	outputPort := a.OutputFactory(contextHandler, a.LoggerHandler)
-	repository := a.RepoFactory(contextHandler, a.LoggerHandler, a.TwitterHandler, a.SessionHandler, a.UserDbHandler)
+	repository := a.RepoFactory(contextHandler, a.LoggerHandler, a.TwitterHandler, a.SessionHandler, a.UserDBHandler)
 	inputPort := a.InputFactory(outputPort, repository, a.LoggerHandler)
 	inputPort.Callback(token, secret)
 }
@@ -65,7 +65,7 @@ func (a *Auth) Callback(contextHandler handler.ContextHandler) {
 // ログアウト処理
 func (a *Auth) Logout(contextHandler handler.ContextHandler) {
 	outputPort := a.OutputFactory(contextHandler, a.LoggerHandler)
-	repository := a.RepoFactory(contextHandler, a.LoggerHandler, a.TwitterHandler, a.SessionHandler, a.UserDbHandler)
+	repository := a.RepoFactory(contextHandler, a.LoggerHandler, a.TwitterHandler, a.SessionHandler, a.UserDBHandler)
 	inputPort := a.InputFactory(outputPort, repository, a.LoggerHandler)
 	inputPort.Logout()
 }

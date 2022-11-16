@@ -35,7 +35,7 @@ func TestUserMuteFindAllByTwitterID(t *testing.T) {
 	for _, tt := range table {
 		t.Run(tt.name, func(t *testing.T) {
 			mutes := []entity.Mute{}
-			if err := MuteDbHandler.FindAllByUserID(&mutes, tt.arg.value); err != nil {
+			if err := MuteDBHandler.FindAllByUserID(&mutes, tt.arg.value); err != nil {
 				t.Error(err)
 			}
 
@@ -90,13 +90,13 @@ func TestUserMuteCreateNew(t *testing.T) {
 		},
 	}
 
-	DbHandler.Transaction(func(conn handler.DbConnection) error {
-		muteDbHandler := database.NewMuteHandler(conn)
+	DBHandler.Transaction(func(conn handler.DBConnection) error {
+		muteDBHandler := database.NewMuteHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 作成・更新する
 				mutes := []entity.Mute{tt.arg.createSource}
-				err := muteDbHandler.CreateNew(&mutes, tt.arg.column, tt.arg.value)
+				err := muteDBHandler.CreateNew(&mutes, tt.arg.column, tt.arg.value)
 				if err != nil {
 					t.Error(err)
 				}
@@ -111,12 +111,12 @@ func TestUserMuteCreateNew(t *testing.T) {
 		return errors.New("rollback")
 	})
 	/*
-		MuteDbHandler.Transaction(func() error {
+		MuteDBHandler.Transaction(func() error {
 			for _, tt := range table {
 				t.Run(tt.name, func(t *testing.T) {
 					// 作成・更新する
 					mutes := []entity.Mute{tt.arg.createSource}
-					err := MuteDbHandler.CreateNew(&mutes, tt.arg.column, tt.arg.value)
+					err := MuteDBHandler.CreateNew(&mutes, tt.arg.column, tt.arg.value)
 					if err != nil {
 						t.Error(err)
 					}

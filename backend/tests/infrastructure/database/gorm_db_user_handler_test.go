@@ -36,7 +36,7 @@ func TestFirst(t *testing.T) {
 	for _, tt := range table {
 		t.Run(tt.name, func(t *testing.T) {
 			user := entity.User{}
-			UserDbHandler.First(&user, tt.arg.value)
+			UserDBHandler.First(&user, tt.arg.value)
 
 			// 中身の比較
 			if user.GetName() != tt.wantUser.GetName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -75,13 +75,13 @@ func TestCreate(t *testing.T) {
 		},
 	}
 
-	DbHandler.Transaction(func(conn handler.DbConnection) error {
-		userDbHandler := database.NewUserDbHandler(conn)
+	DBHandler.Transaction(func(conn handler.DBConnection) error {
+		userDBHandler := database.NewUserDBHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 作成する
 				user := tt.arg.createSource
-				userDbHandler.Create(&user)
+				userDBHandler.Create(&user)
 
 				// 中身の比較
 				if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -92,12 +92,12 @@ func TestCreate(t *testing.T) {
 		return errors.New("rollback")
 	})
 	/*
-		UserDbHandler.Transaction(func() error {
+		UserDBHandler.Transaction(func() error {
 			for _, tt := range table {
 				t.Run(tt.name, func(t *testing.T) {
 					// 作成する
 					user := tt.arg.createSource
-					UserDbHandler.Create(&user)
+					UserDBHandler.Create(&user)
 
 					// 中身の比較
 					if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -144,13 +144,13 @@ func TestUpdate(t *testing.T) {
 	}
 
 	// イメージ
-	DbHandler.Transaction(func(conn handler.DbConnection) error {
-		userDbHandler := database.NewUserDbHandler(conn)
+	DBHandler.Transaction(func(conn handler.DBConnection) error {
+		userDBHandler := database.NewUserDBHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 更新する
 				user := tt.arg.createSource
-				userDbHandler.Update(&user, tt.arg.value)
+				userDBHandler.Update(&user, tt.arg.value)
 
 				// 中身の比較
 				if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -162,12 +162,12 @@ func TestUpdate(t *testing.T) {
 	})
 
 	/*
-		UserDbHandler.Transaction(func() error {
+		UserDBHandler.Transaction(func() error {
 			for _, tt := range table {
 				t.Run(tt.name, func(t *testing.T) {
 					// 更新する
 					user := tt.arg.createSource
-					UserDbHandler.Update(&user, tt.arg.value)
+					UserDBHandler.Update(&user, tt.arg.value)
 
 					// 中身の比較
 					if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -232,13 +232,13 @@ func TestUpsert(t *testing.T) {
 		},
 	}
 
-	DbHandler.Transaction(func(conn handler.DbConnection) error {
-		userDbHandler := database.NewUserDbHandler(conn)
+	DBHandler.Transaction(func(conn handler.DBConnection) error {
+		userDBHandler := database.NewUserDBHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 作成・更新する
 				user := tt.arg.createSource
-				userDbHandler.Upsert(&user, tt.arg.column, tt.arg.value)
+				userDBHandler.Upsert(&user, tt.arg.column, tt.arg.value)
 
 				// 中身の比較
 				if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -251,12 +251,12 @@ func TestUpsert(t *testing.T) {
 	})
 
 	/*
-		UserDbHandler.Transaction(func() error {
+		UserDBHandler.Transaction(func() error {
 			for _, tt := range table {
 				t.Run(tt.name, func(t *testing.T) {
 					// 作成・更新する
 					user := tt.arg.createSource
-					UserDbHandler.Upsert(&user, tt.arg.column, tt.arg.value)
+					UserDBHandler.Upsert(&user, tt.arg.column, tt.arg.value)
 
 					// 中身の比較
 					if user.GetName() != tt.wantUser.GetName() || user.GetAccountName() != tt.wantUser.GetAccountName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {
@@ -299,7 +299,7 @@ func TestFind(t *testing.T) {
 	for _, tt := range table {
 		t.Run(tt.name, func(t *testing.T) {
 			user := entity.User{}
-			if err := UserDbHandler.Find(&user, tt.arg.column, tt.arg.value); err != nil {
+			if err := UserDBHandler.Find(&user, tt.arg.column, tt.arg.value); err != nil {
 				t.Errorf("Find(%v, %v) err = %v", tt.arg.column, tt.arg.value, err)
 			}
 
@@ -338,7 +338,7 @@ func TestFindByTwitterID(t *testing.T) {
 	for _, tt := range table {
 		t.Run(tt.name, func(t *testing.T) {
 			user := entity.User{}
-			UserDbHandler.FindByTwitterID(&user, tt.arg.value)
+			UserDBHandler.FindByTwitterID(&user, tt.arg.value)
 
 			// 中身の比較
 			if user.GetName() != tt.wantUser.GetName() || user.GetTwitterID() != tt.wantUser.GetTwitterID() {

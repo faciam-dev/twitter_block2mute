@@ -13,7 +13,7 @@ type AuthRepository struct {
 	loggerHandler  handler.LoggerHandler
 	twitterHandler handler.TwitterHandler
 	sessionHandler handler.SessionHandler
-	userDbHandler  handler.UserDbHandler
+	userDBHandler  handler.UserDBHandler
 }
 
 // NewAuthRepository はAuthRepositoryを返します．
@@ -22,14 +22,14 @@ func NewAuthRepository(
 	loggerHandler handler.LoggerHandler,
 	twitterHandler handler.TwitterHandler,
 	sessionHandler handler.SessionHandler,
-	userDbHandler handler.UserDbHandler,
+	userDBHandler handler.UserDBHandler,
 ) port.AuthRepository {
 	authRepository := &AuthRepository{
 		contextHandler: contextHandler,
 		loggerHandler:  loggerHandler,
 		twitterHandler: twitterHandler,
 		sessionHandler: sessionHandler,
-		userDbHandler:  userDbHandler,
+		userDBHandler:  userDBHandler,
 	}
 	authRepository.sessionHandler.SetContextHandler(contextHandler)
 	return authRepository
@@ -88,7 +88,7 @@ func (a *AuthRepository) AuthByCallbackParams(token string, secret string) (hand
 func (a *AuthRepository) FindUserByTwitterID(twitterID string) (*entity.User, error) {
 	user := entity.User{}
 
-	if err := a.userDbHandler.FindByTwitterID(&user, twitterID); err != nil {
+	if err := a.userDBHandler.FindByTwitterID(&user, twitterID); err != nil {
 		a.loggerHandler.Errorw("Callback() FindByTwitterID: error", "error", err)
 		return &user, err
 	}
@@ -100,7 +100,7 @@ func (a *AuthRepository) FindUserByTwitterID(twitterID string) (*entity.User, er
 
 // userのUpsert処理
 func (a *AuthRepository) UpsertUser(user *entity.User) error {
-	if err := a.userDbHandler.Upsert(user, "twitter_id", user.GetTwitterID()); err != nil {
+	if err := a.userDBHandler.Upsert(user, "twitter_id", user.GetTwitterID()); err != nil {
 		a.loggerHandler.Errorw("Callback() Upsert", "error", err)
 		return err
 	}

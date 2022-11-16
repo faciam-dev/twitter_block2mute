@@ -49,7 +49,7 @@ func TestGetUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbHandler, dbMock, err := newMockGormDbHandler()
+			dbHandler, dbMock, err := newMockGormDBHandler()
 			if err != nil {
 				t.Error("sqlmock(DB) not work")
 			}
@@ -61,7 +61,7 @@ func TestGetUser(t *testing.T) {
 				WithArgs(args.UserID).
 				WillReturnRows(sqlmock.NewRows([]string{"id", "name", "account_name", "twitter_id"}).AddRow(args.UserID, args.UserName, args.UserName, args.UserTwitterID))
 
-			// blockDbHandler
+			// blockDBHandler
 
 			// モックの生成
 			mockCtrl := gomock.NewController(t)
@@ -179,7 +179,7 @@ func TestGetBlocks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbHandler, _, err := newMockGormDbHandler()
+			dbHandler, _, err := newMockGormDBHandler()
 			if err != nil {
 				t.Error("sqlmock(DB) not work")
 			}
@@ -339,13 +339,13 @@ func TestTxUpdateAndDeleteBlocks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbHandler, dbMock, err := newMockGormDbHandler()
+			dbHandler, dbMock, err := newMockGormDBHandler()
 			if err != nil {
 				t.Error("sqlmock(DB) not work")
 			}
 
 			// sqlmock処理
-			// blockDbHandler
+			// blockDBHandler
 			mockedUserBlocksRow := sqlmock.NewRows([]string{"id", "user_id", "target_twitter_id", "flag"})
 			for _, v := range args.blocks {
 				mockedUserBlocksRow.AddRow(v.ID, v.UserID, v.TargetTwitterID, v.Flag)

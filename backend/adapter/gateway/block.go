@@ -37,7 +37,7 @@ func NewBlockRepository(
 // ユーザーを取得する
 func (u *BlockRepository) GetUser(userID string) *entity.User {
 	user := entity.User{}
-	userDBHandler := database.NewUserDbHandler(u.dbHandler.Connect())
+	userDBHandler := database.NewUserDBHandler(u.dbHandler.Connect())
 
 	if err := userDBHandler.First(&user, userID); err != nil {
 		u.loggerHandler.Errorf("user not found (user_id=%s)", userID)
@@ -94,13 +94,13 @@ func (u *BlockRepository) GetBlocks(user *entity.User) (*entity.Blocks, int, err
 
 // update blocks table
 func (u *BlockRepository) TxUpdateAndDeleteBlocks(user *entity.User, blocks *entity.Blocks) error {
-	//err := u.blockDbHandler.Transaction(func() error {
-	err := u.dbHandler.Transaction(func(tx handler.DbConnection) error {
-		blockDbHandler := database.NewBlockDbHandler(tx)
+	//err := u.blockDBHandler.Transaction(func() error {
+	err := u.dbHandler.Transaction(func(tx handler.DBConnection) error {
+		blockDBHandler := database.NewBlockDBHandler(tx)
 
 		// 登録済みのエンティティを取得する
 		registedBlocks := []entity.Block{}
-		if err := blockDbHandler.FindAllByUserID(&registedBlocks, strconv.FormatUint(uint64(user.GetID()), 10)); err != nil {
+		if err := blockDBHandler.FindAllByUserID(&registedBlocks, strconv.FormatUint(uint64(user.GetID()), 10)); err != nil {
 			u.loggerHandler.Errorw("FindAllByUserID", "error", err)
 			return err
 		}
@@ -113,7 +113,7 @@ func (u *BlockRepository) TxUpdateAndDeleteBlocks(user *entity.User, blocks *ent
 		registedBlockEntities.SortByTargetTwtitterID()
 		IDs := registedBlockEntities.FindAllIDsNotFoundWithTwitterID(blocks)
 		if len(IDs) > 0 {
-			if err := blockDbHandler.DeleteByIds(&[]entity.Block{}, IDs); err != nil {
+			if err := blockDBHandler.DeleteByIds(&[]entity.Block{}, IDs); err != nil {
 				log.Print(err)
 				return err
 			}
@@ -122,7 +122,7 @@ func (u *BlockRepository) TxUpdateAndDeleteBlocks(user *entity.User, blocks *ent
 		// 既存レコードは一切更新せずに登録する
 		blocks = blocks.GetNotConvertedBlocks()
 		if len(*blocks) > 0 {
-			if err := blockDbHandler.CreateNewBlocks(blocks.ToBlockEntities(), "user_id", "twitter_id"); err != nil {
+			if err := blockDBHandler.CreateNewBlocks(blocks.ToBlockEntities(), "user_id", "twitter_id"); err != nil {
 				u.loggerHandler.Errorw(
 					"fail to create new blocks.",
 					"user_id",

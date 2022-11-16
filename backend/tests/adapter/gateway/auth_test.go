@@ -67,7 +67,7 @@ func TestIsAuthenticated(t *testing.T) {
 
 			// モックの生成
 			// sqlmock処理
-			dbUserHandler /*dbMock*/, _, err := newMockGormDbUserHandler()
+			dbUserHandler /*dbMock*/, _, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -139,7 +139,7 @@ func TestAuth(t *testing.T) {
 		},
 	}
 
-	dbUserHandler, _, err := newMockGormDbUserHandler()
+	dbUserHandler, _, err := newMockGormDBUserHandler()
 
 	if err != nil {
 		t.Error("sqlmock not work")
@@ -236,7 +236,7 @@ func TestAuthByCallbackParams(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, _, err := newMockGormDbUserHandler()
+			dbUserHandler, _, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -351,7 +351,7 @@ func TestFindUserByTwitterID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, dbMock, err := newMockGormDbUserHandler()
+			dbUserHandler, dbMock, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -442,7 +442,7 @@ func TestUpsertUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, dbMock, err := newMockGormDbUserHandler()
+			dbUserHandler, dbMock, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -531,7 +531,7 @@ func TestUpdateTwitterApi(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, _, err := newMockGormDbUserHandler()
+			dbUserHandler, _, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -603,7 +603,7 @@ func TestUpdateSession(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, _, err := newMockGormDbUserHandler()
+			dbUserHandler, _, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -669,7 +669,7 @@ func TestLogout(t *testing.T) {
 		},
 	}
 
-	dbUserHandler, _, err := newMockGormDbUserHandler()
+	dbUserHandler, _, err := newMockGormDBUserHandler()
 
 	if err != nil {
 		t.Error("sqlmock not work")

@@ -9,7 +9,7 @@ import (
 )
 
 // mock化したGormをつかったDBへのハンドラを得る
-func newMockGormDbHandler() (handler.DBHandler, sqlmock.Sqlmock, error) {
+func newMockGormDBHandler() (handler.DBHandler, sqlmock.Sqlmock, error) {
 	mockDB, mock, err := sqlmock.New()
 	if err != nil {
 		return nil, mock, err
@@ -24,15 +24,15 @@ func newMockGormDbHandler() (handler.DBHandler, sqlmock.Sqlmock, error) {
 		&gorm.Config{},
 	)
 
-	gormDbHandler := database.NewGormDbHandler(
-		database.GormDbHandler{Conn: db}.Connect(),
+	gormDBHandler := database.NewGormDBHandler(
+		database.GormDBHandler{Conn: db}.Connect(),
 	)
 
-	return gormDbHandler, mock, err
+	return gormDBHandler, mock, err
 }
 
 // mock化したGormをつかったUserDbへのハンドラを得る
-func newMockGormDbUserHandler() (handler.UserDbHandler, sqlmock.Sqlmock, error) {
+func newMockGormDBUserHandler() (handler.UserDBHandler, sqlmock.Sqlmock, error) {
 	mockDB, mock, err := sqlmock.New()
 	if err != nil {
 		return nil, mock, err
@@ -47,9 +47,9 @@ func newMockGormDbUserHandler() (handler.UserDbHandler, sqlmock.Sqlmock, error) 
 		&gorm.Config{},
 	)
 
-	gormDbUserHandler := database.NewUserDbHandler(
-		database.GormDbHandler{Conn: db}.Connect(),
+	gormDBUserHandler := database.NewUserDBHandler(
+		database.GormDBHandler{Conn: db}.Connect(),
 	)
 
-	return gormDbUserHandler, mock, err
+	return gormDBUserHandler, mock, err
 }

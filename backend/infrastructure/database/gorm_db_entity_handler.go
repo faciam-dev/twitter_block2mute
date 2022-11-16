@@ -10,20 +10,20 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type GormDbEntityHandler[E any, M any] struct {
+type GormDBEntityHandler[E any, M any] struct {
 	db *gorm.DB
 	model.ModelForDomain[E, M]
 }
 
-func NewDbEntityHandler[E any, M any](gormDbHandler GormDbHandler) GormDbEntityHandler[E, M] {
-	gormDbEntityHandler := new(GormDbEntityHandler[E, M])
-	gormDbEntityHandler.db = gormDbHandler.Conn
+func NewDbEntityHandler[E any, M any](gormDBHandler GormDBHandler) GormDBEntityHandler[E, M] {
+	gormDBEntityHandler := new(GormDBEntityHandler[E, M])
+	gormDBEntityHandler.db = gormDBHandler.Conn
 
-	return *gormDbEntityHandler
+	return *gormDBEntityHandler
 }
 
 // トランザクションfunc
-func (g *GormDbEntityHandler[E, M]) Transaction(fn func() error) error {
+func (g *GormDBEntityHandler[E, M]) Transaction(fn func() error) error {
 	return g.db.Transaction(func(tx *gorm.DB) error {
 		backUpDb := g.db
 		g.db = tx
@@ -34,22 +34,22 @@ func (g *GormDbEntityHandler[E, M]) Transaction(fn func() error) error {
 }
 
 // トランザクション開始
-func (g *GormDbEntityHandler[E, M]) Begin() {
+func (g *GormDBEntityHandler[E, M]) Begin() {
 	g.db = g.db.Begin()
 }
 
 // トランザクションコミット
-func (g *GormDbEntityHandler[E, M]) Commit() {
+func (g *GormDBEntityHandler[E, M]) Commit() {
 	g.db = g.db.Commit()
 }
 
 // トランザクションロールバック
-func (g *GormDbEntityHandler[E, M]) Rollback() {
+func (g *GormDBEntityHandler[E, M]) Rollback() {
 	g.db = g.db.Rollback()
 }
 
 // レコード1件をIDで取得
-func (g *GormDbEntityHandler[E, M]) First(domainEntityInterface interface{}, ID string) error {
+func (g *GormDBEntityHandler[E, M]) First(domainEntityInterface interface{}, ID string) error {
 
 	domainEntity, err := g.InterfaceToEntity(domainEntityInterface)
 	if err != nil {
@@ -69,7 +69,7 @@ func (g *GormDbEntityHandler[E, M]) First(domainEntityInterface interface{}, ID 
 }
 
 // レコードを作成
-func (g *GormDbEntityHandler[E, M]) Create(domainEntityInterface interface{}) error {
+func (g *GormDBEntityHandler[E, M]) Create(domainEntityInterface interface{}) error {
 	domainEntity, err := g.InterfaceToEntity(domainEntityInterface)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (g *GormDbEntityHandler[E, M]) Create(domainEntityInterface interface{}) er
 }
 
 // レコードをID基準で更新
-func (g *GormDbEntityHandler[E, M]) Update(domainEntityInterface interface{}, ID string) error {
+func (g *GormDBEntityHandler[E, M]) Update(domainEntityInterface interface{}, ID string) error {
 	domainEntity, err := g.InterfaceToEntity(domainEntityInterface)
 	if err != nil {
 		return err
@@ -105,7 +105,7 @@ func (g *GormDbEntityHandler[E, M]) Update(domainEntityInterface interface{}, ID
 }
 
 // レコード1件を検索。※columnNameにユーザーからの入力値を絶対に使わないこと。
-func (g *GormDbEntityHandler[E, M]) Find(domainEntityInterface interface{}, columnName string, searchValue string) error {
+func (g *GormDBEntityHandler[E, M]) Find(domainEntityInterface interface{}, columnName string, searchValue string) error {
 	domainEntity, err := g.InterfaceToEntity(domainEntityInterface)
 	if err != nil {
 		return err
@@ -128,7 +128,7 @@ func (g *GormDbEntityHandler[E, M]) Find(domainEntityInterface interface{}, colu
 }
 
 // レコード全件を検索。※columnNameにユーザーからの入力値を絶対に使わないこと。
-func (g *GormDbEntityHandler[E, M]) FindAll(domainEntitiesInterface interface{}, columnName string, searchValue string) error {
+func (g *GormDBEntityHandler[E, M]) FindAll(domainEntitiesInterface interface{}, columnName string, searchValue string) error {
 
 	entities, err := g.InterfaceToEntities(domainEntitiesInterface)
 	if err != nil {
@@ -154,7 +154,7 @@ func (g *GormDbEntityHandler[E, M]) FindAll(domainEntitiesInterface interface{},
 }
 
 // 条件に該当するレコードを新規作成または更新する
-func (g *GormDbEntityHandler[E, M]) Upsert(domainEntitiesInterface interface{}, columnName string, searchValue string) error {
+func (g *GormDBEntityHandler[E, M]) Upsert(domainEntitiesInterface interface{}, columnName string, searchValue string) error {
 	domainEntity, err := g.InterfaceToEntity(domainEntitiesInterface)
 
 	if err != nil {
@@ -177,7 +177,7 @@ func (g *GormDbEntityHandler[E, M]) Upsert(domainEntitiesInterface interface{}, 
 }
 
 // プライマリキーに対応するモデルのレコードの削除処理
-func (g *GormDbEntityHandler[E, M]) Delete(domainEntityInterface interface{}, searchValue string) error {
+func (g *GormDBEntityHandler[E, M]) Delete(domainEntityInterface interface{}, searchValue string) error {
 
 	domainEntity, err := g.InterfaceToEntity(domainEntityInterface)
 	if err != nil {
@@ -194,7 +194,7 @@ func (g *GormDbEntityHandler[E, M]) Delete(domainEntityInterface interface{}, se
 }
 
 // 複数プライマリキーに対応するモデルのレコードの削除処理
-func (g *GormDbEntityHandler[E, M]) DeleteByIds(domainEntitiesInterface interface{}, IDs []uint) error {
+func (g *GormDBEntityHandler[E, M]) DeleteByIds(domainEntitiesInterface interface{}, IDs []uint) error {
 
 	entities, err := g.InterfaceToEntities(domainEntitiesInterface)
 	if err != nil {
@@ -215,7 +215,7 @@ func (g *GormDbEntityHandler[E, M]) DeleteByIds(domainEntitiesInterface interfac
 }
 
 // エンティティに対応するモデルの全レコード削除処理
-func (g *GormDbEntityHandler[E, M]) DeleteAll(domainEntityInterface interface{}, columnName string, searchValue string) error {
+func (g *GormDBEntityHandler[E, M]) DeleteAll(domainEntityInterface interface{}, columnName string, searchValue string) error {
 
 	domainEntity, err := g.InterfaceToEntity(domainEntityInterface)
 	if err != nil {
@@ -235,7 +235,7 @@ func (g *GormDbEntityHandler[E, M]) DeleteAll(domainEntityInterface interface{},
 }
 
 // エンティティ変換：interfaceをentityにする
-func (g *GormDbEntityHandler[E, M]) InterfaceToEntity(interf interface{}) (*E, error) {
+func (g *GormDBEntityHandler[E, M]) InterfaceToEntity(interf interface{}) (*E, error) {
 	switch casted := interf.(type) {
 	case *E:
 		return casted, nil
@@ -245,7 +245,7 @@ func (g *GormDbEntityHandler[E, M]) InterfaceToEntity(interf interface{}) (*E, e
 }
 
 // エンティティスライス変換：interfaceを[]entityにする。
-func (g *GormDbEntityHandler[E, M]) InterfaceToEntities(interfaceSlice interface{}) (*[]E, error) {
+func (g *GormDBEntityHandler[E, M]) InterfaceToEntities(interfaceSlice interface{}) (*[]E, error) {
 	switch casted := interfaceSlice.(type) {
 	case *[]E:
 		return casted, nil
@@ -255,7 +255,7 @@ func (g *GormDbEntityHandler[E, M]) InterfaceToEntities(interfaceSlice interface
 }
 
 // モデルスライス変換：interface([]entity)を[]modelにする。
-func (g *GormDbEntityHandler[E, M]) EntitiesToModels(entities []E) []M {
+func (g *GormDBEntityHandler[E, M]) EntitiesToModels(entities []E) []M {
 	models := []M{}
 
 	for _, entity := range entities {

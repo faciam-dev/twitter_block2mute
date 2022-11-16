@@ -7,19 +7,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type GormDbUserHandler struct {
-	GormDbEntityHandler[entity.User, model.User]
+type GormDBUserHandler struct {
+	GormDBEntityHandler[entity.User, model.User]
 }
 
-func NewUserDbHandler(conn handler.DbConnection) handler.UserDbHandler {
-	userDbHandler := new(GormDbUserHandler)
-	userDbHandler.db = conn.GetConnection().(*gorm.DB)
-	userDbHandler.ModelForDomain = &model.UserModelForDomain{}
+func NewUserDBHandler(conn handler.DBConnection) handler.UserDBHandler {
+	userDBHandler := new(GormDBUserHandler)
+	userDBHandler.db = conn.GetConnection().(*gorm.DB)
+	userDBHandler.ModelForDomain = &model.UserModelForDomain{}
 
-	return userDbHandler
+	return userDBHandler
 }
 
 // ユーザーをTwitterIDで取得
-func (g *GormDbUserHandler) FindByTwitterID(user interface{}, twitterID string) error {
+func (g *GormDBUserHandler) FindByTwitterID(user interface{}, twitterID string) error {
 	return g.Find(user, "twitter_id", twitterID)
 }

@@ -22,12 +22,12 @@ type User struct {
 	// -> gateway.NewUserRepository
 	RepoFactory func(
 		LoggerHandler handler.LoggerHandler,
-		dbHandler handler.UserDbHandler,
+		dbHandler handler.UserDBHandler,
 	) port.UserRepository
 
 	LoggerHandler  handler.LoggerHandler
 	SessionHandler handler.SessionHandler
-	UserDbHandler  handler.UserDbHandler
+	UserDBHandler  handler.UserDBHandler
 }
 
 // GetUserByID は，httpを受け取り，portを組み立てて，inputPort.GetUserByIDを呼び出します．
@@ -41,7 +41,7 @@ func (u *User) GetUserSelf(contextHandler handler.ContextHandler) {
 	}
 
 	outputPort := u.OutputFactory(contextHandler, u.LoggerHandler)
-	repository := u.RepoFactory(u.LoggerHandler, u.UserDbHandler)
+	repository := u.RepoFactory(u.LoggerHandler, u.UserDBHandler)
 	inputPort := u.InputFactory(outputPort, repository, u.LoggerHandler)
 	inputPort.GetUserByID(userID.(string))
 

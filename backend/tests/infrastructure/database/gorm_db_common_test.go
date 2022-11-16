@@ -11,25 +11,25 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 )
 
-var DbHandler handler.DBHandler
-var UserDbHandler handler.UserDbHandler
-var BlockDbHandler handler.BlockDbHandler
-var MuteDbHandler handler.MuteDbHandler
+var DBHandler handler.DBHandler
+var UserDBHandler handler.UserDBHandler
+var BlockDBHandler handler.BlockDBHandler
+var MuteDBHandler handler.MuteDBHandler
 
 func TestMain(m *testing.M) {
 	// 前処理
 	config := config.NewConfig(".env.test")
 
-	dbConnection := database.NewGormDbConnectionByConfig(config)
-	DbHandler = database.NewGormDbHandler(dbConnection)
+	dbConnection := database.NewGormDBConnectionByConfig(config)
+	DBHandler = database.NewGormDBHandler(dbConnection)
 
-	UserDbHandler = database.NewUserDbHandler(DbHandler.Connect())
-	BlockDbHandler = database.NewBlockDbHandler(DbHandler.Connect())
-	MuteDbHandler = database.NewMuteHandler(DbHandler.Connect())
+	UserDBHandler = database.NewUserDBHandler(DBHandler.Connect())
+	BlockDBHandler = database.NewBlockDBHandler(DBHandler.Connect())
+	MuteDBHandler = database.NewMuteHandler(DBHandler.Connect())
 
 	// userテーブルから何も得られない場合はseederを実行
 	user := &entity.User{}
-	if err := UserDbHandler.Find(user, "id", "1"); err != nil || user.GetID() == 0 {
+	if err := UserDBHandler.Find(user, "id", "1"); err != nil || user.GetID() == 0 {
 		migration.Seeder()
 	}
 

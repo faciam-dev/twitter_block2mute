@@ -36,7 +36,7 @@ func NewBlock2MuteRepository(
 // ユーザーを取得する
 func (b *Block2MuteRepository) GetUser(userID string) *entity.User {
 	user := entity.User{}
-	userDBHandler := database.NewUserDbHandler(b.dbHandler.Connect())
+	userDBHandler := database.NewUserDBHandler(b.dbHandler.Connect())
 
 	if err := userDBHandler.First(&user, userID); err != nil {
 		b.loggerHandler.Errorf("user not found (user_id=%s)", userID)
@@ -66,16 +66,16 @@ func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error
 
 	// update blocks table
 	convertedIDs := []string{}
-	//	err := b.muteDbHandler.Transaction(func() error {
-	err := b.dbHandler.Transaction(func(tx handler.DbConnection) error {
-		blockDbHandler := database.NewBlockDbHandler(tx)
-		muteDbHandler := database.NewMuteHandler(tx)
+	//	err := b.muteDBHandler.Transaction(func() error {
+	err := b.dbHandler.Transaction(func(tx handler.DBConnection) error {
+		blockDBHandler := database.NewBlockDBHandler(tx)
+		muteDBHandler := database.NewMuteHandler(tx)
 
-		//err := b.muteDbHandler.Transaction(func() error {
+		//err := b.muteDBHandler.Transaction(func() error {
 		// block2mute
 		registedBlocks := []entity.Block{}
-		if err := blockDbHandler.FindAllByUserID(&registedBlocks, userID); err != nil {
-			b.loggerHandler.Errorw("blockDbHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
+		if err := blockDBHandler.FindAllByUserID(&registedBlocks, userID); err != nil {
+			b.loggerHandler.Errorw("blockDBHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
 			return err
 		}
 		registedBlockEntities := entity.Blocks{}
@@ -85,8 +85,8 @@ func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error
 		b.loggerHandler.Debugf("user_id=%s Num_Of_blocks=%d", userID, len(registedBlockEntities))
 
 		registedMutes := []entity.Mute{}
-		if err := muteDbHandler.FindAllByUserID(&registedMutes, userID); err != nil {
-			b.loggerHandler.Errorw("muteDbHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
+		if err := muteDBHandler.FindAllByUserID(&registedMutes, userID); err != nil {
+			b.loggerHandler.Errorw("muteDBHandler.FindAllByUserID() error.", "user_id", userID, "error", err)
 			return err
 		}
 		registedMuteEntities := entity.Mutes{}
@@ -156,7 +156,7 @@ func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error
 
 		// 移行完了処理 blocks更新とmute更新
 		if len(convertedBlockEntities) > 0 {
-			if err := blockDbHandler.CreateNewBlocks(&convertedBlockEntities, "user_id", "twitter_id"); err != nil {
+			if err := blockDBHandler.CreateNewBlocks(&convertedBlockEntities, "user_id", "twitter_id"); err != nil {
 				b.loggerHandler.Errorw(
 					"fail to create new blocks.",
 					"user_id",
@@ -170,7 +170,7 @@ func (b *Block2MuteRepository) All(user *entity.User) (*entity.Block2Mute, error
 			}
 		}
 		if len(muteEntities) > 0 {
-			if err := muteDbHandler.CreateNew(&muteEntities, "user_id", "twitter_id"); err != nil {
+			if err := muteDBHandler.CreateNew(&muteEntities, "user_id", "twitter_id"); err != nil {
 				b.loggerHandler.Errorw(
 					"fail to create new mutes.",
 					"user_id",

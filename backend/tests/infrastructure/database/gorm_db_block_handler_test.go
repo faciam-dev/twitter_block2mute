@@ -36,7 +36,7 @@ func TestFindAllByTwitterID(t *testing.T) {
 	for _, tt := range table {
 		t.Run(tt.name, func(t *testing.T) {
 			blocks := []entity.Block{}
-			if err := BlockDbHandler.FindAllByUserID(&blocks, tt.arg.value); err != nil {
+			if err := BlockDBHandler.FindAllByUserID(&blocks, tt.arg.value); err != nil {
 				t.Error(err)
 			}
 
@@ -91,13 +91,13 @@ func TestCreateNewBlocks(t *testing.T) {
 		},
 	}
 
-	DbHandler.Transaction(func(conn handler.DbConnection) error {
-		blockDbHandler := database.NewBlockDbHandler(conn)
+	DBHandler.Transaction(func(conn handler.DBConnection) error {
+		blockDBHandler := database.NewBlockDBHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 作成・更新する
 				blocks := []entity.Block{tt.arg.createSource}
-				err := blockDbHandler.CreateNewBlocks(&blocks, tt.arg.column, tt.arg.value)
+				err := blockDBHandler.CreateNewBlocks(&blocks, tt.arg.column, tt.arg.value)
 				if err != nil {
 					t.Error(err)
 				}
@@ -113,12 +113,12 @@ func TestCreateNewBlocks(t *testing.T) {
 	})
 
 	/*
-		BlockDbHandler.Transaction(func() error {
+		BlockDBHandler.Transaction(func() error {
 			for _, tt := range table {
 				t.Run(tt.name, func(t *testing.T) {
 					// 作成・更新する
 					blocks := []entity.Block{tt.arg.createSource}
-					err := BlockDbHandler.CreateNewBlocks(&blocks, tt.arg.column, tt.arg.value)
+					err := BlockDBHandler.CreateNewBlocks(&blocks, tt.arg.column, tt.arg.value)
 					if err != nil {
 						t.Error(err)
 					}

@@ -34,7 +34,7 @@ type Routing struct {
 func NewRouting(
 	config *config.Config,
 	loggerHandler handler.LoggerHandler,
-	dbConnection handler.DbConnection,
+	dbConnection handler.DBConnection,
 	twitterHandler handler.TwitterHandler,
 ) *Routing {
 	// setup
@@ -53,7 +53,7 @@ func NewRouting(
 	r.CsrfConfig()
 	r.LoggerConfig()
 	sessionHandler := NewGinSessionHandler(config, r.Gin)
-	dbHandler := database.NewGormDbHandler(dbConnection)
+	dbHandler := database.NewGormDBHandler(dbConnection)
 	r.setRouting(loggerHandler, dbHandler, twitterHandler, sessionHandler)
 	return r
 }
@@ -96,7 +96,7 @@ func (r *Routing) setRouting(
 		RepoFactory:    gateway.NewUserRepository,
 		LoggerHandler:  loggerHandler,
 		SessionHandler: sessionHandler,
-		UserDbHandler:  database.NewUserDbHandler(dbHandler.Connect()),
+		UserDBHandler:  database.NewUserDBHandler(dbHandler.Connect()),
 	}
 
 	authController := controller.Auth{
@@ -106,7 +106,7 @@ func (r *Routing) setRouting(
 		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
-		UserDbHandler:  database.NewUserDbHandler(dbHandler.Connect()),
+		UserDBHandler:  database.NewUserDBHandler(dbHandler.Connect()),
 	}
 
 	blockController := controller.Block{

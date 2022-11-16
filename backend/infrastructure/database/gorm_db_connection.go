@@ -7,20 +7,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type GormDbConnection struct {
+type GormDBConnection struct {
 	db *gorm.DB
 }
 
 // DB接続を作成する
-func NewGormDbConnection(db *gorm.DB) handler.DbConnection {
-	dbConnection := new(GormDbConnection)
+func NewGormDBConnection(db *gorm.DB) handler.DBConnection {
+	dbConnection := new(GormDBConnection)
 	dbConnection.db = db
 
 	return dbConnection
 }
 
 // DB接続をConfigから作成する
-func NewGormDbConnectionByConfig(config *config.Config) handler.DbConnection {
+func NewGormDBConnectionByConfig(config *config.Config) handler.DBConnection {
 	dsn := config.DB.Username + ":" + config.DB.Password + "@tcp(" + config.DB.Host + ":" + config.DB.Port + ")/" + config.DB.DBName + "?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	// https://github.com/go-sql-driver/mysql#examples
@@ -28,13 +28,13 @@ func NewGormDbConnectionByConfig(config *config.Config) handler.DbConnection {
 		panic(err.Error())
 	}
 
-	dbConnection := new(GormDbConnection)
+	dbConnection := new(GormDBConnection)
 	dbConnection.db = db
 
 	return dbConnection
 }
 
 // DB接続を得る
-func (g *GormDbConnection) GetConnection() interface{} {
+func (g *GormDBConnection) GetConnection() interface{} {
 	return g.db
 }
