@@ -8,19 +8,19 @@ import (
 )
 
 type GormDbHandler struct {
-	DbHandler
+	DbInfo
 	Conn *gorm.DB
 }
 
-func NewGormDbHandlerByConnection(conn *gorm.DB) handler.DBConnectionHandler {
+func NewGormDbHandler(gormDBConn handler.DbConnection) handler.DBHandler {
 	gormHandler := GormDbHandler{}
-	gormHandler.Conn = conn
+	gormHandler.Conn = gormDBConn.GetConnection().(*gorm.DB)
 
 	return gormHandler
 }
 
-func NewGormDbHandler(config *config.Config) handler.DBConnectionHandler {
-	return newGormDbHandler(DbHandler{
+func NewGormDbHandler_(config *config.Config) handler.DBHandler {
+	return newGormDbHandler(DbInfo{
 		Host:     config.DB.Host,
 		Port:     config.DB.Port,
 		Username: config.DB.Username,
@@ -29,7 +29,7 @@ func NewGormDbHandler(config *config.Config) handler.DBConnectionHandler {
 	})
 }
 
-func newGormDbHandler(dbHandler DbHandler) handler.DBConnectionHandler {
+func newGormDbHandler(dbHandler DbInfo) handler.DBHandler {
 	dsn := dbHandler.Username + ":" + dbHandler.Password + "@tcp(" + dbHandler.Host + ":" + dbHandler.Port + ")/" + dbHandler.DBName + "?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	// https://github.com/go-sql-driver/mysql#examples
@@ -39,7 +39,7 @@ func newGormDbHandler(dbHandler DbHandler) handler.DBConnectionHandler {
 	}
 
 	gormHandler := GormDbHandler{
-		DbHandler: dbHandler,
+		DbInfo: dbHandler,
 	}
 
 	gormHandler.Conn = db

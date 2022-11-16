@@ -51,7 +51,8 @@ var userMutes = []model.UserMute{
 func Seeder() {
 	config := config.NewConfig(".env.test")
 
-	gormHandler := database.NewGormDbHandler(config)
+	dbConnection := database.NewGormDbConnectionByConfig(config)
+	gormHandler := database.NewGormDbHandler(dbConnection)
 
 	gormConn := gormHandler.Connect().GetConnection().(*gorm.DB)
 

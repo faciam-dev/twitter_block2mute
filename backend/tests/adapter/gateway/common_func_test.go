@@ -9,7 +9,7 @@ import (
 )
 
 // mock化したGormをつかったDBへのハンドラを得る
-func newMockGormDbHandler() (handler.DBConnectionHandler, sqlmock.Sqlmock, error) {
+func newMockGormDbHandler() (handler.DBHandler, sqlmock.Sqlmock, error) {
 	mockDB, mock, err := sqlmock.New()
 	if err != nil {
 		return nil, mock, err
@@ -24,7 +24,9 @@ func newMockGormDbHandler() (handler.DBConnectionHandler, sqlmock.Sqlmock, error
 		&gorm.Config{},
 	)
 
-	gormDbHandler := database.NewGormDbHandlerByConnection(db)
+	gormDbHandler := database.NewGormDbHandler(
+		database.GormDbHandler{Conn: db}.Connect(),
+	)
 
 	return gormDbHandler, mock, err
 }

@@ -1,6 +1,6 @@
 package database
 
-type DbHandler struct {
+type DbInfo struct {
 	Host     string
 	Port     string
 	Username string

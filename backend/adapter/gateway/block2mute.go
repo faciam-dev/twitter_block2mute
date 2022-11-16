@@ -13,7 +13,7 @@ import (
 
 type Block2MuteRepository struct {
 	loggerHandler  handler.LoggerHandler
-	dbHandler      handler.DBConnectionHandler
+	dbHandler      handler.DBHandler
 	twitterHandler handler.TwitterHandler
 	sessionHandler handler.SessionHandler
 }
@@ -21,7 +21,7 @@ type Block2MuteRepository struct {
 // NewBlockRepository はBlockRepositoryを返します．
 func NewBlock2MuteRepository(
 	loggerHandler handler.LoggerHandler,
-	dbHandler handler.DBConnectionHandler,
+	dbHandler handler.DBHandler,
 	twitterHandler handler.TwitterHandler,
 	sessionHandler handler.SessionHandler,
 ) port.Block2MuteRepository {

@@ -14,7 +14,7 @@ import (
 
 type BlockRepository struct {
 	loggerHandler  handler.LoggerHandler
-	dbHandler      handler.DBConnectionHandler
+	dbHandler      handler.DBHandler
 	twitterHandler handler.TwitterHandler
 	sessionHandler handler.SessionHandler
 }
@@ -22,7 +22,7 @@ type BlockRepository struct {
 // NewBlockRepository はBlockRepositoryを返します．
 func NewBlockRepository(
 	loggerHandler handler.LoggerHandler,
-	dbHandler handler.DBConnectionHandler,
+	dbHandler handler.DBHandler,
 	twitterHandler handler.TwitterHandler,
 	sessionHandler handler.SessionHandler,
 ) port.BlockRepository {

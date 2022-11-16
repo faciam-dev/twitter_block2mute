@@ -11,7 +11,7 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 )
 
-var DbHandler handler.DBConnectionHandler
+var DbHandler handler.DBHandler
 var UserDbHandler handler.UserDbHandler
 var BlockDbHandler handler.BlockDbHandler
 var MuteDbHandler handler.MuteDbHandler
@@ -19,7 +19,9 @@ var MuteDbHandler handler.MuteDbHandler
 func TestMain(m *testing.M) {
 	// 前処理
 	config := config.NewConfig(".env.test")
-	DbHandler = database.NewGormDbHandler(config)
+
+	dbConnection := database.NewGormDbConnectionByConfig(config)
+	DbHandler = database.NewGormDbHandler(dbConnection)
 
 	UserDbHandler = database.NewUserDbHandler(DbHandler.Connect())
 	BlockDbHandler = database.NewBlockDbHandler(DbHandler.Connect())

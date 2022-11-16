@@ -10,7 +10,8 @@ import (
 func Migration() {
 	config := config.NewConfig(".env")
 
-	gormHandler := database.NewGormDbHandler(config)
+	dbConnection := database.NewGormDbConnectionByConfig(config)
+	gormHandler := database.NewGormDbHandler(dbConnection)
 
 	gormConn := gormHandler.Connect().GetConnection().(*gorm.DB)
 

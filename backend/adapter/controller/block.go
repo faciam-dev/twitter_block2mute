@@ -24,14 +24,14 @@ type Block struct {
 	// -> gateway.NewBlockRepository
 	RepoFactory func(
 		loggerHandler handler.LoggerHandler,
-		dbHandler handler.DBConnectionHandler,
+		dbHandler handler.DBHandler,
 		twitterHandler handler.TwitterHandler,
 		sessionHandler handler.SessionHandler,
 	) port.BlockRepository
 
 	LoggerHandler  handler.LoggerHandler
 	TwitterHandler handler.TwitterHandler
-	DBHandler      handler.DBConnectionHandler
+	DBHandler      handler.DBHandler
 	SessionHandler handler.SessionHandler
 }
 
