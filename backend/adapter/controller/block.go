@@ -24,16 +24,14 @@ type Block struct {
 	// -> gateway.NewBlockRepository
 	RepoFactory func(
 		loggerHandler handler.LoggerHandler,
-		dbHandler handler.BlockDbHandler,
-		userDbHandler handler.UserDbHandler,
+		dbHandler handler.DBHandler,
 		twitterHandler handler.TwitterHandler,
 		sessionHandler handler.SessionHandler,
 	) port.BlockRepository
 
 	LoggerHandler  handler.LoggerHandler
 	TwitterHandler handler.TwitterHandler
-	BlockDbHandler handler.BlockDbHandler
-	UserDbHandler  handler.UserDbHandler
+	DBHandler      handler.DBHandler
 	SessionHandler handler.SessionHandler
 }
 
@@ -44,7 +42,7 @@ func (b *Block) GetBlockByID(contextHandler handler.ContextHandler) {
 	id := b.SessionHandler.Get("user_id")
 
 	outputPort := b.OutputFactory(contextHandler, b.LoggerHandler)
-	repository := b.RepoFactory(b.LoggerHandler, b.BlockDbHandler, b.UserDbHandler, b.TwitterHandler, b.SessionHandler)
+	repository := b.RepoFactory(b.LoggerHandler, b.DBHandler, b.TwitterHandler, b.SessionHandler)
 	inputPort := b.InputFactory(outputPort, repository, b.LoggerHandler)
 
 	if id == nil {

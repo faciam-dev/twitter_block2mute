@@ -5,7 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 )
 
 func TestUserMuteFindAllByTwitterID(t *testing.T) {
@@ -33,7 +35,7 @@ func TestUserMuteFindAllByTwitterID(t *testing.T) {
 	for _, tt := range table {
 		t.Run(tt.name, func(t *testing.T) {
 			mutes := []entity.Mute{}
-			if err := MuteDbHandler.FindAllByUserID(&mutes, tt.arg.value); err != nil {
+			if err := MuteDBHandler.FindAllByUserID(&mutes, tt.arg.value); err != nil {
 				t.Error(err)
 			}
 
@@ -88,13 +90,13 @@ func TestUserMuteCreateNew(t *testing.T) {
 		},
 	}
 
-	//MuteDbHandler.Begin()
-	MuteDbHandler.Transaction(func() error {
+	DBHandler.Transaction(func(conn handler.DBConnection) error {
+		muteDBHandler := database.NewMuteHandler(conn)
 		for _, tt := range table {
 			t.Run(tt.name, func(t *testing.T) {
 				// 作成・更新する
 				mutes := []entity.Mute{tt.arg.createSource}
-				err := MuteDbHandler.CreateNew(&mutes, tt.arg.column, tt.arg.value)
+				err := muteDBHandler.CreateNew(&mutes, tt.arg.column, tt.arg.value)
 				if err != nil {
 					t.Error(err)
 				}
@@ -108,5 +110,25 @@ func TestUserMuteCreateNew(t *testing.T) {
 
 		return errors.New("rollback")
 	})
-	//MuteDbHandler.Rollback()
+	/*
+		MuteDBHandler.Transaction(func() error {
+			for _, tt := range table {
+				t.Run(tt.name, func(t *testing.T) {
+					// 作成・更新する
+					mutes := []entity.Mute{tt.arg.createSource}
+					err := MuteDBHandler.CreateNew(&mutes, tt.arg.column, tt.arg.value)
+					if err != nil {
+						t.Error(err)
+					}
+
+					// 中身の比較
+					if mutes[0].GetFlag() != tt.wantMute.GetFlag() || mutes[0].GetUserID() != tt.wantMute.GetUserID() || mutes[0].GetTargetTwitterID() != tt.wantMute.GetTargetTwitterID() {
+						t.Errorf("UserMuteCreate()  = %v, want %v", mutes[0], tt.wantMute)
+					}
+				})
+			}
+
+			return errors.New("rollback")
+		})
+	*/
 }

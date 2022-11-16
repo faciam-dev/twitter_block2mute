@@ -34,7 +34,7 @@ type Routing struct {
 func NewRouting(
 	config *config.Config,
 	loggerHandler handler.LoggerHandler,
-	dbHandler *database.GormDbHandler,
+	dbConnection handler.DBConnection,
 	twitterHandler handler.TwitterHandler,
 ) *Routing {
 	// setup
@@ -53,6 +53,7 @@ func NewRouting(
 	r.CsrfConfig()
 	r.LoggerConfig()
 	sessionHandler := NewGinSessionHandler(config, r.Gin)
+	dbHandler := database.NewGormDBHandler(dbConnection)
 	r.setRouting(loggerHandler, dbHandler, twitterHandler, sessionHandler)
 	return r
 }
@@ -85,7 +86,7 @@ func (r *Routing) setGinLogger(config *config.Config) {
 
 func (r *Routing) setRouting(
 	loggerHandler handler.LoggerHandler,
-	dbHandler *database.GormDbHandler,
+	dbHandler handler.DBHandler,
 	twitterHandler handler.TwitterHandler,
 	sessionHandler handler.SessionHandler,
 ) {
@@ -95,7 +96,7 @@ func (r *Routing) setRouting(
 		RepoFactory:    gateway.NewUserRepository,
 		LoggerHandler:  loggerHandler,
 		SessionHandler: sessionHandler,
-		UserDbHandler:  database.NewUserDbHandler(dbHandler),
+		UserDBHandler:  database.NewUserDBHandler(dbHandler.Connect()),
 	}
 
 	authController := controller.Auth{
@@ -105,7 +106,7 @@ func (r *Routing) setRouting(
 		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
-		UserDbHandler:  database.NewUserDbHandler(dbHandler),
+		UserDBHandler:  database.NewUserDBHandler(dbHandler.Connect()),
 	}
 
 	blockController := controller.Block{
@@ -115,8 +116,7 @@ func (r *Routing) setRouting(
 		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
-		BlockDbHandler: database.NewBlockDbHandler(dbHandler),
-		UserDbHandler:  database.NewUserDbHandler(dbHandler),
+		DBHandler:      dbHandler,
 	}
 
 	block2MuteController := controller.Block2Mute{
@@ -126,9 +126,7 @@ func (r *Routing) setRouting(
 		LoggerHandler:  loggerHandler,
 		TwitterHandler: twitterHandler,
 		SessionHandler: sessionHandler,
-		BlockDbHandler: database.NewBlockDbHandler(dbHandler),
-		UserDbHandler:  database.NewUserDbHandler(dbHandler),
-		MuteDbHandler:  database.NewMuteHandler(dbHandler),
+		DBHandler:      dbHandler,
 	}
 
 	// PROXY

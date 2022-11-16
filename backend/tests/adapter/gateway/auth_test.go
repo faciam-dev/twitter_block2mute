@@ -7,39 +7,12 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/golang/mock/gomock"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway"
-	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/common"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
-	"github.com/faciam_dev/twitter_block2mute/backend/infrastructure/database"
 	"github.com/faciam_dev/twitter_block2mute/backend/tests/adapter/gateway/mock_handler"
 )
-
-// mock化したGormをつかったUserDbへのハンドラを得る
-func newMockGormDbUserHandler() (handler.UserDbHandler, sqlmock.Sqlmock, error) {
-	mockDB, mock, err := sqlmock.New()
-	if err != nil {
-		return nil, mock, err
-	}
-
-	db, err := gorm.Open(mysql.New(
-		mysql.Config{
-			DriverName:                "mysql",
-			Conn:                      mockDB,
-			SkipInitializeWithVersion: true,
-		}),
-		&gorm.Config{},
-	)
-
-	gormDbUserHandler := database.NewUserDbHandler(
-		&database.GormDbHandler{Conn: db},
-	)
-
-	return gormDbUserHandler, mock, err
-}
 
 // IsAuthnticatedに対するテスト
 func TestIsAuthenticated(t *testing.T) {
@@ -94,7 +67,7 @@ func TestIsAuthenticated(t *testing.T) {
 
 			// モックの生成
 			// sqlmock処理
-			dbUserHandler /*dbMock*/, _, err := newMockGormDbUserHandler()
+			dbUserHandler /*dbMock*/, _, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -166,7 +139,7 @@ func TestAuth(t *testing.T) {
 		},
 	}
 
-	dbUserHandler, _, err := newMockGormDbUserHandler()
+	dbUserHandler, _, err := newMockGormDBUserHandler()
 
 	if err != nil {
 		t.Error("sqlmock not work")
@@ -263,7 +236,7 @@ func TestAuthByCallbackParams(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, _, err := newMockGormDbUserHandler()
+			dbUserHandler, _, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -378,7 +351,7 @@ func TestFindUserByTwitterID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, dbMock, err := newMockGormDbUserHandler()
+			dbUserHandler, dbMock, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -469,7 +442,7 @@ func TestUpsertUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, dbMock, err := newMockGormDbUserHandler()
+			dbUserHandler, dbMock, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -558,7 +531,7 @@ func TestUpdateTwitterApi(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, _, err := newMockGormDbUserHandler()
+			dbUserHandler, _, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -630,7 +603,7 @@ func TestUpdateSession(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, _, err := newMockGormDbUserHandler()
+			dbUserHandler, _, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")
@@ -696,7 +669,7 @@ func TestLogout(t *testing.T) {
 		},
 	}
 
-	dbUserHandler, _, err := newMockGormDbUserHandler()
+	dbUserHandler, _, err := newMockGormDBUserHandler()
 
 	if err != nil {
 		t.Error("sqlmock not work")

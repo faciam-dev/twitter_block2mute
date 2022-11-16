@@ -1,11 +1,21 @@
 package handler
 
+// 接続
+type DBConnection interface {
+	GetConnection() interface{}
+}
+
+// DB接続に関する操作をするハンドラ
+type DBHandler interface {
+	Transaction(fn func(DBConnection) error) error
+	Begin() DBConnection
+	Commit() DBConnection
+	Rollback() DBConnection
+	Connect() DBConnection
+}
+
 // このハンドラは各gatewayで共通の基本的な操作のみを扱う
-type DbHandler interface {
-	Transaction(fn func() error) error
-	Begin()
-	Commit()
-	Rollback()
+type CommonDBHandler interface {
 	First(interface{}, string) error
 	Create(interface{}) error
 	Find(interface{}, string, string) error
@@ -18,21 +28,21 @@ type DbHandler interface {
 }
 
 // user独自の処理を追加したハンドラ
-type UserDbHandler interface {
-	DbHandler
+type UserDBHandler interface {
+	CommonDBHandler
 	FindByTwitterID(interface{}, string) error
 }
 
 // block独自の処理を追加したハンドラ
-type BlockDbHandler interface {
-	DbHandler
+type BlockDBHandler interface {
+	CommonDBHandler
 	FindAllByUserID(interface{}, string) error
 	CreateNewBlocks(interface{}, string, string) error
 }
 
 // mute独自の処理を追加したハンドラ
-type MuteDbHandler interface {
-	DbHandler
+type MuteDBHandler interface {
+	CommonDBHandler
 	FindAllByUserID(interface{}, string) error
 	CreateNew(interface{}, string, string) error
 }

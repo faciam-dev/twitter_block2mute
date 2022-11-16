@@ -26,9 +26,9 @@ func server() {
 	config := config.NewConfig(".env")
 
 	loggerHandler := logger.NewZapHandler(config)
-	dbHandler := database.NewGormDbHandler(config)
+	dbConnection := database.NewGormDBConnectionByConfig(config)
 	twitterHandler := twitterapi.NewGotwiHandler(config)
 
-	r := framework.NewRouting(config, loggerHandler, dbHandler, twitterHandler)
+	r := framework.NewRouting(config, loggerHandler, dbConnection, twitterHandler)
 	r.Run()
 }

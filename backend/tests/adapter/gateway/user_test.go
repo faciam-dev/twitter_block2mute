@@ -60,7 +60,7 @@ func TestGetUserByID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args := tt.args
 
-			dbUserHandler, dbMock, err := newMockGormDbUserHandler()
+			dbUserHandler, dbMock, err := newMockGormDBUserHandler()
 
 			if err != nil {
 				t.Error("sqlmock not work")

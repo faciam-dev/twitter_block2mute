@@ -4,29 +4,30 @@ import (
 	"github.com/faciam_dev/twitter_block2mute/backend/adapter/gateway/handler"
 	"github.com/faciam_dev/twitter_block2mute/backend/database/gorm/model"
 	"github.com/faciam_dev/twitter_block2mute/backend/entity"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
-type GormDbMuteHandler struct {
-	GormDbEntityHandler[entity.Mute, model.UserMute]
+type GormDBMuteHandler struct {
+	GormDBEntityHandler[entity.Mute, model.UserMute]
 }
 
-func NewMuteHandler(gormDbHandler *GormDbHandler) handler.MuteDbHandler {
-	dbHandler := new(GormDbMuteHandler)
-	dbHandler.db = gormDbHandler.Conn
+func NewMuteHandler(conn handler.DBConnection) handler.MuteDBHandler {
+	dbHandler := new(GormDBMuteHandler)
+	dbHandler.db = conn.GetConnection().(*gorm.DB)
 	dbHandler.ModelForDomain = &model.UserMuteModelForDomain{}
 
 	return dbHandler
 }
 
 // ミュートをUserIDで全て取得
-func (u *GormDbMuteHandler) FindAllByUserID(entities interface{}, userID string) error {
+func (u *GormDBMuteHandler) FindAllByUserID(entities interface{}, userID string) error {
 	return u.FindAll(entities, "user_id", userID)
 }
 
 // 新規ミュートを追加する（ただし追加済みのものも更新される）名称と実装が不一致
-func (u *GormDbMuteHandler) CreateNew(recordSrc interface{}, columnName1 string, columnName2 string) error {
-	entities, err := u.GormDbEntityHandler.InterfaceToEntities(recordSrc)
+func (u *GormDBMuteHandler) CreateNew(recordSrc interface{}, columnName1 string, columnName2 string) error {
+	entities, err := u.GormDBEntityHandler.InterfaceToEntities(recordSrc)
 	if err != nil {
 		return err
 	}

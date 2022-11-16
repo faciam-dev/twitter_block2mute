@@ -11,13 +11,13 @@ import (
 
 type UserRepository struct {
 	loggerHandler handler.LoggerHandler
-	dbHandler     handler.UserDbHandler
+	dbHandler     handler.UserDBHandler
 }
 
 // NewUserRepository はUserRepositoryを返します．
 func NewUserRepository(
 	loggerHandler handler.LoggerHandler,
-	dbHandler handler.UserDbHandler,
+	dbHandler handler.UserDBHandler,
 ) port.UserRepository {
 	return &UserRepository{
 		loggerHandler: loggerHandler,
